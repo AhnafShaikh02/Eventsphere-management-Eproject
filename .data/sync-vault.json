@@ -1,0 +1,533 @@
+{
+  "HELIOS-4K7B-ZJ": {
+    "syncKey": "HELIOS-4K7B-ZJ",
+    "updatedAt": "2026-11-16T18:47:20.490Z",
+    "deviceLabel": "Win32",
+    "checksum": "b43e24545657280c",
+    "payload": {
+      "favorites": [
+        "earth",
+        "saturn",
+        "jupiter"
+      ],
+      "notes": {
+        "earth": "Primary oceanic reference world; compare N2/O2 equilibrium against Mars CO2.",
+        "saturn": "Check Cassini division optical clarity at high orbital inclination."
+      },
+      "analytics": [
+        {
+          "id": "ev-1794854837209-sydz",
+          "date": "2026-11-16",
+          "bodyId": "earth",
+          "durationMinutes": 6,
+          "mode": "explore",
+          "action": "deep-space"
+        },
+        {
+          "id": "ev-1794854615227-ycmt",
+          "date": "2026-11-16",
+          "bodyId": "venus",
+          "durationMinutes": 4,
+          "mode": "explore",
+          "action": "observe"
+        },
+        {
+          "id": "ev-1794854603193-4w0l",
+          "date": "2026-11-16",
+          "bodyId": "sun",
+          "durationMinutes": 5,
+          "mode": "explore",
+          "action": "deep-space"
+        },
+        {
+          "id": "seed-29-0-saturn",
+          "date": "2026-10-18",
+          "bodyId": "saturn",
+          "durationMinutes": 19,
+          "mode": "voyage",
+          "action": "share"
+        },
+        {
+          "id": "seed-29-1-venus",
+          "date": "2026-10-18",
+          "bodyId": "venus",
+          "durationMinutes": 7,
+          "mode": "explore",
+          "action": "observe"
+        },
+        {
+          "id": "seed-29-2-uranus",
+          "date": "2026-10-18",
+          "bodyId": "uranus",
+          "durationMinutes": 14,
+          "mode": "voyage",
+          "action": "bookmark"
+        },
+        {
+          "id": "seed-28-0-earth",
+          "date": "2026-10-19",
+          "bodyId": "earth",
+          "durationMinutes": 8,
+          "mode": "explore",
+          "action": "bookmark"
+        },
+        {
+          "id": "seed-28-1-neptune",
+          "date": "2026-10-19",
+          "bodyId": "neptune",
+          "durationMinutes": 15,
+          "mode": "voyage",
+          "action": "observe"
+        },
+        {
+          "id": "seed-27-0-sun",
+          "date": "2026-10-20",
+          "bodyId": "sun",
+          "durationMinutes": 16,
+          "mode": "voyage",
+          "action": "deep-space"
+        },
+        {
+          "id": "seed-26-0-saturn",
+          "date": "2026-10-21",
+          "bodyId": "saturn",
+          "durationMinutes": 5,
+          "mode": "explore",
+          "action": "observe"
+        },
+        {
+          "id": "seed-26-1-venus",
+          "date": "2026-10-21",
+          "bodyId": "venus",
+          "durationMinutes": 12,
+          "mode": "voyage",
+          "action": "bookmark"
+        },
+        {
+          "id": "seed-26-2-uranus",
+          "date": "2026-10-21",
+          "bodyId": "uranus",
+          "durationMinutes": 19,
+          "mode": "explore",
+          "action": "observe"
+        },
+        {
+          "id": "seed-25-0-earth",
+          "date": "2026-10-22",
+          "bodyId": "earth",
+          "durationMinutes": 13,
+          "mode": "voyage",
+          "action": "observe"
+        },
+        {
+          "id": "seed-25-1-neptune",
+          "date": "2026-10-22",
+          "bodyId": "neptune",
+          "durationMinutes": 20,
+          "mode": "explore",
+          "action": "deep-space"
+        },
+        {
+          "id": "seed-24-0-sun",
+          "date": "2026-10-23",
+          "bodyId": "sun",
+          "durationMinutes": 21,
+          "mode": "explore",
+          "action": "share"
+        },
+        {
+          "id": "seed-23-0-saturn",
+          "date": "2026-10-24",
+          "bodyId": "saturn",
+          "durationMinutes": 10,
+          "mode": "voyage",
+          "action": "bookmark"
+        },
+        {
+          "id": "seed-23-1-venus",
+          "date": "2026-10-24",
+          "bodyId": "venus",
+          "durationMinutes": 17,
+          "mode": "explore",
+          "action": "observe"
+        },
+        {
+          "id": "seed-23-2-uranus",
+          "date": "2026-10-24",
+          "bodyId": "uranus",
+          "durationMinutes": 5,
+          "mode": "voyage",
+          "action": "deep-space"
+        },
+        {
+          "id": "seed-22-0-earth",
+          "date": "2026-10-25",
+          "bodyId": "earth",
+          "durationMinutes": 18,
+          "mode": "explore",
+          "action": "deep-space"
+        },
+        {
+          "id": "seed-22-1-neptune",
+          "date": "2026-10-25",
+          "bodyId": "neptune",
+          "durationMinutes": 6,
+          "mode": "voyage",
+          "action": "share"
+        },
+        {
+          "id": "seed-21-0-sun",
+          "date": "2026-10-26",
+          "bodyId": "sun",
+          "durationMinutes": 7,
+          "mode": "voyage",
+          "action": "observe"
+        },
+        {
+          "id": "seed-20-0-saturn",
+          "date": "2026-10-27",
+          "bodyId": "saturn",
+          "durationMinutes": 15,
+          "mode": "explore",
+          "action": "observe"
+        },
+        {
+          "id": "seed-20-1-venus",
+          "date": "2026-10-27",
+          "bodyId": "venus",
+          "durationMinutes": 22,
+          "mode": "voyage",
+          "action": "deep-space"
+        },
+        {
+          "id": "seed-20-2-uranus",
+          "date": "2026-10-27",
+          "bodyId": "uranus",
+          "durationMinutes": 10,
+          "mode": "explore",
+          "action": "share"
+        },
+        {
+          "id": "seed-19-0-earth",
+          "date": "2026-10-28",
+          "bodyId": "earth",
+          "durationMinutes": 4,
+          "mode": "voyage",
+          "action": "share"
+        },
+        {
+          "id": "seed-19-1-neptune",
+          "date": "2026-10-28",
+          "bodyId": "neptune",
+          "durationMinutes": 11,
+          "mode": "explore",
+          "action": "observe"
+        },
+        {
+          "id": "seed-18-0-sun",
+          "date": "2026-10-29",
+          "bodyId": "sun",
+          "durationMinutes": 12,
+          "mode": "explore",
+          "action": "bookmark"
+        },
+        {
+          "id": "seed-17-0-saturn",
+          "date": "2026-10-30",
+          "bodyId": "saturn",
+          "durationMinutes": 20,
+          "mode": "voyage",
+          "action": "deep-space"
+        },
+        {
+          "id": "seed-17-1-venus",
+          "date": "2026-10-30",
+          "bodyId": "venus",
+          "durationMinutes": 8,
+          "mode": "explore",
+          "action": "share"
+        },
+        {
+          "id": "seed-17-2-uranus",
+          "date": "2026-10-30",
+          "bodyId": "uranus",
+          "durationMinutes": 15,
+          "mode": "voyage",
+          "action": "observe"
+        },
+        {
+          "id": "seed-16-0-earth",
+          "date": "2026-10-31",
+          "bodyId": "earth",
+          "durationMinutes": 9,
+          "mode": "explore",
+          "action": "observe"
+        },
+        {
+          "id": "seed-16-1-neptune",
+          "date": "2026-10-31",
+          "bodyId": "neptune",
+          "durationMinutes": 16,
+          "mode": "voyage",
+          "action": "bookmark"
+        },
+        {
+          "id": "seed-15-0-sun",
+          "date": "2026-11-01",
+          "bodyId": "sun",
+          "durationMinutes": 17,
+          "mode": "voyage",
+          "action": "observe"
+        },
+        {
+          "id": "seed-14-0-saturn",
+          "date": "2026-11-02",
+          "bodyId": "saturn",
+          "durationMinutes": 6,
+          "mode": "explore",
+          "action": "share"
+        },
+        {
+          "id": "seed-14-1-venus",
+          "date": "2026-11-02",
+          "bodyId": "venus",
+          "durationMinutes": 13,
+          "mode": "voyage",
+          "action": "observe"
+        },
+        {
+          "id": "seed-14-2-uranus",
+          "date": "2026-11-02",
+          "bodyId": "uranus",
+          "durationMinutes": 20,
+          "mode": "explore",
+          "action": "bookmark"
+        },
+        {
+          "id": "seed-13-0-earth",
+          "date": "2026-11-03",
+          "bodyId": "earth",
+          "durationMinutes": 14,
+          "mode": "voyage",
+          "action": "bookmark"
+        },
+        {
+          "id": "seed-13-1-neptune",
+          "date": "2026-11-03",
+          "bodyId": "neptune",
+          "durationMinutes": 21,
+          "mode": "explore",
+          "action": "observe"
+        },
+        {
+          "id": "seed-12-0-sun",
+          "date": "2026-11-04",
+          "bodyId": "sun",
+          "durationMinutes": 22,
+          "mode": "explore",
+          "action": "deep-space"
+        },
+        {
+          "id": "seed-11-0-saturn",
+          "date": "2026-11-05",
+          "bodyId": "saturn",
+          "durationMinutes": 11,
+          "mode": "voyage",
+          "action": "observe"
+        },
+        {
+          "id": "seed-11-1-venus",
+          "date": "2026-11-05",
+          "bodyId": "venus",
+          "durationMinutes": 18,
+          "mode": "explore",
+          "action": "bookmark"
+        },
+        {
+          "id": "seed-11-2-uranus",
+          "date": "2026-11-05",
+          "bodyId": "uranus",
+          "durationMinutes": 6,
+          "mode": "voyage",
+          "action": "observe"
+        },
+        {
+          "id": "seed-10-0-earth",
+          "date": "2026-11-06",
+          "bodyId": "earth",
+          "durationMinutes": 19,
+          "mode": "explore",
+          "action": "observe"
+        },
+        {
+          "id": "seed-10-1-neptune",
+          "date": "2026-11-06",
+          "bodyId": "neptune",
+          "durationMinutes": 7,
+          "mode": "voyage",
+          "action": "deep-space"
+        },
+        {
+          "id": "seed-9-0-sun",
+          "date": "2026-11-07",
+          "bodyId": "sun",
+          "durationMinutes": 8,
+          "mode": "voyage",
+          "action": "share"
+        },
+        {
+          "id": "seed-8-0-saturn",
+          "date": "2026-11-08",
+          "bodyId": "saturn",
+          "durationMinutes": 16,
+          "mode": "explore",
+          "action": "bookmark"
+        },
+        {
+          "id": "seed-8-1-venus",
+          "date": "2026-11-08",
+          "bodyId": "venus",
+          "durationMinutes": 4,
+          "mode": "voyage",
+          "action": "observe"
+        },
+        {
+          "id": "seed-8-2-uranus",
+          "date": "2026-11-08",
+          "bodyId": "uranus",
+          "durationMinutes": 11,
+          "mode": "explore",
+          "action": "deep-space"
+        },
+        {
+          "id": "seed-7-0-earth",
+          "date": "2026-11-09",
+          "bodyId": "earth",
+          "durationMinutes": 5,
+          "mode": "voyage",
+          "action": "deep-space"
+        },
+        {
+          "id": "seed-7-1-neptune",
+          "date": "2026-11-09",
+          "bodyId": "neptune",
+          "durationMinutes": 12,
+          "mode": "explore",
+          "action": "share"
+        },
+        {
+          "id": "seed-6-0-sun",
+          "date": "2026-11-10",
+          "bodyId": "sun",
+          "durationMinutes": 13,
+          "mode": "explore",
+          "action": "observe"
+        },
+        {
+          "id": "seed-5-0-saturn",
+          "date": "2026-11-11",
+          "bodyId": "saturn",
+          "durationMinutes": 21,
+          "mode": "voyage",
+          "action": "observe"
+        },
+        {
+          "id": "seed-5-1-venus",
+          "date": "2026-11-11",
+          "bodyId": "venus",
+          "durationMinutes": 9,
+          "mode": "explore",
+          "action": "deep-space"
+        },
+        {
+          "id": "seed-5-2-uranus",
+          "date": "2026-11-11",
+          "bodyId": "uranus",
+          "durationMinutes": 16,
+          "mode": "voyage",
+          "action": "share"
+        },
+        {
+          "id": "seed-4-0-earth",
+          "date": "2026-11-12",
+          "bodyId": "earth",
+          "durationMinutes": 10,
+          "mode": "explore",
+          "action": "share"
+        },
+        {
+          "id": "seed-4-1-neptune",
+          "date": "2026-11-12",
+          "bodyId": "neptune",
+          "durationMinutes": 17,
+          "mode": "voyage",
+          "action": "observe"
+        },
+        {
+          "id": "seed-3-0-sun",
+          "date": "2026-11-13",
+          "bodyId": "sun",
+          "durationMinutes": 18,
+          "mode": "voyage",
+          "action": "bookmark"
+        },
+        {
+          "id": "seed-2-0-saturn",
+          "date": "2026-11-14",
+          "bodyId": "saturn",
+          "durationMinutes": 7,
+          "mode": "explore",
+          "action": "deep-space"
+        },
+        {
+          "id": "seed-2-1-venus",
+          "date": "2026-11-14",
+          "bodyId": "venus",
+          "durationMinutes": 14,
+          "mode": "voyage",
+          "action": "share"
+        },
+        {
+          "id": "seed-2-2-uranus",
+          "date": "2026-11-14",
+          "bodyId": "uranus",
+          "durationMinutes": 21,
+          "mode": "explore",
+          "action": "observe"
+        },
+        {
+          "id": "seed-1-0-earth",
+          "date": "2026-11-15",
+          "bodyId": "earth",
+          "durationMinutes": 15,
+          "mode": "voyage",
+          "action": "observe"
+        },
+        {
+          "id": "seed-1-1-neptune",
+          "date": "2026-11-15",
+          "bodyId": "neptune",
+          "durationMinutes": 22,
+          "mode": "explore",
+          "action": "bookmark"
+        }
+      ],
+      "preferences": {
+        "nightMode": true,
+        "deepSpaceLayer": true,
+        "showOrbits": true
+      }
+    }
+  },
+  "SPHERE-TEST-01": {
+    "syncKey": "SPHERE-TEST-01",
+    "updatedAt": "2026-11-16T18:54:53.799Z",
+    "deviceLabel": "SmokeTest",
+    "checksum": "8b9373183a11d905",
+    "payload": {
+      "favoriteBoothIds": [
+        "booth-A2"
+      ]
+    }
+  }
+}

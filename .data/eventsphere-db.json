@@ -1,0 +1,913 @@
+{
+  "users": [
+    {
+      "id": "usr-admin-1",
+      "name": "Elena Vance",
+      "email": "organizer@eventsphere.io",
+      "passwordHash": "$2b$10$b.kLf3xREe.GF5BSwQbP8.n23Lq88vpWolkNvObHuwkGm84RbqFZq",
+      "role": "admin",
+      "company": "EventSphere Management",
+      "title": "Lead Expo Director",
+      "gdprConsent": true,
+      "createdAt": "2026-11-16T18:54:48.872Z"
+    },
+    {
+      "id": "usr-exh-1",
+      "name": "Marcus Chen",
+      "email": "exhibitor@lumina-robotics.io",
+      "passwordHash": "$2b$10$ihv2gklEk6QWO5xlSCBSquIFIrJVVjcWM9zGmIiOe0gjz530pL9lG",
+      "role": "exhibitor",
+      "company": "Lumina Robotics",
+      "title": "VP of Field Engineering",
+      "gdprConsent": true,
+      "createdAt": "2026-11-16T18:54:48.872Z"
+    },
+    {
+      "id": "usr-exh-2",
+      "name": "Sora Takahashi",
+      "email": "exhibitor@aethergrid.io",
+      "passwordHash": "$2b$10$2vHv9ziAKKVQPEg7i0J3CO.AS4eopMwow0xejHBQYIIWUmb.QwfBq",
+      "role": "exhibitor",
+      "company": "AetherGrid CleanTech",
+      "title": "Solutions Architect",
+      "gdprConsent": true,
+      "createdAt": "2026-11-16T18:54:48.872Z"
+    },
+    {
+      "id": "usr-att-1",
+      "name": "Maya Patel",
+      "email": "attendee@eventsphere.io",
+      "passwordHash": "$2b$10$ci0EtWFGCzfoOzZ4DC7mCefJDtSGofpme9n1aeKsT7sAhosPq1O8K",
+      "role": "attendee",
+      "company": "Horizon Ventures",
+      "title": "Hardware Partner",
+      "gdprConsent": true,
+      "createdAt": "2026-11-16T18:54:48.872Z"
+    }
+  ],
+  "resetTokens": [],
+  "expos": [
+    {
+      "id": "expo-2026-global",
+      "title": "NextGen Industrial & Tech Expo 2026",
+      "date": "2026-11-18",
+      "endDate": "2026-11-20",
+      "location": "ExCeL Hall 4 · London",
+      "description": "Flagship three-day convergence of autonomous robotics, clean microgrids, spatial twins, and enterprise security.",
+      "theme": "Autonomous Infrastructure & Live Twins",
+      "bannerAccent": "#7B5CFF",
+      "registeredUserIds": [
+        "usr-att-1"
+      ]
+    },
+    {
+      "id": "expo-2026-bio",
+      "title": "BioMed & Diagnostics Summit 2026",
+      "date": "2026-12-08",
+      "endDate": "2026-12-09",
+      "location": "Moscone West · San Francisco",
+      "description": "Clinical instrumentation, microfluidic diagnostics, and hospital automation showcase.",
+      "theme": "Precision Diagnostics at Scale",
+      "bannerAccent": "#4FE3C1",
+      "registeredUserIds": []
+    }
+  ],
+  "booths": [
+    {
+      "id": "booth-A1",
+      "expoId": "expo-2026-global",
+      "number": "A1",
+      "zone": "North Innovation Wing",
+      "size": "6x3m Corner",
+      "priceUsd": 4200,
+      "status": "available",
+      "row": 0,
+      "col": 0,
+      "exhibitorId": null,
+      "exhibitorName": null,
+      "trafficCount": 36
+    },
+    {
+      "id": "booth-A2",
+      "expoId": "expo-2026-global",
+      "number": "A2",
+      "zone": "North Innovation Wing",
+      "size": "3x3m Standard",
+      "priceUsd": 2800,
+      "status": "reserved",
+      "row": 0,
+      "col": 1,
+      "exhibitorId": "exh-1",
+      "exhibitorName": "Lumina Robotics",
+      "trafficCount": 58
+    },
+    {
+      "id": "booth-A3",
+      "expoId": "expo-2026-global",
+      "number": "A3",
+      "zone": "North Innovation Wing",
+      "size": "3x3m Standard",
+      "priceUsd": 2800,
+      "status": "available",
+      "row": 0,
+      "col": 2,
+      "exhibitorId": null,
+      "exhibitorName": null,
+      "trafficCount": 81
+    },
+    {
+      "id": "booth-A4",
+      "expoId": "expo-2026-global",
+      "number": "A4",
+      "zone": "North Innovation Wing",
+      "size": "3x3m Standard",
+      "priceUsd": 2800,
+      "status": "pending",
+      "row": 0,
+      "col": 3,
+      "exhibitorId": null,
+      "exhibitorName": null,
+      "trafficCount": 104
+    },
+    {
+      "id": "booth-A5",
+      "expoId": "expo-2026-global",
+      "number": "A5",
+      "zone": "North Innovation Wing",
+      "size": "3x3m Standard",
+      "priceUsd": 2800,
+      "status": "reserved",
+      "row": 0,
+      "col": 4,
+      "exhibitorId": "exh-4",
+      "exhibitorName": "Prism Spatial Labs",
+      "trafficCount": 127
+    },
+    {
+      "id": "booth-A6",
+      "expoId": "expo-2026-global",
+      "number": "A6",
+      "zone": "North Innovation Wing",
+      "size": "6x3m Corner",
+      "priceUsd": 4200,
+      "status": "available",
+      "row": 0,
+      "col": 5,
+      "exhibitorId": null,
+      "exhibitorName": null,
+      "trafficCount": 150
+    },
+    {
+      "id": "booth-B1",
+      "expoId": "expo-2026-global",
+      "number": "B1",
+      "zone": "Central Atrium",
+      "size": "6x3m Corner",
+      "priceUsd": 4200,
+      "status": "available",
+      "row": 1,
+      "col": 0,
+      "exhibitorId": null,
+      "exhibitorName": null,
+      "trafficCount": 52
+    },
+    {
+      "id": "booth-B2",
+      "expoId": "expo-2026-global",
+      "number": "B2",
+      "zone": "Central Atrium",
+      "size": "3x3m Standard",
+      "priceUsd": 2800,
+      "status": "available",
+      "row": 1,
+      "col": 1,
+      "exhibitorId": null,
+      "exhibitorName": null,
+      "trafficCount": 75
+    },
+    {
+      "id": "booth-B3",
+      "expoId": "expo-2026-global",
+      "number": "B3",
+      "zone": "Central Atrium",
+      "size": "6x6m Island",
+      "priceUsd": 6800,
+      "status": "reserved",
+      "row": 1,
+      "col": 2,
+      "exhibitorId": "exh-2",
+      "exhibitorName": "AetherGrid CleanTech",
+      "trafficCount": 98
+    },
+    {
+      "id": "booth-B4",
+      "expoId": "expo-2026-global",
+      "number": "B4",
+      "zone": "Central Atrium",
+      "size": "6x6m Island",
+      "priceUsd": 6800,
+      "status": "available",
+      "row": 1,
+      "col": 3,
+      "exhibitorId": null,
+      "exhibitorName": null,
+      "trafficCount": 121
+    },
+    {
+      "id": "booth-B5",
+      "expoId": "expo-2026-global",
+      "number": "B5",
+      "zone": "Central Atrium",
+      "size": "3x3m Standard",
+      "priceUsd": 2800,
+      "status": "pending",
+      "row": 1,
+      "col": 4,
+      "exhibitorId": null,
+      "exhibitorName": null,
+      "trafficCount": 144
+    },
+    {
+      "id": "booth-B6",
+      "expoId": "expo-2026-global",
+      "number": "B6",
+      "zone": "Central Atrium",
+      "size": "6x3m Corner",
+      "priceUsd": 4200,
+      "status": "available",
+      "row": 1,
+      "col": 5,
+      "exhibitorId": null,
+      "exhibitorName": null,
+      "trafficCount": 167
+    },
+    {
+      "id": "booth-C1",
+      "expoId": "expo-2026-global",
+      "number": "C1",
+      "zone": "West Robotics Row",
+      "size": "6x3m Corner",
+      "priceUsd": 4200,
+      "status": "reserved",
+      "row": 2,
+      "col": 0,
+      "exhibitorId": "exh-3",
+      "exhibitorName": "Sentinel Mesh Security",
+      "trafficCount": 69
+    },
+    {
+      "id": "booth-C2",
+      "expoId": "expo-2026-global",
+      "number": "C2",
+      "zone": "West Robotics Row",
+      "size": "3x3m Standard",
+      "priceUsd": 2800,
+      "status": "available",
+      "row": 2,
+      "col": 1,
+      "exhibitorId": null,
+      "exhibitorName": null,
+      "trafficCount": 92
+    },
+    {
+      "id": "booth-C3",
+      "expoId": "expo-2026-global",
+      "number": "C3",
+      "zone": "West Robotics Row",
+      "size": "3x3m Standard",
+      "priceUsd": 2800,
+      "status": "available",
+      "row": 2,
+      "col": 2,
+      "exhibitorId": null,
+      "exhibitorName": null,
+      "trafficCount": 115
+    },
+    {
+      "id": "booth-C4",
+      "expoId": "expo-2026-global",
+      "number": "C4",
+      "zone": "West Robotics Row",
+      "size": "3x3m Standard",
+      "priceUsd": 2800,
+      "status": "reserved",
+      "row": 2,
+      "col": 3,
+      "exhibitorId": "exh-5",
+      "exhibitorName": "HelixBio Diagnostics",
+      "trafficCount": 138
+    },
+    {
+      "id": "booth-C5",
+      "expoId": "expo-2026-global",
+      "number": "C5",
+      "zone": "West Robotics Row",
+      "size": "3x3m Standard",
+      "priceUsd": 2800,
+      "status": "available",
+      "row": 2,
+      "col": 4,
+      "exhibitorId": null,
+      "exhibitorName": null,
+      "trafficCount": 161
+    },
+    {
+      "id": "booth-C6",
+      "expoId": "expo-2026-global",
+      "number": "C6",
+      "zone": "West Robotics Row",
+      "size": "6x3m Corner",
+      "priceUsd": 4200,
+      "status": "pending",
+      "row": 2,
+      "col": 5,
+      "exhibitorId": null,
+      "exhibitorName": null,
+      "trafficCount": 44
+    },
+    {
+      "id": "booth-D1",
+      "expoId": "expo-2026-global",
+      "number": "D1",
+      "zone": "South Enterprise Hall",
+      "size": "6x3m Corner",
+      "priceUsd": 4200,
+      "status": "available",
+      "row": 3,
+      "col": 0,
+      "exhibitorId": null,
+      "exhibitorName": null,
+      "trafficCount": 86
+    },
+    {
+      "id": "booth-D2",
+      "expoId": "expo-2026-global",
+      "number": "D2",
+      "zone": "South Enterprise Hall",
+      "size": "3x3m Standard",
+      "priceUsd": 2800,
+      "status": "reserved",
+      "row": 3,
+      "col": 1,
+      "exhibitorId": "exh-1",
+      "exhibitorName": "Lumina Robotics",
+      "trafficCount": 109
+    },
+    {
+      "id": "booth-D3",
+      "expoId": "expo-2026-global",
+      "number": "D3",
+      "zone": "South Enterprise Hall",
+      "size": "3x3m Standard",
+      "priceUsd": 2800,
+      "status": "available",
+      "row": 3,
+      "col": 2,
+      "exhibitorId": null,
+      "exhibitorName": null,
+      "trafficCount": 132
+    },
+    {
+      "id": "booth-D4",
+      "expoId": "expo-2026-global",
+      "number": "D4",
+      "zone": "South Enterprise Hall",
+      "size": "3x3m Standard",
+      "priceUsd": 2800,
+      "status": "pending",
+      "row": 3,
+      "col": 3,
+      "exhibitorId": null,
+      "exhibitorName": null,
+      "trafficCount": 155
+    },
+    {
+      "id": "booth-D5",
+      "expoId": "expo-2026-global",
+      "number": "D5",
+      "zone": "South Enterprise Hall",
+      "size": "3x3m Standard",
+      "priceUsd": 2800,
+      "status": "available",
+      "row": 3,
+      "col": 4,
+      "exhibitorId": null,
+      "exhibitorName": null,
+      "trafficCount": 38
+    },
+    {
+      "id": "booth-D6",
+      "expoId": "expo-2026-global",
+      "number": "D6",
+      "zone": "South Enterprise Hall",
+      "size": "6x3m Corner",
+      "priceUsd": 4200,
+      "status": "available",
+      "row": 3,
+      "col": 5,
+      "exhibitorId": null,
+      "exhibitorName": null,
+      "trafficCount": 61
+    }
+  ],
+  "exhibitors": [
+    {
+      "id": "exh-1",
+      "userId": "usr-exh-1",
+      "companyName": "Lumina Robotics",
+      "category": "Robotics & AI",
+      "tagline": "Autonomous warehouse orchestration and tactile manipulator arms",
+      "description": "Lumina builds millimeter-accurate cobots and fleet routing controllers engineered for high-throughput fulfillment centers.",
+      "logoColor": "#7B5CFF",
+      "contactEmail": "exhibitor@lumina-robotics.io",
+      "website": "https://lumina-robotics.example",
+      "products": [
+        "Lumina Arm M4",
+        "FleetOS Edge Router",
+        "VisionPick Sensor Kit"
+      ],
+      "staff": [
+        "Marcus Chen",
+        "Priya Nair",
+        "Liam Brooks"
+      ],
+      "profileViews": 248
+    },
+    {
+      "id": "exh-2",
+      "userId": "usr-exh-2",
+      "companyName": "AetherGrid CleanTech",
+      "category": "Clean Energy",
+      "tagline": "Modular solid-state microgrids for zero-emission venues",
+      "description": "High-density containerized battery storage and bidirectional DC microgrids powering commercial expos and campuses.",
+      "logoColor": "#4FE3C1",
+      "contactEmail": "exhibitor@aethergrid.io",
+      "website": "https://aethergrid.example",
+      "products": [
+        "AetherCell 500kWh",
+        "GridPulse Telemetry",
+        "SolarSync Inverter"
+      ],
+      "staff": [
+        "Sora Takahashi",
+        "Devon Cole"
+      ],
+      "profileViews": 194
+    },
+    {
+      "id": "exh-3",
+      "userId": "usr-exh-3",
+      "companyName": "Sentinel Mesh Security",
+      "category": "Cloud & Security",
+      "tagline": "Zero-trust identity fabric for distributed edge fleets",
+      "description": "Hardware-attested workload identities and real-time anomaly containment for industrial IoT deployments.",
+      "logoColor": "#FF6B57",
+      "contactEmail": "hello@sentinelmesh.example",
+      "website": "https://sentinelmesh.example",
+      "products": [
+        "MeshGate HSM",
+        "ZeroTrust CLI",
+        "AuditStream"
+      ],
+      "staff": [
+        "Aria Novak",
+        "Julian Cruz"
+      ],
+      "profileViews": 176
+    },
+    {
+      "id": "exh-4",
+      "userId": "usr-exh-4",
+      "companyName": "Prism Spatial Labs",
+      "category": "Spatial Computing",
+      "tagline": "Real-time digital twin optics and holographic CAD review",
+      "description": "Ultra-low-latency WebGL and headset visualization engines for architectural, factory, and live venue twins.",
+      "logoColor": "#38BDF8",
+      "contactEmail": "team@prismspatial.example",
+      "website": "https://prismspatial.example",
+      "products": [
+        "Prism Twin Studio",
+        "HoloLink SDK"
+      ],
+      "staff": [
+        "Noah Lindqvist",
+        "Chloe Park"
+      ],
+      "profileViews": 215
+    },
+    {
+      "id": "exh-5",
+      "userId": "usr-exh-5",
+      "companyName": "HelixBio Diagnostics",
+      "category": "Biotech & MedTech",
+      "tagline": "Point-of-care microfluidic sequencers under 12 minutes",
+      "description": "Portable isothermal assay cartridges and encrypted clinical telemetry dashboards.",
+      "logoColor": "#F59E0B",
+      "contactEmail": "info@helixbio.example",
+      "website": "https://helixbio.example",
+      "products": [
+        "HelixCartridge Pro",
+        "BioVault Sync"
+      ],
+      "staff": [
+        "Dr. Amara Osei",
+        "Kenji Sato"
+      ],
+      "profileViews": 162
+    }
+  ],
+  "applications": [
+    {
+      "id": "app-1",
+      "expoId": "expo-2026-global",
+      "exhibitorId": "exh-1",
+      "companyName": "Lumina Robotics",
+      "category": "Robotics & AI",
+      "productsSummary": "Lumina Arm M4 collaborative robot cell + live pick-and-place demo.",
+      "documents": [
+        "ISO-10218-Safety-Cert.pdf",
+        "Booth-Power-Spec.pdf"
+      ],
+      "status": "approved",
+      "submittedAt": "2026-11-11"
+    },
+    {
+      "id": "app-2",
+      "expoId": "expo-2026-global",
+      "exhibitorId": "exh-2",
+      "companyName": "AetherGrid CleanTech",
+      "category": "Clean Energy",
+      "productsSummary": "AetherCell modular energy wall and GridPulse monitoring station.",
+      "documents": [
+        "UL-9540-Compliance.pdf"
+      ],
+      "status": "approved",
+      "submittedAt": "2026-11-12"
+    },
+    {
+      "id": "app-3",
+      "expoId": "expo-2026-global",
+      "exhibitorId": "exh-3",
+      "companyName": "Sentinel Mesh Security",
+      "category": "Cloud & Security",
+      "productsSummary": "Hardware-attested zero-trust edge gateway live penetration lab.",
+      "documents": [
+        "SOC2-Attestation.pdf",
+        "Demo-Network-Plan.pdf"
+      ],
+      "status": "pending",
+      "submittedAt": "2026-11-15"
+    }
+  ],
+  "sessions": [
+    {
+      "id": "ses-1",
+      "expoId": "expo-2026-global",
+      "title": "Opening Keynote: Real-Time Venues & Digital Twins",
+      "speaker": "Elena Vance",
+      "speakerRole": "Lead Expo Director, EventSphere",
+      "topic": "Spatial Operations",
+      "startTime": "09:30",
+      "endTime": "10:30",
+      "location": "Main Keynote Stage",
+      "capacity": 400,
+      "registeredUserIds": [
+        "usr-att-1"
+      ],
+      "bookmarkedUserIds": [
+        "usr-att-1"
+      ],
+      "updatedAt": "2026-11-16T18:54:48.872Z"
+    },
+    {
+      "id": "ses-2",
+      "expoId": "expo-2026-global",
+      "title": "Tactile Cobots & Fleet Orchestration Workshop",
+      "speaker": "Marcus Chen",
+      "speakerRole": "VP Engineering, Lumina Robotics",
+      "topic": "Robotics & AI",
+      "startTime": "11:00",
+      "endTime": "12:15",
+      "location": "West Robotics Theater (near Booth A2)",
+      "capacity": 120,
+      "registeredUserIds": [
+        "usr-att-1"
+      ],
+      "bookmarkedUserIds": [],
+      "updatedAt": "2026-11-16T18:54:48.872Z"
+    },
+    {
+      "id": "ses-3",
+      "expoId": "expo-2026-global",
+      "title": "Decarbonizing Mega-Expos with Solid-State Microgrids",
+      "speaker": "Sora Takahashi",
+      "speakerRole": "Solutions Architect, AetherGrid",
+      "topic": "Clean Energy",
+      "startTime": "13:30",
+      "endTime": "14:30",
+      "location": "Central Atrium Stage",
+      "capacity": 180,
+      "registeredUserIds": [],
+      "bookmarkedUserIds": [
+        "usr-att-1"
+      ],
+      "updatedAt": "2026-11-16T18:54:48.872Z"
+    },
+    {
+      "id": "ses-4",
+      "expoId": "expo-2026-global",
+      "title": "Zero-Trust Edge Security for Connected Hardware",
+      "speaker": "Aria Novak",
+      "speakerRole": "Principal Security Engineer, Sentinel Mesh",
+      "topic": "Cloud & Security",
+      "startTime": "15:15",
+      "endTime": "16:15",
+      "location": "Enterprise Lab B",
+      "capacity": 90,
+      "registeredUserIds": [],
+      "bookmarkedUserIds": [],
+      "updatedAt": "2026-11-16T18:54:48.872Z"
+    }
+  ],
+  "messages": [
+    {
+      "id": "msg-1",
+      "senderId": "usr-exh-1",
+      "senderName": "Marcus Chen (Lumina Robotics)",
+      "senderRole": "exhibitor",
+      "recipientChannel": "organizer",
+      "recipientLabel": "Organizer Desk",
+      "body": "Confirming 3-phase power drop at Booth A2 before setup opens at 07:00.",
+      "createdAt": "2026-11-16T08:15:00.000Z"
+    },
+    {
+      "id": "msg-2",
+      "senderId": "usr-admin-1",
+      "senderName": "Elena Vance (Organizer)",
+      "senderRole": "admin",
+      "recipientChannel": "organizer",
+      "recipientLabel": "Organizer Desk",
+      "body": "Confirmed Marcus — facilities crew has tagged Booth A2 for 32A power delivery.",
+      "createdAt": "2026-11-16T08:22:00.000Z"
+    }
+  ],
+  "notifications": [
+    {
+      "id": "not-1794855293711-2yp4",
+      "targetUserId": "all",
+      "title": "Booth A1 Reserved",
+      "message": "Lumina Robotics has claimed Booth A1 in North Innovation Wing.",
+      "kind": "booth",
+      "readBy": [],
+      "createdAt": "2026-11-16T18:54:53.711Z"
+    },
+    {
+      "id": "not-1",
+      "targetUserId": "all",
+      "title": "Live Floor Plan Synchronized",
+      "message": "All 24 booths for NextGen Industrial & Tech Expo 2026 are live for real-time reservation.",
+      "kind": "booth",
+      "readBy": [],
+      "createdAt": "2026-11-16T18:54:48.872Z"
+    },
+    {
+      "id": "not-2",
+      "targetUserId": "all",
+      "title": "Keynote Reminder · 09:30",
+      "message": "Opening Keynote: Real-Time Venues & Digital Twins begins at Main Keynote Stage.",
+      "kind": "reminder",
+      "readBy": [],
+      "createdAt": "2026-11-16T18:54:48.872Z"
+    }
+  ],
+  "feedback": [
+    {
+      "id": "fb-1",
+      "userId": "usr-att-1",
+      "userName": "Maya Patel",
+      "category": "Suggestion",
+      "message": "Love being able to see booth A2 power & demo status directly on the 3D hall map.",
+      "createdAt": "2026-11-15T14:20:00.000Z",
+      "status": "resolved"
+    }
+  ],
+  "activityLogs": [
+    {
+      "id": "log-1794855293728-fm8d",
+      "actor": "Marcus Chen",
+      "action": "BOOTH_RELEASED",
+      "detail": "Released Booth A1",
+      "timestamp": "2026-11-16T18:54:53.728Z"
+    },
+    {
+      "id": "log-1794855293711-iye3",
+      "actor": "Marcus Chen",
+      "action": "BOOTH_RESERVED",
+      "detail": "Reserved Booth A1 for Lumina Robotics",
+      "timestamp": "2026-11-16T18:54:53.711Z"
+    },
+    {
+      "id": "log-1794855293698-pmbc",
+      "actor": "Marcus Chen",
+      "action": "USER_LOGIN",
+      "detail": "Signed in (exhibitor)",
+      "timestamp": "2026-11-16T18:54:53.698Z"
+    },
+    {
+      "id": "log-1",
+      "actor": "Elena Vance (Admin)",
+      "action": "EXPO_PUBLISHED",
+      "detail": "Published NextGen Industrial & Tech Expo 2026 with 24 booths and 4 sessions.",
+      "timestamp": "2026-11-16T18:54:48.872Z"
+    },
+    {
+      "id": "log-2",
+      "actor": "Marcus Chen (Exhibitor)",
+      "action": "BOOTH_RESERVED",
+      "detail": "Atomically reserved Booth A2 (6x3m Corner) in North Innovation Wing.",
+      "timestamp": "2026-11-16T18:54:48.872Z"
+    }
+  ],
+  "analyticsSeries": [
+    {
+      "date": "2026-10-18",
+      "boothTraffic": 261,
+      "sessionBookmarks": 91,
+      "profileViews": 112
+    },
+    {
+      "date": "2026-10-19",
+      "boothTraffic": 232,
+      "sessionBookmarks": 74,
+      "profileViews": 219
+    },
+    {
+      "date": "2026-10-20",
+      "boothTraffic": 203,
+      "sessionBookmarks": 57,
+      "profileViews": 196
+    },
+    {
+      "date": "2026-10-21",
+      "boothTraffic": 174,
+      "sessionBookmarks": 115,
+      "profileViews": 173
+    },
+    {
+      "date": "2026-10-22",
+      "boothTraffic": 145,
+      "sessionBookmarks": 98,
+      "profileViews": 150
+    },
+    {
+      "date": "2026-10-23",
+      "boothTraffic": 296,
+      "sessionBookmarks": 81,
+      "profileViews": 127
+    },
+    {
+      "date": "2026-10-24",
+      "boothTraffic": 267,
+      "sessionBookmarks": 64,
+      "profileViews": 104
+    },
+    {
+      "date": "2026-10-25",
+      "boothTraffic": 238,
+      "sessionBookmarks": 122,
+      "profileViews": 211
+    },
+    {
+      "date": "2026-10-26",
+      "boothTraffic": 209,
+      "sessionBookmarks": 105,
+      "profileViews": 188
+    },
+    {
+      "date": "2026-10-27",
+      "boothTraffic": 180,
+      "sessionBookmarks": 88,
+      "profileViews": 165
+    },
+    {
+      "date": "2026-10-28",
+      "boothTraffic": 151,
+      "sessionBookmarks": 71,
+      "profileViews": 142
+    },
+    {
+      "date": "2026-10-29",
+      "boothTraffic": 302,
+      "sessionBookmarks": 54,
+      "profileViews": 119
+    },
+    {
+      "date": "2026-10-30",
+      "boothTraffic": 273,
+      "sessionBookmarks": 112,
+      "profileViews": 96
+    },
+    {
+      "date": "2026-10-31",
+      "boothTraffic": 244,
+      "sessionBookmarks": 95,
+      "profileViews": 203
+    },
+    {
+      "date": "2026-11-01",
+      "boothTraffic": 215,
+      "sessionBookmarks": 78,
+      "profileViews": 180
+    },
+    {
+      "date": "2026-11-02",
+      "boothTraffic": 186,
+      "sessionBookmarks": 61,
+      "profileViews": 157
+    },
+    {
+      "date": "2026-11-03",
+      "boothTraffic": 157,
+      "sessionBookmarks": 119,
+      "profileViews": 134
+    },
+    {
+      "date": "2026-11-04",
+      "boothTraffic": 308,
+      "sessionBookmarks": 102,
+      "profileViews": 111
+    },
+    {
+      "date": "2026-11-05",
+      "boothTraffic": 279,
+      "sessionBookmarks": 85,
+      "profileViews": 218
+    },
+    {
+      "date": "2026-11-06",
+      "boothTraffic": 250,
+      "sessionBookmarks": 68,
+      "profileViews": 195
+    },
+    {
+      "date": "2026-11-07",
+      "boothTraffic": 221,
+      "sessionBookmarks": 51,
+      "profileViews": 172
+    },
+    {
+      "date": "2026-11-08",
+      "boothTraffic": 192,
+      "sessionBookmarks": 109,
+      "profileViews": 149
+    },
+    {
+      "date": "2026-11-09",
+      "boothTraffic": 163,
+      "sessionBookmarks": 92,
+      "profileViews": 126
+    },
+    {
+      "date": "2026-11-10",
+      "boothTraffic": 314,
+      "sessionBookmarks": 75,
+      "profileViews": 103
+    },
+    {
+      "date": "2026-11-11",
+      "boothTraffic": 285,
+      "sessionBookmarks": 58,
+      "profileViews": 210
+    },
+    {
+      "date": "2026-11-12",
+      "boothTraffic": 351,
+      "sessionBookmarks": 156,
+      "profileViews": 247
+    },
+    {
+      "date": "2026-11-13",
+      "boothTraffic": 322,
+      "sessionBookmarks": 139,
+      "profileViews": 224
+    },
+    {
+      "date": "2026-11-14",
+      "boothTraffic": 293,
+      "sessionBookmarks": 122,
+      "profileViews": 201
+    },
+    {
+      "date": "2026-11-15",
+      "boothTraffic": 264,
+      "sessionBookmarks": 105,
+      "profileViews": 178
+    },
+    {
+      "date": "2026-11-16",
+      "boothTraffic": 247,
+      "sessionBookmarks": 88,
+      "profileViews": 155
+    }
+  ]
+}

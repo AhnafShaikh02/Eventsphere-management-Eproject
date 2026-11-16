@@ -1,0 +1,264 @@
+@import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
+
+@layer base {
+  :root {
+    --font-display: 'Bricolage Grotesque', system-ui, -apple-system, sans-serif;
+    --font-sans: 'DM Sans', system-ui, -apple-system, sans-serif;
+    --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+    --es-bg: #F4F7F5;
+    --es-surface: #FFFFFF;
+    --es-surface-recessed: #E8EFEA;
+    --es-ink: #09140E;
+    --es-mute: #466153;
+    --es-accent: #059669;
+  }
+
+  .dark {
+    --es-bg: #040705;
+    --es-surface: #09120D;
+    --es-surface-recessed: #060B08;
+    --es-ink: #ECFDF5;
+    --es-mute: #8EAD9E;
+    --es-accent: #10B981;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1, h2, h3, .font-display {
+    font-family: var(--font-display);
+    text-wrap: balance;
+  }
+
+  .font-mono {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Kinetic masked headline & optical focus-in reveals */
+.ln {
+  display: block;
+  overflow: hidden;
+  padding-bottom: 0.08em;
+}
+
+.ln > span {
+  display: block;
+  opacity: 0;
+  filter: blur(8px);
+  transform: translateY(105%);
+  transition:
+    transform 0.9s cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 0.75s cubic-bezier(0.16, 1, 0.3, 1),
+    filter 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform, opacity, filter;
+}
+
+.rv.go .ln > span {
+  opacity: 1;
+  filter: blur(0px);
+  transform: translateY(0);
+}
+
+.ln:nth-child(1) > span {
+  transition-delay: 0.03s;
+}
+
+.ln:nth-child(2) > span {
+  transition-delay: 0.14s;
+}
+
+.ln:nth-child(3) > span {
+  transition-delay: 0.25s;
+}
+
+/* Staggered word reveal for sub-headings & editorial callouts */
+.rv-fade {
+  opacity: 0;
+  filter: blur(5px);
+  transform: translateY(18px);
+  transition:
+    opacity 0.7s 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.75s 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+    filter 0.7s 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.rv.go .rv-fade,
+.rv-fade.go {
+  opacity: 1;
+  filter: blur(0px);
+  transform: translateY(0);
+}
+
+.rv-stagger-1 {
+  transition-delay: 0.12s;
+}
+
+.rv-stagger-2 {
+  transition-delay: 0.22s;
+}
+
+.rv-stagger-3 {
+  transition-delay: 0.32s;
+}
+
+/* Subtle metallic champagne shimmer for focal headline accents */
+@keyframes champagneShimmer {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.text-champagne-shimmer {
+  background: linear-gradient(110deg, #047857 0%, #10B981 32%, #6EE7B7 50%, #10B981 68%, #047857 100%);
+  background-size: 220% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: champagneShimmer 7s ease-in-out infinite;
+}
+
+.dark .text-champagne-shimmer {
+  background: linear-gradient(110deg, #10B981 0%, #34D399 35%, #D1FAE5 50%, #34D399 68%, #059669 100%);
+  background-size: 220% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Prismatic emerald-jade-mint gradient accent for focal Sphere display title */
+.text-sphere-prism {
+  background: linear-gradient(110deg, #065F46 0%, #059669 38%, #0D9488 68%, #065F46 100%);
+  background-size: 220% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: champagneShimmer 8s ease-in-out infinite;
+}
+
+.dark .text-sphere-prism {
+  background: linear-gradient(110deg, #34D399 0%, #A7F3D0 35%, #2DD4BF 65%, #10B981 100%);
+  background-size: 220% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Subtle GPU-only float animation for Hero telemetry showcase cards */
+@keyframes heroCardFloat {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+.float-card {
+  animation: heroCardFloat 6.5s ease-in-out infinite;
+  will-change: transform;
+}
+
+.float-card-alt {
+  animation: heroCardFloat 7.5s ease-in-out 1.4s infinite;
+  will-change: transform;
+}
+
+/* Specular architectural surface treatment (no backdrop-filter over WebGL) */
+.surface-luxe {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.58),
+    0 20px 50px -18px rgba(4, 24, 14, 0.16);
+}
+
+.dark .surface-luxe {
+  background-image: linear-gradient(155deg, rgba(16, 185, 129, 0.08) 0%, rgba(4, 7, 5, 0.04) 55%, rgba(5, 150, 105, 0.06) 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(52, 211, 153, 0.16),
+    0 24px 60px -16px rgba(0, 0, 0, 0.8);
+}
+
+/* Interactive specular sheen on primary CTA buttons */
+.btn-luxe {
+  position: relative;
+  overflow: hidden;
+  transition:
+    transform 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 0.2s ease;
+}
+
+.btn-luxe::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-110%) skewX(-18deg);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.28), transparent);
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+}
+
+.btn-luxe:hover::after {
+  transform: translateX(115%) skewX(-18deg);
+}
+
+.btn-luxe:hover {
+  transform: translateY(-1px);
+}
+
+.btn-luxe:active {
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .ln > span {
+    opacity: 1;
+    filter: none;
+    transform: none;
+    transition: none;
+  }
+  .rv-fade {
+    opacity: 1;
+    filter: none;
+    transform: none;
+    transition: none;
+  }
+  .text-champagne-shimmer,
+  .text-sphere-prism,
+  .float-card,
+  .float-card-alt {
+    animation: none;
+  }
+  .btn-luxe::after {
+    display: none;
+  }
+}
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  body {
+    background: #ffffff !important;
+    color: #09140E !important;
+  }
+}
