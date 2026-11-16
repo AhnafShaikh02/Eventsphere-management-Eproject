@@ -4,12 +4,14 @@ import type { BoothStatus, ExpoBooth } from '../types/eventsphere';
 export const STATUS_COLORS: Record<BoothStatus, number> = {
   available: 0x34d399,
   reserved: 0xf97362,
+  occupied: 0x38bdf8,
   pending: 0xa78bfa,
 };
 
 export const STATUS_HEX: Record<BoothStatus, string> = {
   available: '#34D399',
   reserved: '#F97362',
+  occupied: '#38BDF8',
   pending: '#A78BFA',
 };
 
@@ -93,7 +95,7 @@ export function createBoothFasciaTexture(booth: ExpoBooth, maxAniso: number): TH
   ctx.fillRect(0, 0, 112, 128);
 
   ctx.fillStyle = '#040705';
-  ctx.font = '800 50px "Bricolage Grotesque", system-ui, sans-serif';
+  ctx.font = '800 50px "Plus Jakarta Sans", system-ui, sans-serif';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   ctx.fillText(booth.number, 56, 66);

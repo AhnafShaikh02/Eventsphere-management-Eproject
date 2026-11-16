@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { Check, Copy, Download, Share2, X } from 'lucide-react';
-import { motion } from 'motion/react';
+import { Check, Copy, Download, Share2 } from 'lucide-react';
 import type { ExhibitorProfile, ExpoBooth } from '../types/eventsphere';
+import { Button, Modal } from './ui';
 
 interface ShareModalProps {
   isOpen: boolean;
@@ -22,7 +22,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({
 }) => {
   const [copied, setCopied] = useState(false);
 
-  if (!isOpen || !booth) return null;
+  if (!booth) return null;
 
   const shareText = exhibitor
     ? `Visiting ${exhibitor.companyName} at Booth ${booth.number} (${booth.zone}) during EventSphere NextGen Expo 2026.`
@@ -66,71 +66,56 @@ export const ShareModal: React.FC<ShareModalProps> = ({
   };
 
   return (
-    <div className="no-print fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4">
-      <motion.div
-        initial={{ opacity: 0, scale: 0.96, y: 10 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-        className="surface-luxe w-full max-w-md rounded-2xl border border-[#10B981]/25 bg-white p-6 text-[#09140E] dark:border-[#10B981]/25 dark:bg-[#040705] dark:text-[#ECFDF5]"
-      >
-        <div className="flex items-center justify-between border-b border-[#10B981]/18 pb-3 dark:border-[#10B981]/20">
-          <div className="flex items-center gap-2">
-            <Share2 className="h-4 w-4 text-[#10B981] dark:text-[#34D399]" />
-            <h2 className="font-display text-lg font-bold">Share Booth {booth.number}</h2>
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Close share modal"
-            className="rounded-lg p-1.5 text-[#466153] hover:bg-[#E8EFEA] dark:text-[#8EAD9E] dark:hover:bg-[#10B981]/10"
-          >
-            <X className="h-4 w-4" />
-          </button>
-        </div>
-
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      maxWidth="md"
+      icon={<Share2 className="h-4 w-4" />}
+      title={`Share Booth ${booth.number}`}
+    >
+      <div className="space-y-4">
         {snapshotDataUrl && (
-          <div className="mt-4 overflow-hidden rounded-xl border border-[#10B981]/20 dark:border-[#10B981]/22">
+          <div className="overflow-hidden rounded-xl border border-slate-200 dark:border-[#10B981]/22">
             <img
               src={snapshotDataUrl}
               alt={`3D expo floor snapshot highlighting Booth ${booth.number}`}
               className="h-44 w-full object-cover"
+              referrerPolicy="no-referrer"
             />
           </div>
         )}
 
-        <p className="mt-4 rounded-xl border border-[#10B981]/18 bg-[#E8EFEA]/80 p-3 text-xs leading-relaxed text-[#466153] dark:border-[#10B981]/20 dark:bg-[#09120D] dark:text-[#C4DFD1]">
+        <p className="rounded-xl border border-slate-200 bg-[#F4F7F5] p-3 text-xs leading-relaxed text-[#466153] dark:border-[#10B981]/20 dark:bg-[#09120D] dark:text-[#C4DFD1]">
           {shareText}
         </p>
 
-        <div className="mt-4 grid grid-cols-2 gap-2.5">
-          <button
-            type="button"
+        <div className="grid grid-cols-2 gap-2.5">
+          <Button
+            variant="outline"
+            size="md"
+            leftIcon={
+              copied ? <Check className="h-3.5 w-3.5 text-[#34D399]" /> : <Copy className="h-3.5 w-3.5" />
+            }
             onClick={handleCopy}
-            className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-[#10B981]/25 bg-white py-2.5 text-xs font-semibold hover:border-[#10B981] dark:border-[#10B981]/22 dark:bg-[#09120D]"
           >
-            {copied ? <Check className="h-3.5 w-3.5 text-[#34D399]" /> : <Copy className="h-3.5 w-3.5" />}
-            <span>{copied ? 'Copied!' : 'Copy Invite Link'}</span>
-          </button>
+            {copied ? 'Copied!' : 'Copy Invite Link'}
+          </Button>
 
-          <button
-            type="button"
-            onClick={handleDownloadSnapshot}
+          <Button
+            variant="outline"
+            size="md"
             disabled={!snapshotDataUrl}
-            className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-[#10B981]/25 bg-white py-2.5 text-xs font-semibold hover:border-[#34D399] disabled:opacity-50 dark:border-[#10B981]/22 dark:bg-[#09120D]"
+            leftIcon={<Download className="h-3.5 w-3.5 text-[#34D399]" />}
+            onClick={handleDownloadSnapshot}
           >
-            <Download className="h-3.5 w-3.5 text-[#34D399]" />
-            <span>Save 3D PNG</span>
-          </button>
+            Save 3D PNG
+          </Button>
         </div>
 
-        <button
-          type="button"
-          onClick={handleNativeShare}
-          className="btn-luxe mt-2.5 w-full rounded-lg bg-gradient-to-r from-[#059669] to-[#34D399] py-2.5 text-xs font-bold text-[#02120B] shadow-md shadow-[#10B981]/20"
-        >
+        <Button variant="primary" size="md" fullWidth onClick={handleNativeShare}>
           Post / Share Discovery
-        </button>
-      </motion.div>
-    </div>
+        </Button>
+      </div>
+    </Modal>
   );
 };

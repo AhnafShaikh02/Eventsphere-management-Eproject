@@ -1,7 +1,9 @@
 import { createOfflineFallbackSnapshot } from '../data/offlineFallbackSeed';
 import type {
+  AdminAttendeeRow,
   BoothStatus,
   ChatMessage,
+  EventRegistration,
   EventSphereSnapshot,
   ExhibitorApplication,
   ExhibitorProfile,
@@ -9,6 +11,7 @@ import type {
   ExpoEvent,
   ExpoSession,
   FeedbackEntry,
+  SpeakerRecord,
   UserAccount,
   UserRole,
 } from '../types/eventsphere';
@@ -68,7 +71,9 @@ export function loadWorkspace(): LocalWorkspaceState {
     const parsed = JSON.parse(raw) as Partial<LocalWorkspaceState>;
     const defaults = getDefaultWorkspace();
     return {
-      favoriteBoothIds: Array.isArray(parsed.favoriteBoothIds) ? parsed.favoriteBoothIds : defaults.favoriteBoothIds,
+      favoriteBoothIds: Array.isArray(parsed.favoriteBoothIds)
+        ? parsed.favoriteBoothIds
+        : defaults.favoriteBoothIds,
       favoriteExhibitorIds: Array.isArray(parsed.favoriteExhibitorIds)
         ? parsed.favoriteExhibitorIds
         : defaults.favoriteExhibitorIds,
@@ -99,9 +104,17 @@ export function loadCachedSnapshot(): EventSphereSnapshot {
   try {
     const raw = localStorage.getItem(STORAGE_SNAPSHOT);
     if (raw) {
-      const parsed = JSON.parse(raw) as EventSphereSnapshot;
+      const parsed = JSON.parse(raw) as Partial<EventSphereSnapshot>;
+      const fallback = createOfflineFallbackSnapshot();
       if (Array.isArray(parsed.booths) && Array.isArray(parsed.sessions)) {
-        return parsed;
+        return {
+          ...fallback,
+          ...parsed,
+          registrations: Array.isArray(parsed.registrations)
+            ? parsed.registrations
+            : fallback.registrations,
+          speakers: Array.isArray(parsed.speakers) ? parsed.speakers : fallback.speakers,
+        };
       }
     }
   } catch {
@@ -211,14 +224,22 @@ async function apiRequest<T>(
 }
 
 export const eventSphereApi = {
-  getState: () => apiRequest<EventSphereSnapshot>('/api/state'),
+  getState: (token?: string | null) => apiRequest<EventSphereSnapshot>('/api/state', {}, token),
 
   register: (payload: {
     name: string;
     email: string;
     password: string;
-    role: 'exhibitor' | 'attendee';
+    role: UserRole;
     company?: string;
+    phone?: string;
+    category?: ExhibitorProfile['category'];
+    description?: string;
+    website?: string;
+    logoColor?: string;
+    products?: string[];
+    documents?: string[];
+    organizerInviteCode?: string;
     gdprConsent: boolean;
   }) =>
     apiRequest<{ token: string; user: UserAccount }>('/api/auth/register', {
@@ -246,7 +267,10 @@ export const eventSphereApi = {
 
   getMe: (token: string) => apiRequest<{ user: UserAccount }>('/api/auth/me', {}, token),
 
-  updateProfile: (token: string, payload: { name: string; company?: string; title?: string }) =>
+  updateProfile: (
+    token: string,
+    payload: { name: string; company?: string; title?: string; phone?: string },
+  ) =>
     apiRequest<{ user: UserAccount; token: string }>(
       '/api/auth/profile',
       { method: 'PUT', body: JSON.stringify(payload) },
@@ -255,7 +279,17 @@ export const eventSphereApi = {
 
   createExpo: (
     token: string,
-    payload: { title: string; date: string; endDate: string; location: string; description: string; theme: string },
+    payload: {
+      title: string;
+      date: string;
+      endDate: string;
+      location: string;
+      description: string;
+      theme: string;
+      category?: string;
+      status?: ExpoEvent['status'];
+      capacity?: number;
+    },
   ) =>
     apiRequest<ExpoEvent>(
       '/api/expos',
@@ -266,7 +300,12 @@ export const eventSphereApi = {
   updateExpo: (
     token: string,
     expoId: string,
-    payload: Partial<Pick<ExpoEvent, 'title' | 'date' | 'endDate' | 'location' | 'description' | 'theme'>>,
+    payload: Partial<
+      Pick<
+        ExpoEvent,
+        'title' | 'date' | 'endDate' | 'location' | 'description' | 'theme' | 'category' | 'status' | 'capacity'
+      >
+    >,
   ) =>
     apiRequest<ExpoEvent>(
       `/api/expos/${encodeURIComponent(expoId)}`,
@@ -278,18 +317,49 @@ export const eventSphereApi = {
     apiRequest<{ ok: boolean }>(`/api/expos/${encodeURIComponent(expoId)}`, { method: 'DELETE' }, token),
 
   registerForExpo: (token: string, expoId: string) =>
-    apiRequest<ExpoEvent>(`/api/expos/${encodeURIComponent(expoId)}/register`, { method: 'POST' }, token),
+    apiRequest<{ expo: ExpoEvent; registration: EventRegistration }>(
+      `/api/expos/${encodeURIComponent(expoId)}/register`,
+      { method: 'POST' },
+      token,
+    ),
+
+  cancelExpoRegistration: (token: string, expoId: string) =>
+    apiRequest<{ ok: boolean; expo: ExpoEvent }>(
+      `/api/expos/${encodeURIComponent(expoId)}/register`,
+      { method: 'DELETE' },
+      token,
+    ),
+
+  createBooth: (
+    token: string,
+    payload: {
+      expoId?: string;
+      number: string;
+      zone: string;
+      size: ExpoBooth['size'];
+      priceUsd: number;
+    },
+  ) => apiRequest<ExpoBooth>('/api/booths', { method: 'POST', body: JSON.stringify(payload) }, token),
 
   updateBooth: (
     token: string,
     boothId: string,
-    payload: { size?: ExpoBooth['size']; priceUsd?: number; status?: BoothStatus; exhibitorId?: string | null },
+    payload: {
+      size?: ExpoBooth['size'];
+      priceUsd?: number;
+      status?: BoothStatus;
+      exhibitorId?: string | null;
+      zone?: string;
+    },
   ) =>
     apiRequest<ExpoBooth>(
       `/api/booths/${encodeURIComponent(boothId)}`,
       { method: 'PUT', body: JSON.stringify(payload) },
       token,
     ),
+
+  deleteBooth: (token: string, boothId: string) =>
+    apiRequest<{ ok: boolean }>(`/api/booths/${encodeURIComponent(boothId)}`, { method: 'DELETE' }, token),
 
   reserveBooth: (token: string, boothId: string) =>
     apiRequest<ExpoBooth>(`/api/booths/${encodeURIComponent(boothId)}/reserve`, { method: 'POST' }, token),
@@ -316,11 +386,22 @@ export const eventSphereApi = {
   reviewApplication: (
     token: string,
     appId: string,
-    payload: { status: 'approved' | 'rejected'; rejectionReason?: string },
+    payload: {
+      status: 'approved' | 'rejected' | 'info_requested';
+      rejectionReason?: string;
+      reviewerNote?: string;
+    },
   ) =>
     apiRequest<ExhibitorApplication>(
       `/api/applications/${encodeURIComponent(appId)}`,
       { method: 'PUT', body: JSON.stringify(payload) },
+      token,
+    ),
+
+  requestApplicationInfo: (token: string, appId: string, reviewerNote: string) =>
+    apiRequest<ExhibitorApplication>(
+      `/api/applications/${encodeURIComponent(appId)}/request-info`,
+      { method: 'POST', body: JSON.stringify({ reviewerNote }) },
       token,
     ),
 
@@ -330,7 +411,17 @@ export const eventSphereApi = {
     payload: Partial<
       Pick<
         ExhibitorProfile,
-        'companyName' | 'tagline' | 'description' | 'products' | 'staff' | 'website' | 'contactEmail' | 'logoColor'
+        | 'companyName'
+        | 'category'
+        | 'tagline'
+        | 'description'
+        | 'products'
+        | 'staff'
+        | 'documents'
+        | 'website'
+        | 'contactEmail'
+        | 'phone'
+        | 'logoColor'
       >
     >,
   ) =>
@@ -365,7 +456,9 @@ export const eventSphereApi = {
   updateSession: (
     token: string,
     sessionId: string,
-    payload: Partial<Pick<ExpoSession, 'title' | 'speaker' | 'startTime' | 'endTime' | 'location' | 'topic'>>,
+    payload: Partial<
+      Pick<ExpoSession, 'title' | 'speaker' | 'speakerRole' | 'startTime' | 'endTime' | 'location' | 'topic' | 'capacity'>
+    >,
   ) =>
     apiRequest<ExpoSession>(
       `/api/sessions/${encodeURIComponent(sessionId)}`,
@@ -375,6 +468,24 @@ export const eventSphereApi = {
 
   deleteSession: (token: string, sessionId: string) =>
     apiRequest<{ ok: boolean }>(`/api/sessions/${encodeURIComponent(sessionId)}`, { method: 'DELETE' }, token),
+
+  createSpeaker: (
+    token: string,
+    payload: Omit<SpeakerRecord, 'id'>,
+  ) => apiRequest<SpeakerRecord>('/api/speakers', { method: 'POST', body: JSON.stringify(payload) }, token),
+
+  updateSpeaker: (token: string, speakerId: string, payload: Partial<Omit<SpeakerRecord, 'id'>>) =>
+    apiRequest<SpeakerRecord>(
+      `/api/speakers/${encodeURIComponent(speakerId)}`,
+      { method: 'PUT', body: JSON.stringify(payload) },
+      token,
+    ),
+
+  deleteSpeaker: (token: string, speakerId: string) =>
+    apiRequest<{ ok: boolean }>(`/api/speakers/${encodeURIComponent(speakerId)}`, { method: 'DELETE' }, token),
+
+  getAdminAttendees: (token: string) =>
+    apiRequest<{ attendees: AdminAttendeeRow[] }>('/api/admin/attendees', {}, token),
 
   toggleSessionRegister: (token: string, sessionId: string) =>
     apiRequest<ExpoSession>(`/api/sessions/${encodeURIComponent(sessionId)}/register`, { method: 'POST' }, token),

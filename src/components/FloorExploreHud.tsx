@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import type { StatusFilter } from '../three/ExpoHallCanvas';
+import { Button } from './ui';
 
 interface FloorExploreHudProps {
   nightMode: boolean;
@@ -21,6 +22,7 @@ interface FloorExploreHudProps {
   statusFilter: StatusFilter;
   availableCount: number;
   reservedCount: number;
+  occupiedCount: number;
   pendingCount: number;
   onToggleNightMode: () => void;
   onToggleFloorGrid: () => void;
@@ -42,6 +44,7 @@ export const FloorExploreHud: React.FC<FloorExploreHudProps> = ({
   statusFilter,
   availableCount,
   reservedCount,
+  occupiedCount,
   pendingCount,
   onToggleNightMode,
   onToggleFloorGrid,
@@ -76,18 +79,21 @@ export const FloorExploreHud: React.FC<FloorExploreHudProps> = ({
 
   if (collapsed) {
     return (
-      <div className="no-print fixed bottom-4 right-4 z-30">
-        <button
-          type="button"
+      <div className="no-print fixed right-4 bottom-4 z-30">
+        <Button
+          variant="outline"
+          size="md"
+          leftIcon={<ChevronUp className="h-4 w-4 text-[#10B981]" />}
           onClick={() => setCollapsed(false)}
-          className="surface-luxe inline-flex min-h-[40px] items-center gap-2 rounded-xl border border-slate-300 bg-white/95 px-4 py-2 text-xs font-semibold text-[#09140E] dark:border-[#10B981]/25 dark:bg-[#040705]/95 dark:text-[#ECFDF5]"
+          className="surface-luxe shadow-lg"
         >
-          <ChevronUp className="h-4 w-4 text-[#10B981]" />
-          <span>Show 3D Controls (H)</span>
-        </button>
+          Show 3D Controls (H)
+        </Button>
       </div>
     );
   }
+
+  const total = availableCount + reservedCount + occupiedCount + pendingCount;
 
   return (
     <div className="no-print pointer-events-none fixed inset-x-0 bottom-3 z-30 flex justify-center px-3">
@@ -95,16 +101,17 @@ export const FloorExploreHud: React.FC<FloorExploreHudProps> = ({
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-        className="surface-luxe pointer-events-auto w-full max-w-5xl rounded-2xl border border-slate-200/90 bg-white/95 px-4 py-3 text-[#09140E] dark:border-[#10B981]/22 dark:bg-[#040705]/95 dark:text-[#ECFDF5]"
+        className="surface-luxe pointer-events-auto w-full max-w-6xl rounded-2xl border border-slate-200/90 bg-white/95 px-4 py-3 text-[#09140E] dark:border-[#10B981]/22 dark:bg-[#040705]/95 dark:text-[#ECFDF5]"
       >
         <div className="flex flex-wrap items-center justify-between gap-3">
           {/* Status Filter Buttons */}
           <div className="flex flex-wrap items-center gap-1.5">
             {(
               [
-                { id: 'all', label: `All (${availableCount + reservedCount + pendingCount})`, color: '#8EAD9E' },
+                { id: 'all', label: `All (${total})`, color: '#8EAD9E' },
                 { id: 'available', label: `Available (${availableCount})`, color: '#34D399' },
                 { id: 'reserved', label: `Reserved (${reservedCount})`, color: '#F97362' },
+                { id: 'occupied', label: `Occupied (${occupiedCount})`, color: '#38BDF8' },
                 { id: 'pending', label: `Pending (${pendingCount})`, color: '#A78BFA' },
               ] as const
             ).map((item) => {
@@ -132,110 +139,82 @@ export const FloorExploreHud: React.FC<FloorExploreHudProps> = ({
 
           {/* Camera Zoom & Focus Presets */}
           <div className="flex flex-wrap items-center gap-1.5">
-            <button
-              type="button"
-              onClick={onZoomIn}
-              title="Zoom in"
-              className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-[#F4F7F5] text-[#09140E] hover:border-[#10B981] dark:border-[#10B981]/20 dark:bg-[#09120D] dark:text-[#ECFDF5]"
-            >
+            <Button variant="icon" size="sm" onClick={onZoomIn} title="Zoom in" aria-label="Zoom in">
               <ZoomIn className="h-3.5 w-3.5" />
-            </button>
-            <button
-              type="button"
-              onClick={onZoomOut}
-              title="Zoom out"
-              className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-[#F4F7F5] text-[#09140E] hover:border-[#10B981] dark:border-[#10B981]/20 dark:bg-[#09120D] dark:text-[#ECFDF5]"
-            >
+            </Button>
+            <Button variant="icon" size="sm" onClick={onZoomOut} title="Zoom out" aria-label="Zoom out">
               <ZoomOut className="h-3.5 w-3.5" />
-            </button>
-            <button
-              type="button"
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              leftIcon={<RotateCcw className="h-3 w-3" />}
               onClick={onResetView}
               title="Reset hall overview"
-              className="inline-flex h-8 items-center gap-1 rounded-lg border border-slate-200 bg-[#F4F7F5] px-2.5 text-xs font-semibold text-[#09140E] hover:border-[#10B981] dark:border-[#10B981]/20 dark:bg-[#09120D] dark:text-[#ECFDF5] whitespace-nowrap"
             >
-              <RotateCcw className="h-3 w-3" />
-              <span>Overview</span>
-            </button>
-            <button
-              type="button"
-              onClick={onFocusStage}
-              className="inline-flex h-8 items-center rounded-lg border border-slate-200 bg-[#F4F7F5] px-2.5 text-xs font-semibold text-[#09140E] hover:border-[#10B981] dark:border-[#10B981]/20 dark:bg-[#09120D] dark:text-[#ECFDF5] whitespace-nowrap"
-            >
+              Overview
+            </Button>
+            <Button variant="outline" size="sm" onClick={onFocusStage}>
               Stage
-            </button>
-            <button
-              type="button"
-              onClick={onFocusPlaza}
-              className="inline-flex h-8 items-center rounded-lg border border-slate-200 bg-[#F4F7F5] px-2.5 text-xs font-semibold text-[#09140E] hover:border-[#10B981] dark:border-[#10B981]/20 dark:bg-[#09120D] dark:text-[#ECFDF5] whitespace-nowrap"
-            >
-              Plaza & Cars
-            </button>
-            <button
-              type="button"
-              onClick={onFocusNextAvailable}
-              className="btn-luxe inline-flex h-8 items-center rounded-lg bg-gradient-to-r from-[#059669] to-[#34D399] px-3 text-xs font-bold text-[#02120B] whitespace-nowrap"
-            >
+            </Button>
+            <Button variant="outline" size="sm" onClick={onFocusPlaza}>
+              Plaza &amp; Cars
+            </Button>
+            <Button variant="primary" size="sm" onClick={onFocusNextAvailable}>
               Find Open Booth
-            </button>
+            </Button>
           </div>
 
           {/* Layer Toggles & Collapse */}
           <div className="flex flex-wrap items-center gap-1.5">
-            <button
-              type="button"
+            <Button
+              variant={showFloorGrid ? 'secondary' : 'outline'}
+              size="sm"
+              leftIcon={<Grid3X3 className="h-3.5 w-3.5" />}
               onClick={onToggleFloorGrid}
               title="Toggle floor grid"
-              className={`inline-flex h-8 items-center gap-1 rounded-lg border px-2.5 text-xs font-semibold ${
-                showFloorGrid
-                  ? 'border-[#34D399]/50 bg-[#34D399]/14 text-emerald-900 dark:text-[#34D399]'
-                  : 'border-slate-200 bg-[#F4F7F5] text-[#466153] dark:border-[#10B981]/20 dark:bg-[#09120D] dark:text-[#8EAD9E]'
-              }`}
             >
-              <Grid3X3 className="h-3.5 w-3.5" />
               <span className="hidden sm:inline">Grid</span>
-            </button>
+            </Button>
 
-            <button
-              type="button"
+            <Button
+              variant={showTrussAndVisitors ? 'secondary' : 'outline'}
+              size="sm"
+              leftIcon={<Layers className="h-3.5 w-3.5" />}
               onClick={onToggleTrussAndVisitors}
               title="Toggle overhead truss and visitors"
-              className={`inline-flex h-8 items-center gap-1 rounded-lg border px-2.5 text-xs font-semibold ${
-                showTrussAndVisitors
-                  ? 'border-[#059669]/50 bg-[#10B981]/14 text-[#047857] dark:border-[#34D399]/40 dark:bg-[#10B981]/15 dark:text-[#34D399]'
-                  : 'border-slate-200 bg-[#F4F7F5] text-[#466153] dark:border-[#10B981]/20 dark:bg-[#09120D] dark:text-[#8EAD9E]'
-              }`}
             >
-              <Layers className="h-3.5 w-3.5" />
               <span className="hidden sm:inline">Crowd</span>
-            </button>
+            </Button>
 
-            <button
-              type="button"
+            <Button
+              variant="icon"
+              size="sm"
               onClick={onToggleNightMode}
               title="Toggle Obsidian / Alabaster hall"
-              className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-[#F4F7F5] text-[#09140E] dark:border-[#10B981]/20 dark:bg-[#09120D] dark:text-[#ECFDF5]"
+              aria-label="Toggle color mode"
             >
               {nightMode ? <Sun className="h-3.5 w-3.5 text-[#34D399]" /> : <Moon className="h-3.5 w-3.5 text-[#059669]" />}
-            </button>
+            </Button>
 
-            <button
-              type="button"
+            <Button
+              variant="outline"
+              size="sm"
+              leftIcon={<Compass className="h-3.5 w-3.5 text-[#10B981]" />}
               onClick={onReturnVoyage}
-              className="inline-flex h-8 items-center gap-1 rounded-lg border border-slate-300 bg-white px-2.5 text-xs font-semibold text-[#09140E] dark:border-[#10B981]/25 dark:bg-[#09120D] dark:text-[#ECFDF5] whitespace-nowrap"
             >
-              <Compass className="h-3.5 w-3.5 text-[#10B981]" />
-              <span>Scroll Tour</span>
-            </button>
+              Scroll Tour
+            </Button>
 
-            <button
-              type="button"
+            <Button
+              variant="icon"
+              size="sm"
               onClick={() => setCollapsed(true)}
               title="Hide HUD (H)"
-              className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-[#F4F7F5] text-[#466153] dark:border-[#10B981]/20 dark:bg-[#09120D] dark:text-[#8EAD9E]"
+              aria-label="Hide 3D controls"
             >
               <ChevronDown className="h-4 w-4" />
-            </button>
+            </Button>
           </div>
         </div>
       </motion.div>

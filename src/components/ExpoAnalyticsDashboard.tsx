@@ -3,6 +3,7 @@ import { BarChart3, Download, FileJson, Printer } from 'lucide-react';
 import { motion } from 'motion/react';
 import type { EventSphereSnapshot } from '../types/eventsphere';
 import { STATUS_HEX } from '../three/expoModels';
+import { Button, Card, Input, StatCard } from './ui';
 
 interface ExpoAnalyticsDashboardProps {
   snapshot: EventSphereSnapshot;
@@ -38,14 +39,21 @@ export const ExpoAnalyticsDashboard: React.FC<ExpoAnalyticsDashboardProps> = ({
     const totalTraffic = filteredSeries.reduce((sum, p) => sum + p.boothTraffic, 0);
     const totalBookmarks = filteredSeries.reduce((sum, p) => sum + p.sessionBookmarks, 0);
     const totalViews = filteredSeries.reduce((sum, p) => sum + p.profileViews, 0);
-    const reservedCount = snapshot.booths.filter((b) => b.status === 'reserved').length;
+    const reservedOrOccupied = snapshot.booths.filter(
+      (b) => b.status === 'reserved' || b.status === 'occupied',
+    );
     const occupancyPct = snapshot.booths.length
-      ? Math.round((reservedCount / snapshot.booths.length) * 100)
+      ? Math.round((reservedOrOccupied.length / snapshot.booths.length) * 100)
       : 0;
-    const potentialRevenue = snapshot.booths
-      .filter((b) => b.status === 'reserved')
-      .reduce((sum, b) => sum + b.priceUsd, 0);
-    return { totalTraffic, totalBookmarks, totalViews, reservedCount, occupancyPct, potentialRevenue };
+    const potentialRevenue = reservedOrOccupied.reduce((sum, b) => sum + b.priceUsd, 0);
+    return {
+      totalTraffic,
+      totalBookmarks,
+      totalViews,
+      reservedCount: reservedOrOccupied.length,
+      occupancyPct,
+      potentialRevenue,
+    };
   }, [filteredSeries, snapshot.booths]);
 
   const handleExportCsv = () => {
@@ -124,115 +132,92 @@ export const ExpoAnalyticsDashboard: React.FC<ExpoAnalyticsDashboardProps> = ({
           </div>
 
           <div className="no-print flex flex-wrap items-center gap-2">
-            <button
-              type="button"
+            <Button
+              variant="primary"
+              size="sm"
+              leftIcon={<Download className="h-3.5 w-3.5" />}
               onClick={handleExportCsv}
-              className="btn-luxe inline-flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-[#059669] to-[#34D399] px-3.5 py-2 text-xs font-bold text-[#02120B]"
             >
-              <Download className="h-3.5 w-3.5" />
-              <span>Export CSV</span>
-            </button>
-            <button
-              type="button"
+              Export CSV
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              leftIcon={<FileJson className="h-3.5 w-3.5 text-[#34D399]" />}
               onClick={handleExportJson}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3.5 py-2 text-xs font-semibold hover:border-[#34D399] dark:border-[#10B981]/22 dark:bg-[#09120D]"
             >
-              <FileJson className="h-3.5 w-3.5 text-[#34D399]" />
-              <span>Export JSON</span>
-            </button>
-            <button
-              type="button"
+              Export JSON
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              leftIcon={<Printer className="h-3.5 w-3.5 text-[#2DD4BF]" />}
               onClick={() => window.print()}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3.5 py-2 text-xs font-semibold hover:border-[#2DD4BF] dark:border-[#10B981]/22 dark:bg-[#09120D]"
             >
-              <Printer className="h-3.5 w-3.5 text-[#2DD4BF]" />
-              <span>Print Report</span>
-            </button>
+              Print Report
+            </Button>
           </div>
         </div>
 
         {/* Date Range Filters */}
-        <div className="no-print surface-luxe flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-4 dark:border-[#10B981]/20 dark:bg-[#09120D]">
+        <Card padding="sm" className="no-print flex flex-wrap items-center justify-between gap-3">
           <div className="flex flex-wrap items-center gap-2">
             <span className="font-mono text-xs font-semibold text-[#466153] dark:text-[#8EAD9E]">
               Date Range:
             </span>
             {[7, 14, 30].map((d) => (
-              <button
-                key={d}
-                type="button"
-                onClick={() => applyPresetDays(d)}
-                className="rounded-lg border border-slate-300 bg-[#F4F7F5] px-3 py-1.5 font-mono text-xs font-semibold hover:border-[#34D399] dark:border-[#10B981]/22 dark:bg-[#040705]"
-              >
+              <Button key={d} variant="outline" size="sm" onClick={() => applyPresetDays(d)}>
                 Last {d}D
-              </button>
+              </Button>
             ))}
           </div>
           <div className="flex flex-wrap items-center gap-2 text-xs">
-            <input
+            <Input
               type="date"
               value={fromDate}
               onChange={(e) => setFromDate(e.target.value)}
-              className="rounded-lg border border-slate-300 bg-[#F4F7F5] px-2.5 py-1.5 font-mono dark:border-[#10B981]/22 dark:bg-[#040705]"
+              className="w-auto font-mono"
             />
             <span>→</span>
-            <input
+            <Input
               type="date"
               value={toDate}
               onChange={(e) => setToDate(e.target.value)}
-              className="rounded-lg border border-slate-300 bg-[#F4F7F5] px-2.5 py-1.5 font-mono dark:border-[#10B981]/22 dark:bg-[#040705]"
+              className="w-auto font-mono"
             />
           </div>
-        </div>
+        </Card>
 
         {/* KPI Strip */}
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {[
-            {
-              label: 'Booth Occupancy',
-              value: `${kpis.occupancyPct}%`,
-              sub: `${kpis.reservedCount} / ${snapshot.booths.length} reserved · $${kpis.potentialRevenue.toLocaleString()}`,
-              accent: '#34D399',
-            },
-            {
-              label: 'Booth Floor Traffic',
-              value: kpis.totalTraffic.toLocaleString(),
-              sub: `Across ${filteredSeries.length} selected days`,
-              accent: '#10B981',
-            },
-            {
-              label: 'Session Bookmarks',
-              value: kpis.totalBookmarks.toLocaleString(),
-              sub: `${snapshot.sessions.length} live scheduled tracks`,
-              accent: '#2DD4BF',
-            },
-            {
-              label: 'Concurrent Users',
-              value: String(snapshot.concurrentUsers),
-              sub: `${kpis.totalViews.toLocaleString()} exhibitor profile views`,
-              accent: '#6EE7B7',
-            },
-          ].map((kpi) => (
-            <div
-              key={kpi.label}
-              className="surface-luxe rounded-2xl border border-slate-200 bg-white p-5 dark:border-[#10B981]/20 dark:bg-[#09120D]"
-            >
-              <div className="h-1 w-8 rounded-xs" style={{ backgroundColor: kpi.accent }} />
-              <div className="mt-3 text-xs font-semibold text-[#466153] dark:text-[#8EAD9E]">
-                {kpi.label}
-              </div>
-              <div className="mt-1 font-display text-3xl font-extrabold tabular-nums">
-                {kpi.value}
-              </div>
-              <div className="mt-1 font-mono text-[11px] text-[#466153] dark:text-[#8EAD9E]">
-                {kpi.sub}
-              </div>
-            </div>
-          ))}
+          <StatCard
+            label="Booth Occupancy"
+            value={`${kpis.occupancyPct}%`}
+            sublabel={`${kpis.reservedCount} / ${snapshot.booths.length} booked · $${kpis.potentialRevenue.toLocaleString()}`}
+            tone="emerald"
+          />
+          <StatCard
+            label="Booth Floor Traffic"
+            value={kpis.totalTraffic.toLocaleString()}
+            sublabel={`Across ${filteredSeries.length} selected days`}
+            tone="emerald"
+          />
+          <StatCard
+            label="Session Bookmarks"
+            value={kpis.totalBookmarks.toLocaleString()}
+            sublabel={`${snapshot.sessions.length} live scheduled tracks`}
+            tone="teal"
+          />
+          <StatCard
+            label="Concurrent Users"
+            value={snapshot.concurrentUsers}
+            sublabel={`${kpis.totalViews.toLocaleString()} exhibitor profile views`}
+            tone="violet"
+          />
         </div>
 
         {/* Interactive Trend Chart */}
-        <div className="surface-luxe rounded-2xl border border-slate-200 bg-white p-5 dark:border-[#10B981]/20 dark:bg-[#09120D]">
+        <Card padding="lg">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-2 font-display text-lg font-bold">
               <BarChart3 className="h-4 w-4 text-[#34D399]" />
@@ -319,11 +304,11 @@ export const ExpoAnalyticsDashboard: React.FC<ExpoAnalyticsDashboardProps> = ({
               </div>
             )}
           </div>
-        </div>
+        </Card>
 
         {/* Breakdown Tables */}
         <div className="grid gap-6 lg:grid-cols-2">
-          <div className="surface-luxe rounded-2xl border border-slate-200 bg-white p-5 dark:border-[#10B981]/20 dark:bg-[#09120D]">
+          <Card padding="lg">
             <h2 className="font-display text-lg font-bold">Top Booth Traffic &amp; Allocation</h2>
             <div className="mt-3 overflow-x-auto">
               <table className="w-full text-left text-xs">
@@ -361,9 +346,9 @@ export const ExpoAnalyticsDashboard: React.FC<ExpoAnalyticsDashboardProps> = ({
                 </tbody>
               </table>
             </div>
-          </div>
+          </Card>
 
-          <div className="surface-luxe rounded-2xl border border-slate-200 bg-white p-5 dark:border-[#10B981]/20 dark:bg-[#09120D]">
+          <Card padding="lg">
             <h2 className="font-display text-lg font-bold">Session Registration &amp; Popularity</h2>
             <div className="mt-3 space-y-3">
               {snapshot.sessions.map((s) => {
@@ -393,7 +378,7 @@ export const ExpoAnalyticsDashboard: React.FC<ExpoAnalyticsDashboardProps> = ({
                 );
               })}
             </div>
-          </div>
+          </Card>
         </div>
       </motion.div>
     </div>

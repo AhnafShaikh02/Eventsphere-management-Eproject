@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Building2, Lock, Shield, Ticket } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 import { io } from 'socket.io-client';
 import { AuthModal } from './components/AuthModal';
@@ -10,10 +11,13 @@ import { FavoritesView } from './components/FavoritesView';
 import { FloorExploreHud } from './components/FloorExploreHud';
 import { NotificationAndFeedbackModal } from './components/NotificationAndFeedbackModal';
 import { OfflineIndicator } from './components/PWAStatusWidgets';
-import { PortalsWorkspace } from './components/PortalsWorkspace';
+import { AttendeePortal } from './components/portals/AttendeePortal';
+import { ExhibitorPortal } from './components/portals/ExhibitorPortal';
+import { OrganizerPortal } from './components/portals/OrganizerPortal';
 import { SearchModal } from './components/SearchModal';
 import { ShareModal } from './components/ShareModal';
 import { type ActiveView, TopNav } from './components/TopNav';
+import { Button, Card } from './components/ui';
 import {
   type CloudSyncMeta,
   type LocalWorkspaceState,
@@ -49,9 +53,13 @@ export default function App() {
   const initialAuth = useMemo(() => loadAuthSession(), []);
   const [authToken, setAuthToken] = useState<string | null>(initialAuth.token);
   const [currentUser, setCurrentUser] = useState<UserAccount | null>(initialAuth.user);
+  const authTokenRef = useRef<string | null>(initialAuth.token);
+
+  useEffect(() => {
+    authTokenRef.current = authToken;
+  }, [authToken]);
 
   const [activeView, setActiveView] = useState<ActiveView>('voyage');
-  const [portalTab, setPortalTab] = useState<UserRole>('attendee');
   const [scrollProgress, setScrollProgress] = useState(0);
 
   const [selectedBoothId, setSelectedBoothId] = useState<string | null>(null);
@@ -59,7 +67,9 @@ export default function App() {
 
   const [searchOpen, setSearchOpen] = useState(false);
   const [authOpen, setAuthOpen] = useState(false);
-  const [authDefaultRole, setAuthDefaultRole] = useState<'exhibitor' | 'attendee'>('attendee');
+  const [authDefaultRole, setAuthDefaultRole] = useState<UserRole>('attendee');
+  const [authDefaultTab, setAuthDefaultTab] = useState<'role-select' | 'login' | 'register' | 'reset'>('role-select');
+  const [routeToPortalAfterAuth, setRouteToPortalAfterAuth] = useState(false);
   const [cloudOpen, setCloudOpen] = useState(false);
   const [alertsOpen, setAlertsOpen] = useState(false);
 
@@ -77,7 +87,16 @@ export default function App() {
     if (toastTimerRef.current) window.clearTimeout(toastTimerRef.current);
     toastTimerRef.current = window.setTimeout(() => {
       setToastMessage(null);
-    }, 3200);
+    }, 3400);
+  }, []);
+
+  const refreshStateFromServer = useCallback(async (tokenOverride?: string | null) => {
+    const tokenToUse = tokenOverride !== undefined ? tokenOverride : authTokenRef.current;
+    const res = await eventSphereApi.getState(tokenToUse);
+    if (res.ok) {
+      setSnapshot(res.data);
+      saveCachedSnapshot(res.data);
+    }
   }, []);
 
   // Sync Tailwind dark class with Night Mode preference
@@ -94,7 +113,7 @@ export default function App() {
   useEffect(() => {
     let active = true;
 
-    eventSphereApi.getState().then((res) => {
+    eventSphereApi.getState(authToken).then((res) => {
       if (active && res.ok) {
         setSnapshot(res.data);
         saveCachedSnapshot(res.data);
@@ -119,10 +138,31 @@ export default function App() {
       reconnectionAttempts: 10,
     });
 
-    socket.on('state:sync', (nextState: EventSphereSnapshot) => {
+    socket.on('state:sync', (nextPublicState: EventSphereSnapshot) => {
       if (!active) return;
-      setSnapshot(nextState);
-      saveCachedSnapshot(nextState);
+      if (authTokenRef.current) {
+        // Merge public slices immediately, then hydrate role-scoped records using JWT
+        setSnapshot((prev) => ({
+          ...prev,
+          expos: nextPublicState.expos,
+          booths: nextPublicState.booths,
+          exhibitors: nextPublicState.exhibitors,
+          sessions: nextPublicState.sessions,
+          speakers: nextPublicState.speakers,
+          analyticsSeries: nextPublicState.analyticsSeries,
+          concurrentUsers: nextPublicState.concurrentUsers,
+          notifications: nextPublicState.notifications,
+        }));
+        eventSphereApi.getState(authTokenRef.current).then((res) => {
+          if (active && res.ok) {
+            setSnapshot(res.data);
+            saveCachedSnapshot(res.data);
+          }
+        });
+      } else {
+        setSnapshot(nextPublicState);
+        saveCachedSnapshot(nextPublicState);
+      }
     });
 
     socket.on('booth:updated', (updatedBooth: ExpoBooth) => {
@@ -222,14 +262,6 @@ export default function App() {
     return () => window.removeEventListener('keydown', onKeyDown);
   }, []);
 
-  const refreshStateFromServer = useCallback(async () => {
-    const res = await eventSphereApi.getState();
-    if (res.ok) {
-      setSnapshot(res.data);
-      saveCachedSnapshot(res.data);
-    }
-  }, []);
-
   const selectedBooth = useMemo(
     () => snapshot.booths.find((b) => b.id === selectedBoothId) || null,
     [snapshot.booths, selectedBoothId],
@@ -246,6 +278,44 @@ export default function App() {
   }, [snapshot.notifications, currentUser?.id]);
 
   // Action Handlers
+  const openAuthModal = useCallback(
+    (
+      role: UserRole = 'attendee',
+      tab: 'role-select' | 'login' | 'register' | 'reset' = 'role-select',
+      routeToPortal = false,
+    ) => {
+      setAuthDefaultRole(role);
+      setAuthDefaultTab(tab);
+      setRouteToPortalAfterAuth(routeToPortal);
+      setAuthOpen(true);
+    },
+    [],
+  );
+
+  const handleLogout = useCallback(() => {
+    setAuthToken(null);
+    setCurrentUser(null);
+    saveAuthSession(null, null);
+    if (activeView === 'portals') {
+      setActiveView('voyage');
+    }
+    showToast('Signed out');
+  }, [activeView, showToast]);
+
+  const handleNavigateSection = useCallback(
+    (sectionId: string) => {
+      if (activeView !== 'voyage') {
+        setActiveView('voyage');
+        window.setTimeout(() => {
+          document.getElementById(sectionId)?.scrollIntoView({ behavior: 'smooth' });
+        }, 120);
+      } else {
+        document.getElementById(sectionId)?.scrollIntoView({ behavior: 'smooth' });
+      }
+    },
+    [activeView],
+  );
+
   const handleSelectBooth = useCallback(
     (boothId: string) => {
       setSelectedBoothId(boothId);
@@ -261,8 +331,7 @@ export default function App() {
   const handleReserveBooth = useCallback(
     async (boothId: string) => {
       if (!authToken) {
-        setAuthDefaultRole('exhibitor');
-        setAuthOpen(true);
+        openAuthModal('exhibitor', 'role-select', false);
         return;
       }
       const res = await eventSphereApi.reserveBooth(authToken, boothId);
@@ -273,7 +342,7 @@ export default function App() {
       showToast(`Booth ${res.data.number} reserved live!`);
       await refreshStateFromServer();
     },
-    [authToken, refreshStateFromServer, showToast],
+    [authToken, openAuthModal, refreshStateFromServer, showToast],
   );
 
   const handleReleaseBooth = useCallback(
@@ -314,7 +383,7 @@ export default function App() {
   const handleSendMessage = useCallback(
     async (channel: string, label: string, body: string): Promise<boolean> => {
       if (!authToken) {
-        setAuthOpen(true);
+        openAuthModal('attendee', 'role-select', false);
         return false;
       }
       const res = await eventSphereApi.sendMessage(authToken, {
@@ -329,14 +398,20 @@ export default function App() {
       await refreshStateFromServer();
       return true;
     },
-    [authToken, refreshStateFromServer, showToast],
+    [authToken, openAuthModal, refreshStateFromServer, showToast],
   );
 
-  const handleOpenPortals = useCallback((preferredRole?: UserRole) => {
-    if (preferredRole) setPortalTab(preferredRole);
-    setActiveView('portals');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, []);
+  const handleOpenPortals = useCallback(
+    (preferredRole?: UserRole) => {
+      if (!currentUser || !authToken) {
+        openAuthModal(preferredRole || 'attendee', 'role-select', true);
+        return;
+      }
+      setActiveView('portals');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    },
+    [currentUser, authToken, openAuthModal],
+  );
 
   const handleShareBooth = useCallback((booth: ExpoBooth, exhibitor: ExhibitorProfile | null) => {
     const snapshotUrl = canvasRef.current?.captureSnapshot() || null;
@@ -345,6 +420,7 @@ export default function App() {
 
   const availableCount = snapshot.booths.filter((b) => b.status === 'available').length;
   const reservedCount = snapshot.booths.filter((b) => b.status === 'reserved').length;
+  const occupiedCount = snapshot.booths.filter((b) => b.status === 'occupied').length;
   const pendingCount = snapshot.booths.filter((b) => b.status === 'pending').length;
 
   return (
@@ -363,17 +439,34 @@ export default function App() {
         onSelectBooth={handleSelectBooth}
       />
 
-      {/* 3-Zone Top Navigation */}
+      {/* Enterprise Navbar */}
       <TopNav
         activeView={activeView}
+        currentUser={currentUser}
+        nightMode={workspace.preferences.nightMode}
+        favoriteCount={workspace.favoriteBoothIds.length}
+        scrollProgress={scrollProgress}
         onChangeView={(v) => {
+          if (v === 'portals' && (!currentUser || !authToken)) {
+            openAuthModal('attendee', 'role-select', true);
+            return;
+          }
           setActiveView(v);
-          if (v === 'voyage') {
+          if (v === 'voyage' || v === 'portals') {
             window.scrollTo({ top: 0, behavior: 'smooth' });
           }
         }}
+        onNavigateSection={handleNavigateSection}
         onOpenSearch={() => setSearchOpen(true)}
-        scrollProgress={scrollProgress}
+        onOpenAuth={(tab) => openAuthModal('attendee', tab || 'role-select', tab !== 'login')}
+        onOpenCloudSync={() => setCloudOpen(true)}
+        onToggleNightMode={() =>
+          setWorkspace((prev) => ({
+            ...prev,
+            preferences: { ...prev.preferences, nightMode: !prev.preferences.nightMode },
+          }))
+        }
+        onLogout={handleLogout}
       />
 
       {/* Active Route View */}
@@ -407,14 +500,37 @@ export default function App() {
           }}
           onOpenAnalytics={() => setActiveView('analytics')}
           onOpenPortals={handleOpenPortals}
-          onOpenAuth={(role) => {
-            if (role) setAuthDefaultRole(role);
-            setAuthOpen(true);
-          }}
+          onOpenAuth={(role, tab) => openAuthModal(role || 'attendee', tab || 'role-select', true)}
           onOpenFavorites={() => setActiveView('favorites')}
           onOpenCloudSync={() => setCloudOpen(true)}
           onOpenNotifications={() => setAlertsOpen(true)}
           onSelectBooth={handleSelectBooth}
+          onRegisterExpo={async (expoId) => {
+            if (!authToken) {
+              openAuthModal('attendee', 'register', true);
+              return;
+            }
+            const res = await eventSphereApi.registerForExpo(authToken, expoId);
+            if (!res.ok) {
+              showToast(res.error);
+              return;
+            }
+            showToast(`Pass issued (${res.data.registration.ticketCode}) for ${res.data.expo.title}`);
+            await refreshStateFromServer();
+          }}
+          onToggleSessionBookmark={async (sessionId) => {
+            if (!authToken) {
+              openAuthModal('attendee', 'login', false);
+              return;
+            }
+            const res = await eventSphereApi.toggleSessionBookmark(authToken, sessionId);
+            if (!res.ok) {
+              showToast(res.error);
+              return;
+            }
+            showToast('Session reminder updated');
+            await refreshStateFromServer();
+          }}
         />
       )}
 
@@ -426,6 +542,7 @@ export default function App() {
           statusFilter={statusFilter}
           availableCount={availableCount}
           reservedCount={reservedCount}
+          occupiedCount={occupiedCount}
           pendingCount={pendingCount}
           onToggleNightMode={() =>
             setWorkspace((prev) => ({
@@ -462,164 +579,113 @@ export default function App() {
         />
       )}
 
+      {/* Role-Guarded Portals */}
       {activeView === 'portals' && (
-        <PortalsWorkspace
-          snapshot={snapshot}
-          currentUser={currentUser}
-          activeTab={portalTab}
-          onChangeTab={setPortalTab}
-          onOpenAuth={(role) => {
-            if (role) setAuthDefaultRole(role);
-            setAuthOpen(true);
-          }}
-          onInspectBoothOnFloor={(boothId) => {
-            setActiveView('explore');
-            handleSelectBooth(boothId);
-          }}
-          onRegisterExpo={async (expoId) => {
-            if (!authToken) return;
-            const res = await eventSphereApi.registerForExpo(authToken, expoId);
-            if (!res.ok) return showToast(res.error);
-            showToast('Expo registration confirmed!');
-            await refreshStateFromServer();
-          }}
-          onToggleSessionRegister={async (sessionId) => {
-            if (!authToken) return;
-            const res = await eventSphereApi.toggleSessionRegister(authToken, sessionId);
-            if (!res.ok) return showToast(res.error);
-            showToast('Session registration updated');
-            await refreshStateFromServer();
-          }}
-          onToggleSessionBookmark={async (sessionId) => {
-            if (!authToken) return;
-            const res = await eventSphereApi.toggleSessionBookmark(authToken, sessionId);
-            if (!res.ok) return showToast(res.error);
-            showToast('Session bookmark & reminder updated');
-            await refreshStateFromServer();
-          }}
-          onReserveBooth={handleReserveBooth}
-          onReleaseBooth={handleReleaseBooth}
-          onSubmitApplication={async (payload) => {
-            if (!authToken) {
-              setAuthOpen(true);
-              return false;
-            }
-            const res = await eventSphereApi.submitApplication(authToken, payload);
-            if (!res.ok) {
-              showToast(res.error);
-              return false;
-            }
-            showToast('Exhibitor application submitted for review');
-            await refreshStateFromServer();
-            return true;
-          }}
-          onReviewApplication={async (appId, status, rejectionReason) => {
-            if (!authToken) {
-              setAuthOpen(true);
-              return;
-            }
-            const res = await eventSphereApi.reviewApplication(authToken, appId, {
-              status,
-              rejectionReason,
-            });
-            if (!res.ok) return showToast(res.error);
-            showToast(`Application marked ${status}`);
-            await refreshStateFromServer();
-          }}
-          onUpdateExhibitorProfile={async (exhibitorId, payload) => {
-            if (!authToken) {
-              setAuthOpen(true);
-              return;
-            }
-            const res = await eventSphereApi.updateExhibitorProfile(authToken, exhibitorId, payload);
-            if (!res.ok) return showToast(res.error);
-            showToast('Exhibitor showcase updated');
-            await refreshStateFromServer();
-          }}
-          onAdminUpdateBooth={async (boothId, payload) => {
-            if (!authToken) {
-              setAuthOpen(true);
-              return;
-            }
-            const res = await eventSphereApi.updateBooth(authToken, boothId, payload);
-            if (!res.ok) return showToast(res.error);
-            showToast(`Booth ${res.data.number} updated`);
-            await refreshStateFromServer();
-          }}
-          onAdminCreateExpo={async (payload) => {
-            if (!authToken) {
-              setAuthOpen(true);
-              return false;
-            }
-            const res = await eventSphereApi.createExpo(authToken, payload);
-            if (!res.ok) {
-              showToast(res.error);
-              return false;
-            }
-            showToast(`Published "${res.data.title}"`);
-            await refreshStateFromServer();
-            return true;
-          }}
-          onAdminUpdateExpo={async (expoId, payload) => {
-            if (!authToken) {
-              setAuthOpen(true);
-              return;
-            }
-            const res = await eventSphereApi.updateExpo(authToken, expoId, payload);
-            if (!res.ok) return showToast(res.error);
-            showToast(`Updated expo "${res.data.title}"`);
-            await refreshStateFromServer();
-          }}
-          onAdminDeleteExpo={async (expoId) => {
-            if (!authToken) return;
-            const res = await eventSphereApi.deleteExpo(authToken, expoId);
-            if (!res.ok) return showToast(res.error);
-            showToast('Expo deleted');
-            await refreshStateFromServer();
-          }}
-          onAdminUpdateFeedback={async (feedbackId, status) => {
-            if (!authToken) {
-              setAuthOpen(true);
-              return;
-            }
-            const res = await eventSphereApi.updateFeedbackStatus(authToken, feedbackId, status);
-            if (!res.ok) return showToast(res.error);
-            showToast(`Feedback marked ${status}`);
-            await refreshStateFromServer();
-          }}
-          onAdminCreateSession={async (payload) => {
-            if (!authToken) {
-              setAuthOpen(true);
-              return false;
-            }
-            const res = await eventSphereApi.createSession(authToken, payload);
-            if (!res.ok) {
-              showToast(res.error);
-              return false;
-            }
-            showToast('Session published to live schedule');
-            await refreshStateFromServer();
-            return true;
-          }}
-          onAdminUpdateSession={async (sessionId, payload) => {
-            if (!authToken) {
-              setAuthOpen(true);
-              return;
-            }
-            const res = await eventSphereApi.updateSession(authToken, sessionId, payload);
-            if (!res.ok) return showToast(res.error);
-            showToast('Live schedule update broadcast to all attendees!');
-            await refreshStateFromServer();
-          }}
-          onAdminDeleteSession={async (sessionId) => {
-            if (!authToken) return;
-            const res = await eventSphereApi.deleteSession(authToken, sessionId);
-            if (!res.ok) return showToast(res.error);
-            showToast('Session removed');
-            await refreshStateFromServer();
-          }}
-          onSendMessage={handleSendMessage}
-        />
+        <>
+          {!currentUser || !authToken ? (
+            <div className="relative z-20 flex min-h-screen items-center justify-center bg-[#F4F7F5]/96 px-4 pt-24 pb-16 dark:bg-[#040705]/96">
+              <Card padding="lg" className="w-full max-w-xl text-center">
+                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-[#10B981]/15 text-[#059669] dark:text-[#34D399]">
+                  <Lock className="h-6 w-6" />
+                </div>
+                <h1 className="mt-4 font-display text-2xl font-extrabold tracking-tight">
+                  Sign in to access your Role Portal
+                </h1>
+                <p className="mt-2 text-sm text-[#466153] dark:text-[#8EAD9E]">
+                  EventSphere enforces role-based permissions. Choose your role to sign in or register an account.
+                </p>
+                <div className="mt-6 grid gap-3 sm:grid-cols-3">
+                  <Button
+                    variant="outline"
+                    leftIcon={<Shield className="h-4 w-4 text-[#10B981]" />}
+                    onClick={() => openAuthModal('admin', 'login', true)}
+                  >
+                    Organizer
+                  </Button>
+                  <Button
+                    variant="outline"
+                    leftIcon={<Building2 className="h-4 w-4 text-[#F97362]" />}
+                    onClick={() => openAuthModal('exhibitor', 'login', true)}
+                  >
+                    Exhibitor
+                  </Button>
+                  <Button
+                    variant="outline"
+                    leftIcon={<Ticket className="h-4 w-4 text-[#2DD4BF]" />}
+                    onClick={() => openAuthModal('attendee', 'login', true)}
+                  >
+                    Attendee
+                  </Button>
+                </div>
+                <div className="mt-4 flex justify-center gap-2">
+                  <Button
+                    variant="primary"
+                    onClick={() => openAuthModal('attendee', 'role-select', true)}
+                  >
+                    Open Role Selector
+                  </Button>
+                  <Button variant="ghost" onClick={() => setActiveView('voyage')}>
+                    Return Home
+                  </Button>
+                </div>
+              </Card>
+            </div>
+          ) : currentUser.role === 'admin' ? (
+            <OrganizerPortal
+              snapshot={snapshot}
+              currentUser={currentUser}
+              authToken={authToken}
+              unreadNotifications={unreadNotifications}
+              onRefreshState={() => refreshStateFromServer()}
+              onOpen3DFloor={() => setActiveView('explore')}
+              onInspectBoothOnFloor={(boothId) => {
+                setActiveView('explore');
+                handleSelectBooth(boothId);
+              }}
+              onOpenAnalytics={() => setActiveView('analytics')}
+              onOpenNotifications={() => setAlertsOpen(true)}
+              onOpenProfileModal={() => openAuthModal('admin', 'login', false)}
+              onLogout={handleLogout}
+              onToast={showToast}
+            />
+          ) : currentUser.role === 'exhibitor' ? (
+            <ExhibitorPortal
+              snapshot={snapshot}
+              currentUser={currentUser}
+              authToken={authToken}
+              unreadNotifications={unreadNotifications}
+              onRefreshState={() => refreshStateFromServer()}
+              onOpen3DFloor={() => setActiveView('explore')}
+              onInspectBoothOnFloor={(boothId) => {
+                setActiveView('explore');
+                handleSelectBooth(boothId);
+              }}
+              onOpenNotifications={() => setAlertsOpen(true)}
+              onOpenProfileModal={() => openAuthModal('exhibitor', 'login', false)}
+              onLogout={handleLogout}
+              onToast={showToast}
+            />
+          ) : (
+            <AttendeePortal
+              snapshot={snapshot}
+              currentUser={currentUser}
+              authToken={authToken}
+              unreadNotifications={unreadNotifications}
+              favoriteBoothIds={workspace.favoriteBoothIds}
+              notes={workspace.notes}
+              onRefreshState={() => refreshStateFromServer()}
+              onOpen3DFloor={() => setActiveView('explore')}
+              onInspectBoothOnFloor={(boothId) => {
+                setActiveView('explore');
+                handleSelectBooth(boothId);
+              }}
+              onOpenNotifications={() => setAlertsOpen(true)}
+              onOpenProfileModal={() => openAuthModal('attendee', 'login', false)}
+              onLogout={handleLogout}
+              onToast={showToast}
+            />
+          )}
+        </>
       )}
 
       {activeView === 'analytics' && (
@@ -645,7 +711,7 @@ export default function App() {
           onRemoveBoothFavorite={handleToggleFavoriteBooth}
           onToggleSessionBookmark={async (sessionId) => {
             if (!authToken) {
-              setAuthOpen(true);
+              openAuthModal('attendee', 'login', false);
               return;
             }
             await eventSphereApi.toggleSessionBookmark(authToken, sessionId);
@@ -674,7 +740,7 @@ export default function App() {
         onSaveNote={handleSaveNote}
         onSendMessage={handleSendMessage}
         onShare={handleShareBooth}
-        onRequireAuth={() => setAuthOpen(true)}
+        onRequireAuth={() => openAuthModal('exhibitor', 'role-select', false)}
       />
 
       {/* Modals */}
@@ -687,8 +753,11 @@ export default function App() {
           handleSelectBooth(boothId);
         }}
         onJumpToSession={() => {
-          setPortalTab('attendee');
-          setActiveView('portals');
+          if (currentUser && authToken) {
+            setActiveView('portals');
+          } else {
+            handleNavigateSection('schedule');
+          }
         }}
       />
 
@@ -697,17 +766,21 @@ export default function App() {
         currentUser={currentUser}
         token={authToken}
         defaultRole={authDefaultRole}
+        defaultTab={authDefaultTab}
         onClose={() => setAuthOpen(false)}
         onAuthenticated={(tok, usr) => {
+          authTokenRef.current = tok;
           setAuthToken(tok);
           setCurrentUser(usr);
           saveAuthSession(tok, usr);
+          refreshStateFromServer(tok);
+          if (routeToPortalAfterAuth) {
+            setActiveView('portals');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            setRouteToPortalAfterAuth(false);
+          }
         }}
-        onLogout={() => {
-          setAuthToken(null);
-          setCurrentUser(null);
-          saveAuthSession(null, null);
-        }}
+        onLogout={handleLogout}
         onToast={showToast}
       />
 

@@ -13,6 +13,7 @@ import {
 import { motion } from 'motion/react';
 import type { ChatMessage, ExhibitorProfile, ExpoBooth, UserAccount } from '../types/eventsphere';
 import { STATUS_HEX } from '../three/expoModels';
+import { Badge, Button, Input, Textarea } from './ui';
 
 interface BoothInspectorDrawerProps {
   booth: ExpoBooth | null;
@@ -64,11 +65,20 @@ export const BoothInspectorDrawer: React.FC<BoothInspectorDrawerProps> = ({
   const threadMessages = messages.filter((m) => m.recipientChannel === channelId).slice(-6);
 
   const canRelease =
-    booth.status === 'reserved' &&
+    (booth.status === 'reserved' || booth.status === 'occupied') &&
     currentUser &&
     (currentUser.role === 'admin' ||
       booth.exhibitorId === currentUser.id ||
       (exhibitor && exhibitor.userId === currentUser.id));
+
+  const statusTone =
+    booth.status === 'available'
+      ? 'emerald'
+      : booth.status === 'reserved'
+        ? 'coral'
+        : booth.status === 'occupied'
+          ? 'teal'
+          : 'violet';
 
   const handleReserve = async () => {
     if (!currentUser) {
@@ -115,11 +125,12 @@ export const BoothInspectorDrawer: React.FC<BoothInspectorDrawerProps> = ({
               className="inline-block h-2.5 w-2.5 rounded-xs"
               style={{ backgroundColor: STATUS_HEX[booth.status] }}
             />
-            <span className="font-mono text-xs font-semibold capitalize text-[#466153] dark:text-[#8EAD9E]">
-              {booth.status} · {booth.zone}
+            <Badge tone={statusTone}>{booth.status}</Badge>
+            <span className="font-mono text-xs text-[#466153] dark:text-[#8EAD9E]">
+              {booth.zone}
             </span>
           </div>
-          <h2 className="mt-1 font-display text-2xl font-extrabold tracking-tight">
+          <h2 className="mt-1.5 font-display text-2xl font-extrabold tracking-tight">
             Booth {booth.number}
           </h2>
           <p className="font-mono text-xs text-[#059669] dark:text-[#34D399]">
@@ -127,50 +138,41 @@ export const BoothInspectorDrawer: React.FC<BoothInspectorDrawerProps> = ({
           </p>
         </div>
 
-        <button
-          type="button"
-          onClick={onClose}
-          aria-label="Close booth inspector"
-          className="rounded-lg border border-slate-200 p-2 text-[#466153] hover:bg-[#F4F7F5] hover:text-[#09140E] dark:border-[#10B981]/20 dark:text-[#8EAD9E] dark:hover:bg-[#10B981]/10 dark:hover:text-white"
-        >
+        <Button variant="icon" size="sm" onClick={onClose} aria-label="Close booth inspector">
           <X className="h-4 w-4" />
-        </button>
+        </Button>
       </div>
 
       {/* Scrollable Body */}
       <div className="flex-1 space-y-5 overflow-y-auto px-5 py-4">
         {/* Quick Actions Row */}
         <div className="flex flex-wrap gap-2">
-          <button
-            type="button"
+          <Button
+            variant="outline"
+            size="sm"
+            leftIcon={<MapPin className="h-3.5 w-3.5 text-[#10B981]" />}
             onClick={() => onFocus3D(booth.id)}
-            className="inline-flex min-h-[38px] items-center gap-1.5 rounded-lg border border-slate-300 bg-[#F4F7F5] px-3 py-1.5 text-xs font-semibold text-[#09140E] hover:border-[#10B981] dark:border-[#10B981]/20 dark:bg-[#09120D] dark:text-[#ECFDF5]"
           >
-            <MapPin className="h-3.5 w-3.5 text-[#10B981]" />
-            <span>Fly Camera Here</span>
-          </button>
+            Fly Camera Here
+          </Button>
 
-          <button
-            type="button"
+          <Button
+            variant={isFavorite ? 'secondary' : 'outline'}
+            size="sm"
+            leftIcon={<Bookmark className="h-3.5 w-3.5" />}
             onClick={() => onToggleFavorite(booth.id)}
-            className={`inline-flex min-h-[38px] items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-semibold ${
-              isFavorite
-                ? 'border-[#34D399] bg-[#34D399]/14 text-emerald-900 dark:text-[#34D399]'
-                : 'border-slate-300 bg-[#F4F7F5] text-[#09140E] dark:border-[#10B981]/20 dark:bg-[#09120D] dark:text-[#ECFDF5]'
-            }`}
           >
-            <Bookmark className="h-3.5 w-3.5" />
-            <span>{isFavorite ? 'Bookmarked' : 'Bookmark'}</span>
-          </button>
+            {isFavorite ? 'Bookmarked' : 'Bookmark'}
+          </Button>
 
-          <button
-            type="button"
+          <Button
+            variant="outline"
+            size="sm"
+            leftIcon={<Share2 className="h-3.5 w-3.5 text-[#34D399]" />}
             onClick={() => onShare(booth, exhibitor)}
-            className="inline-flex min-h-[38px] items-center gap-1.5 rounded-lg border border-slate-300 bg-[#F4F7F5] px-3 py-1.5 text-xs font-semibold text-[#09140E] hover:border-[#34D399] dark:border-[#10B981]/20 dark:bg-[#09120D] dark:text-[#ECFDF5]"
           >
-            <Share2 className="h-3.5 w-3.5 text-[#34D399]" />
-            <span>Share 3D Card</span>
-          </button>
+            Share 3D Card
+          </Button>
         </div>
 
         {/* Reservation CTA */}
@@ -181,33 +183,38 @@ export const BoothInspectorDrawer: React.FC<BoothInspectorDrawerProps> = ({
               <p className="mt-1 text-xs text-[#466153] dark:text-[#8EAD9E]">
                 Reservations lock atomically on the server and update every connected floor map in real time.
               </p>
-              <button
-                type="button"
-                disabled={busy}
+              <Button
+                variant="primary"
+                size="md"
+                fullWidth
+                loading={busy}
+                leftIcon={<CheckCircle2 className="h-4 w-4" />}
                 onClick={handleReserve}
-                className="btn-luxe mt-3 flex w-full items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-[#059669] to-[#34D399] py-2.5 text-xs font-bold text-[#02120B] disabled:opacity-50"
+                className="mt-3"
               >
-                <CheckCircle2 className="h-4 w-4" />
-                <span>{currentUser ? `Reserve Booth ${booth.number}` : 'Sign In to Reserve Booth'}</span>
-              </button>
+                {currentUser ? `Reserve Booth ${booth.number}` : 'Sign In to Reserve Booth'}
+              </Button>
             </>
-          ) : booth.status === 'reserved' ? (
+          ) : booth.status === 'reserved' || booth.status === 'occupied' ? (
             <>
               <div className="text-sm font-semibold">
-                Reserved by {booth.exhibitorName || 'Assigned Exhibitor'}
+                {booth.status === 'occupied' ? 'Occupied' : 'Reserved'} by{' '}
+                {booth.exhibitorName || 'Assigned Exhibitor'}
               </div>
               <p className="mt-1 text-xs text-[#466153] dark:text-[#8EAD9E]">
                 Space locked for live showcase.
               </p>
               {canRelease && (
-                <button
-                  type="button"
-                  disabled={busy}
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  fullWidth
+                  loading={busy}
                   onClick={handleRelease}
-                  className="mt-3 w-full rounded-lg border border-[#F97362]/60 bg-[#F97362]/14 py-2 text-xs font-bold text-[#F97362] hover:bg-[#F97362]/24"
+                  className="mt-3"
                 >
                   Release Booth Space
-                </button>
+                </Button>
               )}
             </>
           ) : (
@@ -240,10 +247,8 @@ export const BoothInspectorDrawer: React.FC<BoothInspectorDrawerProps> = ({
             </p>
 
             {exhibitor.products.length > 0 && (
-              <div className="mt-3">
-                <div className="text-[11px] font-semibold text-[#466153] dark:text-[#8EAD9E]">
-                  Showcased products: {exhibitor.products.join(' · ')}
-                </div>
+              <div className="mt-3 text-[11px] font-semibold text-[#466153] dark:text-[#8EAD9E]">
+                Showcased products: {exhibitor.products.join(' · ')}
               </div>
             )}
 
@@ -270,23 +275,21 @@ export const BoothInspectorDrawer: React.FC<BoothInspectorDrawerProps> = ({
 
         {/* Personal Field Notes */}
         <div className="rounded-xl border border-slate-200 bg-[#F4F7F5] p-4 dark:border-[#10B981]/18 dark:bg-[#09120D]/80">
-          <label className="block text-xs font-semibold text-[#466153] dark:text-[#8EAD9E]">
-            Personal Booth Notes (Synced Offline &amp; Cloud)
-          </label>
-          <textarea
+          <Textarea
+            label="Personal Booth Notes (Synced Offline & Cloud)"
             rows={2}
             value={noteDraft}
             onChange={(e) => setNoteDraft(e.target.value)}
             placeholder="Record follow-up contacts, power specs, or demo times..."
-            className="mt-2 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs text-[#09140E] focus:border-[#10B981] focus:outline-none dark:border-[#10B981]/20 dark:bg-[#040705] dark:text-[#ECFDF5]"
           />
-          <button
-            type="button"
+          <Button
+            variant="outline"
+            size="sm"
             onClick={() => onSaveNote(booth.id, noteDraft)}
-            className="mt-2 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold hover:border-[#34D399] dark:border-[#10B981]/20 dark:bg-[#040705]"
+            className="mt-2.5"
           >
             Save Note
-          </button>
+          </Button>
         </div>
 
         {/* Live Direct Messaging */}
@@ -316,21 +319,17 @@ export const BoothInspectorDrawer: React.FC<BoothInspectorDrawerProps> = ({
               ))
             )}
           </div>
-          <form onSubmit={handleSend} className="mt-2.5 flex gap-2">
-            <input
-              type="text"
-              value={chatText}
-              onChange={(e) => setChatText(e.target.value)}
-              placeholder={currentUser ? `Message ${channelLabel}...` : 'Sign in to send message'}
-              className="flex-1 rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs text-[#09140E] focus:border-[#10B981] focus:outline-none dark:border-[#10B981]/20 dark:bg-[#040705] dark:text-[#ECFDF5]"
-            />
-            <button
-              type="submit"
-              disabled={busy}
-              className="btn-luxe inline-flex items-center justify-center rounded-lg bg-gradient-to-r from-[#059669] to-[#34D399] px-3 py-2 text-xs font-bold text-[#02120B] disabled:opacity-50"
-            >
+          <form onSubmit={handleSend} className="mt-2.5 flex items-center gap-2">
+            <div className="flex-1">
+              <Input
+                value={chatText}
+                onChange={(e) => setChatText(e.target.value)}
+                placeholder={currentUser ? `Message ${channelLabel}...` : 'Sign in to send message'}
+              />
+            </div>
+            <Button type="submit" variant="primary" size="md" loading={busy} aria-label="Send message">
               <Send className="h-3.5 w-3.5" />
-            </button>
+            </Button>
           </form>
         </div>
       </div>

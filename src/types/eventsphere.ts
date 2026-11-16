@@ -7,9 +7,12 @@ export interface UserAccount {
   role: UserRole;
   company?: string;
   title?: string;
+  phone?: string;
   gdprConsent: boolean;
   createdAt: string;
 }
+
+export type ExpoStatus = 'upcoming' | 'live' | 'completed';
 
 export interface ExpoEvent {
   id: string;
@@ -19,11 +22,14 @@ export interface ExpoEvent {
   location: string;
   description: string;
   theme: string;
+  category: string;
+  status: ExpoStatus;
+  capacity?: number;
   bannerAccent: string;
   registeredUserIds: string[];
 }
 
-export type BoothStatus = 'available' | 'reserved' | 'pending';
+export type BoothStatus = 'available' | 'reserved' | 'occupied' | 'pending';
 
 export interface ExpoBooth {
   id: string;
@@ -44,14 +50,22 @@ export interface ExhibitorProfile {
   id: string;
   userId: string;
   companyName: string;
-  category: 'Robotics & AI' | 'Clean Energy' | 'Cloud & Security' | 'Spatial Computing' | 'Biotech & MedTech';
+  category:
+    | 'Robotics & AI'
+    | 'Clean Energy'
+    | 'Cloud & Security'
+    | 'Spatial Computing'
+    | 'Biotech & MedTech';
   tagline: string;
   description: string;
   logoColor: string;
+  logoUrl?: string;
   contactEmail: string;
+  phone?: string;
   website: string;
   products: string[];
   staff: string[];
+  documents?: string[];
   profileViews: number;
 }
 
@@ -63,9 +77,21 @@ export interface ExhibitorApplication {
   category: ExhibitorProfile['category'];
   productsSummary: string;
   documents: string[];
-  status: 'pending' | 'approved' | 'rejected';
+  status: 'pending' | 'approved' | 'rejected' | 'info_requested';
   rejectionReason?: string;
+  reviewerNote?: string;
   submittedAt: string;
+}
+
+export interface EventRegistration {
+  id: string;
+  expoId: string;
+  userId: string;
+  userName: string;
+  userEmail: string;
+  ticketCode: string;
+  status: 'confirmed' | 'cancelled';
+  registeredAt: string;
 }
 
 export interface ExpoSession {
@@ -84,12 +110,22 @@ export interface ExpoSession {
   updatedAt: string;
 }
 
+export interface SpeakerRecord {
+  id: string;
+  expoId: string;
+  name: string;
+  role: string;
+  company: string;
+  topic: string;
+  bio: string;
+}
+
 export interface ChatMessage {
   id: string;
   senderId: string;
   senderName: string;
   senderRole: UserRole;
-  recipientChannel: string; // e.g., 'organizer' or exhibitorId or 'hall-general'
+  recipientChannel: string;
   recipientLabel: string;
   body: string;
   createdAt: string;
@@ -130,12 +166,26 @@ export interface DailyAnalyticsPoint {
   profileViews: number;
 }
 
+export interface AdminAttendeeRow {
+  id: string;
+  name: string;
+  email: string;
+  company?: string;
+  title?: string;
+  phone?: string;
+  createdAt: string;
+  registeredExpoIds: string[];
+  bookmarkedSessionCount: number;
+}
+
 export interface EventSphereSnapshot {
   expos: ExpoEvent[];
   booths: ExpoBooth[];
   exhibitors: ExhibitorProfile[];
   applications: ExhibitorApplication[];
+  registrations: EventRegistration[];
   sessions: ExpoSession[];
+  speakers: SpeakerRecord[];
   messages: ChatMessage[];
   notifications: AppNotification[];
   feedback: FeedbackEntry[];

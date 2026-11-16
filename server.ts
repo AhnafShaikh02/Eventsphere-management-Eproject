@@ -11,6 +11,8 @@ import { Server as SocketIOServer } from 'socket.io';
 import { createServer as createViteServer } from 'vite';
 
 type UserRole = 'admin' | 'exhibitor' | 'attendee';
+type BoothStatus = 'available' | 'reserved' | 'occupied' | 'pending';
+type ExpoStatus = 'upcoming' | 'live' | 'completed';
 
 interface StoredUser {
   id: string;
@@ -20,6 +22,7 @@ interface StoredUser {
   role: UserRole;
   company?: string;
   title?: string;
+  phone?: string;
   gdprConsent: boolean;
   createdAt: string;
 }
@@ -49,6 +52,9 @@ interface ServerDatabase {
     location: string;
     description: string;
     theme: string;
+    category: string;
+    status: ExpoStatus;
+    capacity?: number;
     bannerAccent: string;
     registeredUserIds: string[];
   }>;
@@ -59,7 +65,7 @@ interface ServerDatabase {
     zone: string;
     size: '3x3m Standard' | '6x3m Corner' | '6x6m Island';
     priceUsd: number;
-    status: 'available' | 'reserved' | 'pending';
+    status: BoothStatus;
     row: number;
     col: number;
     exhibitorId: string | null;
@@ -75,9 +81,11 @@ interface ServerDatabase {
     description: string;
     logoColor: string;
     contactEmail: string;
+    phone?: string;
     website: string;
     products: string[];
     staff: string[];
+    documents?: string[];
     profileViews: number;
   }>;
   applications: Array<{
@@ -88,9 +96,20 @@ interface ServerDatabase {
     category: 'Robotics & AI' | 'Clean Energy' | 'Cloud & Security' | 'Spatial Computing' | 'Biotech & MedTech';
     productsSummary: string;
     documents: string[];
-    status: 'pending' | 'approved' | 'rejected';
+    status: 'pending' | 'approved' | 'rejected' | 'info_requested';
     rejectionReason?: string;
+    reviewerNote?: string;
     submittedAt: string;
+  }>;
+  registrations: Array<{
+    id: string;
+    expoId: string;
+    userId: string;
+    userName: string;
+    userEmail: string;
+    ticketCode: string;
+    status: 'confirmed' | 'cancelled';
+    registeredAt: string;
   }>;
   sessions: Array<{
     id: string;
@@ -106,6 +125,15 @@ interface ServerDatabase {
     registeredUserIds: string[];
     bookmarkedUserIds: string[];
     updatedAt: string;
+  }>;
+  speakers: Array<{
+    id: string;
+    expoId: string;
+    name: string;
+    role: string;
+    company: string;
+    topic: string;
+    bio: string;
   }>;
   messages: Array<{
     id: string;
@@ -152,6 +180,7 @@ interface ServerDatabase {
 
 const PORT = Number(process.env.PORT || 3000);
 const JWT_SECRET = process.env.JWT_SECRET || 'eventsphere-dev-jwt-secret-change-in-prod';
+const ORGANIZER_SETUP_CODE = process.env.ORGANIZER_SETUP_CODE || 'EVENTSPHERE-ORG-2026';
 const DATA_DIR = path.resolve(process.cwd(), process.env.EVENTSPHERE_DATA_DIR || '.data');
 const BACKUPS_DIR = path.join(DATA_DIR, 'backups');
 const DB_FILE = path.join(DATA_DIR, 'eventsphere-db.json');
@@ -200,6 +229,7 @@ function createSeedDatabase(): ServerDatabase {
       role: 'admin',
       company: 'EventSphere Management',
       title: 'Lead Expo Director',
+      phone: '+44 20 7946 0100',
       gdprConsent: true,
       createdAt: now,
     },
@@ -211,6 +241,7 @@ function createSeedDatabase(): ServerDatabase {
       role: 'exhibitor',
       company: 'Lumina Robotics',
       title: 'VP of Field Engineering',
+      phone: '+44 20 7946 0811',
       gdprConsent: true,
       createdAt: now,
     },
@@ -222,6 +253,7 @@ function createSeedDatabase(): ServerDatabase {
       role: 'exhibitor',
       company: 'AetherGrid CleanTech',
       title: 'Solutions Architect',
+      phone: '+44 20 7946 0420',
       gdprConsent: true,
       createdAt: now,
     },
@@ -233,6 +265,7 @@ function createSeedDatabase(): ServerDatabase {
       role: 'attendee',
       company: 'Horizon Ventures',
       title: 'Hardware Partner',
+      phone: '+44 20 7946 0905',
       gdprConsent: true,
       createdAt: now,
     },
@@ -247,11 +280,13 @@ function createSeedDatabase(): ServerDatabase {
       tagline: 'Autonomous warehouse orchestration and tactile manipulator arms',
       description:
         'Lumina builds millimeter-accurate cobots and fleet routing controllers engineered for high-throughput fulfillment centers.',
-      logoColor: '#7B5CFF',
+      logoColor: '#10B981',
       contactEmail: 'exhibitor@lumina-robotics.io',
+      phone: '+44 20 7946 0811',
       website: 'https://lumina-robotics.example',
       products: ['Lumina Arm M4', 'FleetOS Edge Router', 'VisionPick Sensor Kit'],
       staff: ['Marcus Chen', 'Priya Nair', 'Liam Brooks'],
+      documents: ['ISO-10218-Safety-Cert.pdf', 'Booth-Power-Spec.pdf'],
       profileViews: 248,
     },
     {
@@ -262,11 +297,13 @@ function createSeedDatabase(): ServerDatabase {
       tagline: 'Modular solid-state microgrids for zero-emission venues',
       description:
         'High-density containerized battery storage and bidirectional DC microgrids powering commercial expos and campuses.',
-      logoColor: '#4FE3C1',
+      logoColor: '#34D399',
       contactEmail: 'exhibitor@aethergrid.io',
+      phone: '+44 20 7946 0420',
       website: 'https://aethergrid.example',
       products: ['AetherCell 500kWh', 'GridPulse Telemetry', 'SolarSync Inverter'],
       staff: ['Sora Takahashi', 'Devon Cole'],
+      documents: ['UL-9540-Compliance.pdf'],
       profileViews: 194,
     },
     {
@@ -277,11 +314,13 @@ function createSeedDatabase(): ServerDatabase {
       tagline: 'Zero-trust identity fabric for distributed edge fleets',
       description:
         'Hardware-attested workload identities and real-time anomaly containment for industrial IoT deployments.',
-      logoColor: '#FF6B57',
+      logoColor: '#F97362',
       contactEmail: 'hello@sentinelmesh.example',
+      phone: '+1 415 555 0194',
       website: 'https://sentinelmesh.example',
       products: ['MeshGate HSM', 'ZeroTrust CLI', 'AuditStream'],
       staff: ['Aria Novak', 'Julian Cruz'],
+      documents: ['SOC2-Attestation.pdf'],
       profileViews: 176,
     },
     {
@@ -294,9 +333,11 @@ function createSeedDatabase(): ServerDatabase {
         'Ultra-low-latency WebGL and headset visualization engines for architectural, factory, and live venue twins.',
       logoColor: '#38BDF8',
       contactEmail: 'team@prismspatial.example',
+      phone: '+46 8 555 0142',
       website: 'https://prismspatial.example',
       products: ['Prism Twin Studio', 'HoloLink SDK'],
       staff: ['Noah Lindqvist', 'Chloe Park'],
+      documents: ['Optics-Safety-Spec.pdf'],
       profileViews: 215,
     },
     {
@@ -309,14 +350,15 @@ function createSeedDatabase(): ServerDatabase {
         'Portable isothermal assay cartridges and encrypted clinical telemetry dashboards.',
       logoColor: '#F59E0B',
       contactEmail: 'info@helixbio.example',
+      phone: '+1 650 555 0118',
       website: 'https://helixbio.example',
       products: ['HelixCartridge Pro', 'BioVault Sync'],
       staff: ['Dr. Amara Osei', 'Kenji Sato'],
+      documents: ['CLIA-Waiver-Brief.pdf'],
       profileViews: 162,
     },
   ];
 
-  // Generate 24 booths across 4 rows x 6 columns
   const zones = ['North Innovation Wing', 'Central Atrium', 'West Robotics Row', 'South Enterprise Hall'];
   const booths: ServerDatabase['booths'] = [];
   const reservedAssignments: Record<string, { id: string; name: string }> = {
@@ -333,7 +375,7 @@ function createSeedDatabase(): ServerDatabase {
     for (let c = 0; c < 6; c++) {
       const code = `${'ABCD'[r]}${c + 1}`;
       const assigned = reservedAssignments[code];
-      const status: 'available' | 'reserved' | 'pending' = assigned
+      const status: BoothStatus = assigned
         ? 'reserved'
         : pendingSet.has(code)
           ? 'pending'
@@ -369,7 +411,10 @@ function createSeedDatabase(): ServerDatabase {
       description:
         'Flagship three-day convergence of autonomous robotics, clean microgrids, spatial twins, and enterprise security.',
       theme: 'Autonomous Infrastructure & Live Twins',
-      bannerAccent: '#7B5CFF',
+      category: 'Robotics & AI',
+      status: 'live',
+      capacity: 1200,
+      bannerAccent: '#10B981',
       registeredUserIds: ['usr-att-1'],
     },
     {
@@ -381,7 +426,25 @@ function createSeedDatabase(): ServerDatabase {
       description:
         'Clinical instrumentation, microfluidic diagnostics, and hospital automation showcase.',
       theme: 'Precision Diagnostics at Scale',
-      bannerAccent: '#4FE3C1',
+      category: 'Biotech & MedTech',
+      status: 'upcoming',
+      capacity: 650,
+      bannerAccent: '#2DD4BF',
+      registeredUserIds: [],
+    },
+    {
+      id: 'expo-2026-clean',
+      title: 'CleanGrid Energy Forum 2026',
+      date: '2027-01-22',
+      endDate: '2027-01-24',
+      location: 'Messe Berlin · Hall 2',
+      description:
+        'Commercial solid-state battery storage, bidirectional microgrids, and zero-emission venue architecture.',
+      theme: 'Zero-Emission Venue Power',
+      category: 'Clean Energy',
+      status: 'upcoming',
+      capacity: 900,
+      bannerAccent: '#34D399',
       registeredUserIds: [],
     },
   ];
@@ -419,6 +482,19 @@ function createSeedDatabase(): ServerDatabase {
       documents: ['SOC2-Attestation.pdf', 'Demo-Network-Plan.pdf'],
       status: 'pending',
       submittedAt: isoDaysAgo(1),
+    },
+  ];
+
+  const registrations: ServerDatabase['registrations'] = [
+    {
+      id: 'reg-1',
+      expoId: 'expo-2026-global',
+      userId: 'usr-att-1',
+      userName: 'Maya Patel',
+      userEmail: 'attendee@eventsphere.io',
+      ticketCode: 'ES-2026-8412',
+      status: 'confirmed',
+      registeredAt: isoDaysAgo(3),
     },
   ];
 
@@ -482,6 +558,45 @@ function createSeedDatabase(): ServerDatabase {
       registeredUserIds: [],
       bookmarkedUserIds: [],
       updatedAt: now,
+    },
+  ];
+
+  const speakers: ServerDatabase['speakers'] = [
+    {
+      id: 'spk-1',
+      expoId: 'expo-2026-global',
+      name: 'Elena Vance',
+      role: 'Lead Expo Director',
+      company: 'EventSphere Management',
+      topic: 'Spatial Operations',
+      bio: 'Architect of live 3D exhibition campuses and sub-2-second floor telemetry platforms.',
+    },
+    {
+      id: 'spk-2',
+      expoId: 'expo-2026-global',
+      name: 'Marcus Chen',
+      role: 'VP of Field Engineering',
+      company: 'Lumina Robotics',
+      topic: 'Robotics & AI',
+      bio: 'Leads millimeter-accurate tactile cobot deployments across 40+ European fulfillment hubs.',
+    },
+    {
+      id: 'spk-3',
+      expoId: 'expo-2026-global',
+      name: 'Sora Takahashi',
+      role: 'Solutions Architect',
+      company: 'AetherGrid CleanTech',
+      topic: 'Clean Energy',
+      bio: 'Designs high-density solid-state DC microgrids for zero-emission mega-venues.',
+    },
+    {
+      id: 'spk-4',
+      expoId: 'expo-2026-global',
+      name: 'Aria Novak',
+      role: 'Principal Security Engineer',
+      company: 'Sentinel Mesh Security',
+      topic: 'Cloud & Security',
+      bio: 'Specializes in hardware-attested zero-trust identity fabrics for autonomous hardware.',
     },
   ];
 
@@ -575,13 +690,28 @@ function createSeedDatabase(): ServerDatabase {
     booths,
     exhibitors,
     applications,
+    registrations,
     sessions,
+    speakers,
     messages,
     notifications,
     feedback,
     activityLogs,
     analyticsSeries,
   };
+}
+
+function migrateDatabase(db: ServerDatabase): ServerDatabase {
+  const seed = createSeedDatabase();
+  if (!Array.isArray(db.registrations)) db.registrations = seed.registrations;
+  if (!Array.isArray(db.speakers)) db.speakers = seed.speakers;
+  db.expos = db.expos.map((e, i) => ({
+    ...e,
+    category: e.category || (i === 0 ? 'Robotics & AI' : 'Biotech & MedTech'),
+    status: e.status || (i === 0 ? 'live' : 'upcoming'),
+    capacity: e.capacity || 800,
+  }));
+  return db;
 }
 
 function loadDatabase(): ServerDatabase {
@@ -599,7 +729,7 @@ function loadDatabase(): ServerDatabase {
     if (!parsed.booths || !parsed.users || !parsed.sessions) {
       throw new Error('Incomplete DB');
     }
-    return parsed;
+    return migrateDatabase(parsed);
   } catch {
     const seed = createSeedDatabase();
     fs.writeFileSync(DB_FILE, JSON.stringify(seed, null, 2), 'utf8');
@@ -641,13 +771,15 @@ function saveVault(vault: Record<string, SyncRecord>): void {
   fs.renameSync(tmp, VAULT_FILE);
 }
 
+interface AuthUserClaims {
+  id: string;
+  email: string;
+  name: string;
+  role: UserRole;
+}
+
 interface AuthRequest extends Request {
-  authUser?: {
-    id: string;
-    email: string;
-    name: string;
-    role: UserRole;
-  };
+  authUser?: AuthUserClaims;
 }
 
 function signToken(user: StoredUser): string {
@@ -666,9 +798,21 @@ function sanitizeUser(user: StoredUser) {
     role: user.role,
     company: user.company,
     title: user.title,
+    phone: user.phone,
     gdprConsent: user.gdprConsent,
     createdAt: user.createdAt,
   };
+}
+
+function decodeOptionalAuth(req: Request): AuthUserClaims | undefined {
+  const header = req.headers.authorization || '';
+  const token = header.startsWith('Bearer ') ? header.slice(7) : '';
+  if (!token) return undefined;
+  try {
+    return jwt.verify(token, JWT_SECRET) as AuthUserClaims;
+  } catch {
+    return undefined;
+  }
 }
 
 async function startServer() {
@@ -727,22 +871,72 @@ async function startServer() {
     };
     db.notifications.unshift(item);
     db.notifications = db.notifications.slice(0, 60);
-    io.emit('notification:new', item);
+    if (targetUserId === 'all') {
+      io.emit('notification:new', item);
+    }
   };
 
-  const getPublicSnapshot = () => ({
-    expos: db.expos,
-    booths: db.booths,
-    exhibitors: db.exhibitors,
-    applications: db.applications,
-    sessions: db.sessions,
-    messages: db.messages,
-    notifications: db.notifications,
-    feedback: db.feedback,
-    activityLogs: db.activityLogs,
-    analyticsSeries: db.analyticsSeries,
-    concurrentUsers: Math.max(1, concurrentUsers),
-  });
+  const getPublicSnapshot = (viewer?: AuthUserClaims) => {
+    const role = viewer?.role;
+    const uid = viewer?.id;
+    const viewerExhibitor = uid ? db.exhibitors.find((e) => e.userId === uid) : undefined;
+
+    const notifications = db.notifications.filter(
+      (n) => n.targetUserId === 'all' || (uid && n.targetUserId === uid),
+    );
+
+    const applications =
+      role === 'admin'
+        ? db.applications
+        : role === 'exhibitor' && viewerExhibitor
+          ? db.applications.filter((a) => a.exhibitorId === viewerExhibitor.id)
+          : [];
+
+    const registrations =
+      role === 'admin'
+        ? db.registrations
+        : uid
+          ? db.registrations.filter((r) => r.userId === uid)
+          : [];
+
+    const messages =
+      role === 'admin'
+        ? db.messages
+        : uid
+          ? db.messages.filter(
+              (m) =>
+                m.senderId === uid ||
+                m.recipientChannel === 'hall-general' ||
+                (viewerExhibitor && m.recipientChannel === viewerExhibitor.id) ||
+                (role === 'exhibitor' && m.recipientChannel === 'organizer'),
+            )
+          : [];
+
+    const feedback =
+      role === 'admin'
+        ? db.feedback
+        : uid
+          ? db.feedback.filter((f) => f.userId === uid)
+          : [];
+
+    const activityLogs = role === 'admin' ? db.activityLogs : [];
+
+    return {
+      expos: db.expos,
+      booths: db.booths,
+      exhibitors: db.exhibitors,
+      applications,
+      registrations,
+      sessions: db.sessions,
+      speakers: db.speakers,
+      messages,
+      notifications,
+      feedback,
+      activityLogs,
+      analyticsSeries: db.analyticsSeries,
+      concurrentUsers: Math.max(1, concurrentUsers),
+    };
+  };
 
   io.on('connection', (socket) => {
     concurrentUsers = io.engine.clientsCount;
@@ -763,12 +957,7 @@ async function startServer() {
       return;
     }
     try {
-      const decoded = jwt.verify(token, JWT_SECRET) as {
-        id: string;
-        email: string;
-        name: string;
-        role: UserRole;
-      };
+      const decoded = jwt.verify(token, JWT_SECRET) as AuthUserClaims;
       req.authUser = decoded;
       next();
     } catch {
@@ -808,18 +997,42 @@ async function startServer() {
     });
   });
 
-  app.get('/api/state', (_req: Request, res: Response) => {
-    res.json(getPublicSnapshot());
+  app.get('/api/state', (req: Request, res: Response) => {
+    const viewer = decodeOptionalAuth(req);
+    res.json(getPublicSnapshot(viewer));
   });
 
   // AUTH-1..6
   app.post('/api/auth/register', (req: Request, res: Response) => {
-    const { name, email, password, role, company, gdprConsent } = req.body as {
+    const {
+      name,
+      email,
+      password,
+      role,
+      company,
+      phone,
+      category,
+      description,
+      website,
+      logoColor,
+      products,
+      documents,
+      organizerInviteCode,
+      gdprConsent,
+    } = req.body as {
       name?: string;
       email?: string;
       password?: string;
       role?: string;
       company?: string;
+      phone?: string;
+      category?: ServerDatabase['exhibitors'][number]['category'];
+      description?: string;
+      website?: string;
+      logoColor?: string;
+      products?: string[];
+      documents?: string[];
+      organizerInviteCode?: string;
       gdprConsent?: boolean;
     };
     if (!name || !email || !password || password.length < 6) {
@@ -830,12 +1043,25 @@ async function startServer() {
       res.status(400).json({ error: 'GDPR data-processing consent is required to register.' });
       return;
     }
+
+    if (role === 'admin') {
+      if (!organizerInviteCode || organizerInviteCode.trim() !== ORGANIZER_SETUP_CODE) {
+        res.status(403).json({
+          error: 'Valid Organizer provisioning invite code is required for Organizer accounts.',
+        });
+        return;
+      }
+    }
+
     const cleanEmail = email.trim().toLowerCase();
     if (db.users.some((u) => u.email === cleanEmail)) {
       res.status(409).json({ error: 'An account with this email already exists.' });
       return;
     }
-    const assignedRole: UserRole = role === 'exhibitor' ? 'exhibitor' : 'attendee';
+
+    const assignedRole: UserRole =
+      role === 'admin' ? 'admin' : role === 'exhibitor' ? 'exhibitor' : 'attendee';
+
     const user: StoredUser = {
       id: `usr-${Date.now()}`,
       name: name.trim().slice(0, 80),
@@ -843,24 +1069,28 @@ async function startServer() {
       passwordHash: bcrypt.hashSync(password, 10),
       role: assignedRole,
       company: company?.trim().slice(0, 80),
+      phone: phone?.trim().slice(0, 32),
       gdprConsent: true,
       createdAt: new Date().toISOString(),
     };
     db.users.push(user);
 
     if (assignedRole === 'exhibitor') {
+      const validColor = logoColor && /^#[0-9a-fA-F]{6}$/.test(logoColor) ? logoColor : '#10B981';
       db.exhibitors.push({
         id: `exh-${Date.now()}`,
         userId: user.id,
         companyName: user.company || `${user.name} Co.`,
-        category: 'Robotics & AI',
-        tagline: 'New EventSphere Exhibitor Partner',
-        description: 'Exhibitor profile awaiting booth setup.',
-        logoColor: '#FF6B57',
+        category: category || 'Robotics & AI',
+        tagline: (description || 'New EventSphere Exhibitor Partner').slice(0, 95),
+        description: (description || 'Exhibitor profile awaiting booth setup.').trim(),
+        logoColor: validColor,
         contactEmail: user.email,
-        website: '',
-        products: [],
+        phone: user.phone,
+        website: (website || '').trim(),
+        products: Array.isArray(products) ? products.filter(Boolean).slice(0, 12) : [],
         staff: [user.name],
+        documents: Array.isArray(documents) ? documents.filter(Boolean).slice(0, 10) : [],
         profileViews: 1,
       });
     }
@@ -952,25 +1182,35 @@ async function startServer() {
       res.status(404).json({ error: 'User not found.' });
       return;
     }
-    const { name, company, title } = req.body as { name?: string; company?: string; title?: string };
+    const { name, company, title, phone } = req.body as {
+      name?: string;
+      company?: string;
+      title?: string;
+      phone?: string;
+    };
     if (name && name.trim()) user.name = name.trim().slice(0, 80);
     if (company !== undefined) user.company = company.trim().slice(0, 80);
     if (title !== undefined) user.title = title.trim().slice(0, 80);
+    if (phone !== undefined) user.phone = phone.trim().slice(0, 32);
     saveDatabase(db);
     res.json({ user: sanitizeUser(user), token: signToken(user) });
   });
 
   // ADM-1: Create/Edit/Delete Expos
   app.post('/api/expos', requireAuth, requireRole('admin'), (req: AuthRequest, res: Response) => {
-    const { title, date, endDate, location, description, theme, bannerAccent } = req.body as {
-      title?: string;
-      date?: string;
-      endDate?: string;
-      location?: string;
-      description?: string;
-      theme?: string;
-      bannerAccent?: string;
-    };
+    const { title, date, endDate, location, description, theme, category, status, capacity, bannerAccent } =
+      req.body as {
+        title?: string;
+        date?: string;
+        endDate?: string;
+        location?: string;
+        description?: string;
+        theme?: string;
+        category?: string;
+        status?: ExpoStatus;
+        capacity?: number;
+        bannerAccent?: string;
+      };
     if (!title || !date || !location) {
       res.status(400).json({ error: 'Title, date, and location are required.' });
       return;
@@ -983,7 +1223,10 @@ async function startServer() {
       location: location.trim(),
       description: (description || '').trim(),
       theme: (theme || 'Enterprise Tech').trim(),
-      bannerAccent: bannerAccent || '#7B5CFF',
+      category: (category || 'Robotics & AI').trim(),
+      status: (status || 'upcoming') as ExpoStatus,
+      capacity: Number(capacity) || 800,
+      bannerAccent: bannerAccent || '#10B981',
       registeredUserIds: [],
     };
     db.expos.unshift(expo);
@@ -999,13 +1242,17 @@ async function startServer() {
       res.status(404).json({ error: 'Expo not found.' });
       return;
     }
-    const { title, date, endDate, location, description, theme } = req.body as Partial<typeof expo>;
+    const { title, date, endDate, location, description, theme, category, status, capacity } =
+      req.body as Partial<typeof expo>;
     if (title && title.trim()) expo.title = title.trim();
     if (date) expo.date = date;
     if (endDate) expo.endDate = endDate;
     if (location && location.trim()) expo.location = location.trim();
     if (description !== undefined) expo.description = description.trim();
     if (theme !== undefined) expo.theme = theme.trim();
+    if (category !== undefined) expo.category = category.trim();
+    if (status) expo.status = status;
+    if (typeof capacity === 'number' && capacity > 0) expo.capacity = capacity;
     pushLog(req.authUser!.name, 'EXPO_UPDATED', `Updated expo "${expo.title}"`);
     pushNotification('all', 'Expo Details Updated', `${expo.title} (${expo.date} · ${expo.location})`, 'system');
     saveDatabase(db);
@@ -1022,19 +1269,60 @@ async function startServer() {
   });
 
   // ADM-2 & ADM-4: Booth Management & Assignment
+  app.post('/api/booths', requireAuth, requireRole('admin'), (req: AuthRequest, res: Response) => {
+    const { expoId, number, zone, size, priceUsd } = req.body as {
+      expoId?: string;
+      number?: string;
+      zone?: string;
+      size?: '3x3m Standard' | '6x3m Corner' | '6x6m Island';
+      priceUsd?: number;
+    };
+    if (!number || !number.trim()) {
+      res.status(400).json({ error: 'Booth number is required.' });
+      return;
+    }
+    const cleanNum = number.trim().toUpperCase().slice(0, 8);
+    if (db.booths.some((b) => b.number.toUpperCase() === cleanNum)) {
+      res.status(409).json({ error: `Booth ${cleanNum} already exists.` });
+      return;
+    }
+    const idx = db.booths.length;
+    const booth = {
+      id: `booth-${cleanNum}-${Date.now().toString().slice(-4)}`,
+      expoId: expoId || db.expos[0]?.id || 'expo-2026-global',
+      number: cleanNum,
+      zone: (zone || 'Central Atrium').trim(),
+      size: size || '3x3m Standard',
+      priceUsd: Number(priceUsd) || 2800,
+      status: 'available' as BoothStatus,
+      row: Math.floor(idx / 6) % 4,
+      col: idx % 6,
+      exhibitorId: null,
+      exhibitorName: null,
+      trafficCount: 0,
+    };
+    db.booths.push(booth);
+    pushLog(req.authUser!.name, 'BOOTH_CREATED', `Created Booth ${booth.number} (${booth.zone})`);
+    saveDatabase(db);
+    io.emit('state:sync', getPublicSnapshot());
+    res.status(201).json(booth);
+  });
+
   app.put('/api/booths/:id', requireAuth, requireRole('admin'), (req: AuthRequest, res: Response) => {
     const booth = db.booths.find((b) => b.id === req.params.id);
     if (!booth) {
       res.status(404).json({ error: 'Booth not found.' });
       return;
     }
-    const { size, priceUsd, status, exhibitorId } = req.body as {
+    const { size, priceUsd, status, exhibitorId, zone } = req.body as {
       size?: '3x3m Standard' | '6x3m Corner' | '6x6m Island';
       priceUsd?: number;
-      status?: 'available' | 'reserved' | 'pending';
+      status?: BoothStatus;
       exhibitorId?: string | null;
+      zone?: string;
     };
     if (size) booth.size = size;
+    if (zone && zone.trim()) booth.zone = zone.trim();
     if (typeof priceUsd === 'number' && priceUsd > 0) booth.priceUsd = priceUsd;
     if (status) booth.status = status;
     if (exhibitorId !== undefined) {
@@ -1042,11 +1330,11 @@ async function startServer() {
         const exh = db.exhibitors.find((e) => e.id === exhibitorId);
         booth.exhibitorId = exh ? exh.id : exhibitorId;
         booth.exhibitorName = exh ? exh.companyName : 'Assigned Exhibitor';
-        booth.status = 'reserved';
+        if (booth.status === 'available' || booth.status === 'pending') booth.status = 'reserved';
       } else {
         booth.exhibitorId = null;
         booth.exhibitorName = null;
-        if (booth.status === 'reserved') booth.status = 'available';
+        if (booth.status === 'reserved' || booth.status === 'occupied') booth.status = 'available';
       }
     }
     pushLog(req.authUser!.name, 'BOOTH_UPDATED', `Updated Booth ${booth.number} (${booth.status})`);
@@ -1057,7 +1345,24 @@ async function startServer() {
     res.json(booth);
   });
 
-  // EXH-3: Atomic Booth Reservation (prevents double booking)
+  app.delete('/api/booths/:id', requireAuth, requireRole('admin'), (req: AuthRequest, res: Response) => {
+    const booth = db.booths.find((b) => b.id === req.params.id);
+    if (!booth) {
+      res.status(404).json({ error: 'Booth not found.' });
+      return;
+    }
+    if (booth.status === 'reserved' || booth.status === 'occupied') {
+      res.status(409).json({ error: 'Release reserved/occupied booth before deleting.' });
+      return;
+    }
+    db.booths = db.booths.filter((b) => b.id !== req.params.id);
+    pushLog(req.authUser!.name, 'BOOTH_DELETED', `Deleted Booth ${booth.number}`);
+    saveDatabase(db);
+    io.emit('state:sync', getPublicSnapshot());
+    res.json({ ok: true });
+  });
+
+  // EXH-3: Atomic Booth Reservation
   app.post('/api/booths/:id/reserve', requireAuth, (req: AuthRequest, res: Response) => {
     const booth = db.booths.find((b) => b.id === req.params.id);
     if (!booth) {
@@ -1149,11 +1454,12 @@ async function startServer() {
         category: category || 'Robotics & AI',
         tagline: productsSummary.slice(0, 90),
         description: productsSummary,
-        logoColor: '#7B5CFF',
+        logoColor: '#10B981',
         contactEmail: req.authUser!.email,
         website: '',
         products: [],
         staff: [req.authUser!.name],
+        documents: Array.isArray(documents) ? documents : [],
         profileViews: 1,
       };
       db.exhibitors.push(exhibitor);
@@ -1183,22 +1489,56 @@ async function startServer() {
       res.status(404).json({ error: 'Application not found.' });
       return;
     }
-    const { status, rejectionReason } = req.body as { status?: 'approved' | 'rejected'; rejectionReason?: string };
-    if (status !== 'approved' && status !== 'rejected') {
-      res.status(400).json({ error: 'Status must be approved or rejected.' });
+    const { status, rejectionReason, reviewerNote } = req.body as {
+      status?: 'approved' | 'rejected' | 'info_requested';
+      rejectionReason?: string;
+      reviewerNote?: string;
+    };
+    if (status !== 'approved' && status !== 'rejected' && status !== 'info_requested') {
+      res.status(400).json({ error: 'Status must be approved, rejected, or info_requested.' });
       return;
     }
     appRec.status = status;
     appRec.rejectionReason = status === 'rejected' ? rejectionReason || 'Floor capacity constraints' : undefined;
+    if (reviewerNote !== undefined) appRec.reviewerNote = reviewerNote.trim();
     pushLog(req.authUser!.name, `APPLICATION_${status.toUpperCase()}`, `${appRec.companyName} (${status})`);
+    const exhOwner = db.exhibitors.find((e) => e.id === appRec.exhibitorId);
     pushNotification(
-      'all',
-      `Application ${status === 'approved' ? 'Approved' : 'Rejected'}`,
-      `${appRec.companyName}: ${status === 'approved' ? 'Ready to select a booth on the live floor plan.' : appRec.rejectionReason}`,
+      exhOwner?.userId || 'all',
+      `Application ${status === 'approved' ? 'Approved' : status === 'rejected' ? 'Rejected' : 'Info Requested'}`,
+      `${appRec.companyName}: ${
+        status === 'approved'
+          ? 'Ready to select a booth on the live floor plan.'
+          : status === 'info_requested'
+            ? appRec.reviewerNote || 'Please provide updated compliance documents.'
+            : appRec.rejectionReason
+      }`,
       'application',
     );
     saveDatabase(db);
     io.emit('application:updated', appRec);
+    io.emit('state:sync', getPublicSnapshot());
+    res.json(appRec);
+  });
+
+  app.post('/api/applications/:id/request-info', requireAuth, requireRole('admin'), (req: AuthRequest, res: Response) => {
+    const appRec = db.applications.find((a) => a.id === req.params.id);
+    if (!appRec) {
+      res.status(404).json({ error: 'Application not found.' });
+      return;
+    }
+    const { reviewerNote } = req.body as { reviewerNote?: string };
+    appRec.status = 'info_requested';
+    appRec.reviewerNote = (reviewerNote || 'Please upload updated safety certification and power draw spec.').trim();
+    const exhOwner = db.exhibitors.find((e) => e.id === appRec.exhibitorId);
+    pushNotification(
+      exhOwner?.userId || 'all',
+      'Application Info Requested',
+      `${appRec.companyName}: ${appRec.reviewerNote}`,
+      'application',
+    );
+    pushLog(req.authUser!.name, 'APPLICATION_INFO_REQUESTED', `${appRec.companyName}: ${appRec.reviewerNote}`);
+    saveDatabase(db);
     io.emit('state:sync', getPublicSnapshot());
     res.json(appRec);
   });
@@ -1214,21 +1554,35 @@ async function startServer() {
       res.status(403).json({ error: 'You can only update your own exhibitor profile.' });
       return;
     }
-    const { companyName, tagline, description, products, staff, website, contactEmail, logoColor } =
-      req.body as Partial<typeof exh>;
+    const {
+      companyName,
+      category,
+      tagline,
+      description,
+      products,
+      staff,
+      documents,
+      website,
+      contactEmail,
+      phone,
+      logoColor,
+    } = req.body as Partial<typeof exh>;
     if (companyName && companyName.trim()) {
       exh.companyName = companyName.trim();
       db.booths.forEach((b) => {
         if (b.exhibitorId === exh.id) b.exhibitorName = exh.companyName;
       });
     }
+    if (category) exh.category = category;
     if (tagline !== undefined) exh.tagline = tagline.trim();
     if (description !== undefined) exh.description = description.trim();
     if (website !== undefined) exh.website = website.trim();
     if (contactEmail !== undefined) exh.contactEmail = contactEmail.trim();
+    if (phone !== undefined) exh.phone = phone.trim();
     if (logoColor && /^#[0-9a-fA-F]{6}$/.test(logoColor)) exh.logoColor = logoColor;
     if (Array.isArray(products)) exh.products = products.slice(0, 12);
     if (Array.isArray(staff)) exh.staff = staff.slice(0, 12);
+    if (Array.isArray(documents)) exh.documents = documents.slice(0, 12);
     pushLog(req.authUser!.name, 'EXHIBITOR_UPDATED', `Updated profile for ${exh.companyName}`);
     saveDatabase(db);
     io.emit('state:sync', getPublicSnapshot());
@@ -1295,13 +1649,16 @@ async function startServer() {
       res.status(404).json({ error: 'Session not found.' });
       return;
     }
-    const { title, speaker, startTime, endTime, location, topic } = req.body as Partial<typeof session>;
+    const { title, speaker, speakerRole, startTime, endTime, location, topic, capacity } =
+      req.body as Partial<typeof session>;
     if (title) session.title = title.trim();
     if (speaker) session.speaker = speaker.trim();
+    if (speakerRole) session.speakerRole = speakerRole.trim();
     if (startTime) session.startTime = startTime;
     if (endTime) session.endTime = endTime;
     if (location) session.location = location.trim();
     if (topic) session.topic = topic.trim();
+    if (typeof capacity === 'number' && capacity > 0) session.capacity = capacity;
     session.updatedAt = new Date().toISOString();
 
     pushLog(req.authUser!.name, 'SESSION_UPDATED', `Moved/updated "${session.title}" -> ${session.startTime} @ ${session.location}`);
@@ -1325,7 +1682,79 @@ async function startServer() {
     res.json({ ok: true });
   });
 
-  // ATT-2 & ATT-5: Expo/Session Registration & Bookmarks
+  // Speakers CRUD (Admin)
+  app.post('/api/speakers', requireAuth, requireRole('admin'), (req: AuthRequest, res: Response) => {
+    const { expoId, name, role, company, topic, bio } = req.body as {
+      expoId?: string;
+      name?: string;
+      role?: string;
+      company?: string;
+      topic?: string;
+      bio?: string;
+    };
+    if (!name || !name.trim()) {
+      res.status(400).json({ error: 'Speaker name is required.' });
+      return;
+    }
+    const speaker = {
+      id: `spk-${Date.now()}`,
+      expoId: expoId || db.expos[0]?.id || 'expo-2026-global',
+      name: name.trim(),
+      role: (role || 'Keynote Speaker').trim(),
+      company: (company || 'Industry Partner').trim(),
+      topic: (topic || 'Innovation').trim(),
+      bio: (bio || '').trim(),
+    };
+    db.speakers.push(speaker);
+    pushLog(req.authUser!.name, 'SPEAKER_CREATED', `Added speaker ${speaker.name}`);
+    saveDatabase(db);
+    io.emit('state:sync', getPublicSnapshot());
+    res.status(201).json(speaker);
+  });
+
+  app.put('/api/speakers/:id', requireAuth, requireRole('admin'), (req: AuthRequest, res: Response) => {
+    const spk = db.speakers.find((s) => s.id === req.params.id);
+    if (!spk) {
+      res.status(404).json({ error: 'Speaker not found.' });
+      return;
+    }
+    const { name, role, company, topic, bio } = req.body as Partial<typeof spk>;
+    if (name && name.trim()) spk.name = name.trim();
+    if (role !== undefined) spk.role = role.trim();
+    if (company !== undefined) spk.company = company.trim();
+    if (topic !== undefined) spk.topic = topic.trim();
+    if (bio !== undefined) spk.bio = bio.trim();
+    saveDatabase(db);
+    io.emit('state:sync', getPublicSnapshot());
+    res.json(spk);
+  });
+
+  app.delete('/api/speakers/:id', requireAuth, requireRole('admin'), (req: AuthRequest, res: Response) => {
+    db.speakers = db.speakers.filter((s) => s.id !== req.params.id);
+    saveDatabase(db);
+    io.emit('state:sync', getPublicSnapshot());
+    res.json({ ok: true });
+  });
+
+  // Admin Attendee Directory
+  app.get('/api/admin/attendees', requireAuth, requireRole('admin'), (_req: AuthRequest, res: Response) => {
+    const attendees = db.users
+      .filter((u) => u.role === 'attendee')
+      .map((u) => ({
+        id: u.id,
+        name: u.name,
+        email: u.email,
+        company: u.company,
+        title: u.title,
+        phone: u.phone,
+        createdAt: u.createdAt,
+        registeredExpoIds: db.expos.filter((e) => e.registeredUserIds.includes(u.id)).map((e) => e.id),
+        bookmarkedSessionCount: db.sessions.filter((s) => s.bookmarkedUserIds.includes(u.id)).length,
+      }));
+    res.json({ attendees });
+  });
+
+  // ATT-2 & ATT-5: Expo/Session Registration, Ticket Generation & Bookmarks
   app.post('/api/expos/:id/register', requireAuth, (req: AuthRequest, res: Response) => {
     const expo = db.expos.find((e) => e.id === req.params.id);
     if (!expo) {
@@ -1335,11 +1764,44 @@ async function startServer() {
     const uid = req.authUser!.id;
     if (!expo.registeredUserIds.includes(uid)) {
       expo.registeredUserIds.push(uid);
-      pushLog(req.authUser!.name, 'EXPO_REGISTERED', `Registered for ${expo.title}`);
-      saveDatabase(db);
-      io.emit('state:sync', getPublicSnapshot());
     }
-    res.json(expo);
+    let reg = db.registrations.find((r) => r.expoId === expo.id && r.userId === uid);
+    if (!reg) {
+      reg = {
+        id: `reg-${Date.now()}-${Math.random().toString(36).slice(2, 5)}`,
+        expoId: expo.id,
+        userId: uid,
+        userName: req.authUser!.name,
+        userEmail: req.authUser!.email,
+        ticketCode: `ES-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 8999)}`,
+        status: 'confirmed',
+        registeredAt: new Date().toISOString().slice(0, 10),
+      };
+      db.registrations.unshift(reg);
+    } else {
+      reg.status = 'confirmed';
+    }
+    pushLog(req.authUser!.name, 'EXPO_REGISTERED', `Registered for ${expo.title} (${reg.ticketCode})`);
+    pushNotification(uid, 'Ticket Confirmed', `Pass ${reg.ticketCode} is active for ${expo.title}.`, 'system');
+    saveDatabase(db);
+    io.emit('state:sync', getPublicSnapshot());
+    res.json({ expo, registration: reg });
+  });
+
+  app.delete('/api/expos/:id/register', requireAuth, (req: AuthRequest, res: Response) => {
+    const expo = db.expos.find((e) => e.id === req.params.id);
+    if (!expo) {
+      res.status(404).json({ error: 'Expo not found.' });
+      return;
+    }
+    const uid = req.authUser!.id;
+    expo.registeredUserIds = expo.registeredUserIds.filter((id) => id !== uid);
+    const reg = db.registrations.find((r) => r.expoId === expo.id && r.userId === uid);
+    if (reg) reg.status = 'cancelled';
+    pushLog(req.authUser!.name, 'EXPO_CANCELLED', `Cancelled ticket for ${expo.title}`);
+    saveDatabase(db);
+    io.emit('state:sync', getPublicSnapshot());
+    res.json({ ok: true, expo });
   });
 
   app.post('/api/sessions/:id/register', requireAuth, (req: AuthRequest, res: Response) => {
@@ -1418,6 +1880,7 @@ async function startServer() {
 
   // SYS-2: Feedback & Support
   app.post('/api/feedback', (req: Request, res: Response) => {
+    const viewer = decodeOptionalAuth(req);
     const { userName, category, message } = req.body as {
       userName?: string;
       category?: 'Suggestion' | 'Technical Issue' | 'Booth Inquiry';
@@ -1429,8 +1892,8 @@ async function startServer() {
     }
     const entry = {
       id: `fb-${Date.now()}`,
-      userId: 'guest',
-      userName: (userName || 'Expo Visitor').trim().slice(0, 64),
+      userId: viewer?.id || 'guest',
+      userName: (userName || viewer?.name || 'Expo Visitor').trim().slice(0, 64),
       category: category || 'Suggestion',
       message: message.trim().slice(0, 1000),
       createdAt: new Date().toISOString(),

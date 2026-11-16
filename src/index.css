@@ -3,7 +3,7 @@
 
 @layer base {
   :root {
-    --font-display: 'Bricolage Grotesque', system-ui, -apple-system, sans-serif;
+    --font-display: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
     --font-sans: 'DM Sans', system-ui, -apple-system, sans-serif;
     --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
     --es-bg: #F4F7F5;
@@ -12,6 +12,8 @@
     --es-ink: #09140E;
     --es-mute: #466153;
     --es-accent: #059669;
+    --es-accent-bright: #10B981;
+    --es-border: rgba(5, 150, 105, 0.16);
   }
 
   .dark {
@@ -21,6 +23,8 @@
     --es-ink: #ECFDF5;
     --es-mute: #8EAD9E;
     --es-accent: #10B981;
+    --es-accent-bright: #34D399;
+    --es-border: rgba(16, 185, 129, 0.2);
   }
 
   html {
@@ -30,7 +34,7 @@
     -moz-osx-font-smoothing: grayscale;
   }
 
-  h1, h2, h3, .font-display {
+  h1, h2, h3, h4, .font-display {
     font-family: var(--font-display);
     text-wrap: balance;
   }

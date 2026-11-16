@@ -76,7 +76,16 @@ test('Health, telemetry metrics, and automated daily backup snapshot', async () 
   assert.ok(metrics.data.backupCount >= 1);
 });
 
-test('Registration enforces GDPR consent and hashes credentials cleanly', async () => {
+test('Unauthenticated GET /api/state redacts private admin logs, registrations, and feedback', async () => {
+  const anonState = await apiJson('/api/state');
+  assert.equal(anonState.status, 200);
+  assert.deepEqual(anonState.data.activityLogs, []);
+  assert.deepEqual(anonState.data.feedback, []);
+  assert.deepEqual(anonState.data.registrations, []);
+  assert.ok(anonState.data.booths.length >= 24);
+});
+
+test('Registration enforces GDPR consent, organizer invite code, and bcrypt hashing', async () => {
   const rejected = await apiJson('/api/auth/register', {
     method: 'POST',
     body: JSON.stringify({
@@ -88,6 +97,33 @@ test('Registration enforces GDPR consent and hashes credentials cleanly', async 
     }),
   });
   assert.equal(rejected.status, 400);
+
+  const badAdminSignup = await apiJson('/api/auth/register', {
+    method: 'POST',
+    body: JSON.stringify({
+      name: 'Fake Admin',
+      email: 'fakeadmin@example.com',
+      password: 'Password123!',
+      role: 'admin',
+      organizerInviteCode: 'WRONG-CODE',
+      gdprConsent: true,
+    }),
+  });
+  assert.equal(badAdminSignup.status, 403);
+
+  const validAdminSignup = await apiJson('/api/auth/register', {
+    method: 'POST',
+    body: JSON.stringify({
+      name: 'Second Organizer',
+      email: 'org2@example.com',
+      password: 'Password123!',
+      role: 'admin',
+      organizerInviteCode: 'EVENTSPHERE-ORG-2026',
+      gdprConsent: true,
+    }),
+  });
+  assert.equal(validAdminSignup.status, 201);
+  assert.equal(validAdminSignup.data.user.role, 'admin');
 
   const created = await apiJson('/api/auth/register', {
     method: 'POST',
@@ -105,19 +141,51 @@ test('Registration enforces GDPR consent and hashes credentials cleanly', async 
   assert.equal(created.data.user.passwordHash, undefined);
 });
 
-test('RBAC blocks attendee from admin expo edits while admin succeeds', async () => {
+test('Exhibitor extended signup persists company showcase and blocks cross-exhibitor edits', async () => {
+  const exhSignup = await apiJson('/api/auth/register', {
+    method: 'POST',
+    body: JSON.stringify({
+      name: 'Marco Bellini',
+      email: 'marco@aerogrid.io',
+      password: 'Password123!',
+      role: 'exhibitor',
+      company: 'AeroGrid Dynamics',
+      category: 'Clean Energy',
+      products: ['GridOS v4', 'SolidState Inverter'],
+      documents: ['Safety-Spec.pdf'],
+      gdprConsent: true,
+    }),
+  });
+  assert.equal(exhSignup.status, 201);
+  assert.equal(exhSignup.data.user.role, 'exhibitor');
+
+  // Exhibitor B must not be allowed to modify seed Exhibitor A (exh-1)
+  const crossEdit = await apiJson('/api/exhibitors/exh-1', {
+    method: 'PUT',
+    headers: { Authorization: `Bearer ${exhSignup.data.token}` },
+    body: JSON.stringify({ companyName: 'Hijacked Showcase' }),
+  });
+  assert.equal(crossEdit.status, 403);
+});
+
+test('RBAC blocks attendee from admin expo edits and attendee directory while admin succeeds', async () => {
   const attLogin = await apiJson('/api/auth/login', {
     method: 'POST',
     body: JSON.stringify({ email: 'attendee@eventsphere.io', password: 'Attendee2026!' }),
   });
   assert.equal(attLogin.status, 200);
 
-  const forbidden = await apiJson('/api/expos/expo-2026-global', {
+  const forbiddenExpoEdit = await apiJson('/api/expos/expo-2026-global', {
     method: 'PUT',
     headers: { Authorization: `Bearer ${attLogin.data.token}` },
     body: JSON.stringify({ title: 'Unauthorized Override' }),
   });
-  assert.equal(forbidden.status, 403);
+  assert.equal(forbiddenExpoEdit.status, 403);
+
+  const forbiddenDir = await apiJson('/api/admin/attendees', {
+    headers: { Authorization: `Bearer ${attLogin.data.token}` },
+  });
+  assert.equal(forbiddenDir.status, 403);
 
   const adminLogin = await apiJson('/api/auth/login', {
     method: 'POST',
@@ -132,6 +200,36 @@ test('RBAC blocks attendee from admin expo edits while admin succeeds', async ()
   });
   assert.equal(updated.status, 200);
   assert.equal(updated.data.title, 'NextGen Industrial & Tech Expo 2026 (Updated)');
+
+  const adminDir = await apiJson('/api/admin/attendees', {
+    headers: { Authorization: `Bearer ${adminLogin.data.token}` },
+  });
+  assert.equal(adminDir.status, 200);
+  assert.ok(Array.isArray(adminDir.data.attendees));
+  assert.ok(adminDir.data.attendees.length >= 1);
+  assert.equal(adminDir.data.attendees[0].passwordHash, undefined);
+});
+
+test('Attendee expo pass registration generates ticketCode and supports cancellation', async () => {
+  const attLogin = await apiJson('/api/auth/login', {
+    method: 'POST',
+    body: JSON.stringify({ email: 'attendee@eventsphere.io', password: 'Attendee2026!' }),
+  });
+  assert.equal(attLogin.status, 200);
+
+  const reg = await apiJson('/api/expos/expo-2026-bio/register', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${attLogin.data.token}` },
+  });
+  assert.equal(reg.status, 200);
+  assert.ok(reg.data.registration.ticketCode.startsWith('ES-'));
+
+  const cancel = await apiJson('/api/expos/expo-2026-bio/register', {
+    method: 'DELETE',
+    headers: { Authorization: `Bearer ${attLogin.data.token}` },
+  });
+  assert.equal(cancel.status, 200);
+  assert.equal(cancel.data.ok, true);
 });
 
 test('Atomic booth reservation prevents double booking with 409 Conflict', async () => {
@@ -159,10 +257,29 @@ test('Atomic booth reservation prevents double booking with 409 Conflict', async
   assert.equal(secondReserve.status, 409);
 });
 
-test('Exhibitor profile view tracking and admin feedback resolution', async () => {
+test('Application request-info workflow, exhibitor view tracking, and admin feedback resolution', async () => {
   const viewRes = await apiJson('/api/exhibitors/exh-1/view', { method: 'POST' });
   assert.equal(viewRes.status, 200);
   assert.ok(viewRes.data.profileViews >= 249);
+
+  const adminLogin = await apiJson('/api/auth/login', {
+    method: 'POST',
+    body: JSON.stringify({ email: 'organizer@eventsphere.io', password: 'ExpoAdmin2026!' }),
+  });
+  const adminState = await apiJson('/api/state', {
+    headers: { Authorization: `Bearer ${adminLogin.data.token}` },
+  });
+  const pendingApp = adminState.data.applications.find((a) => a.status === 'pending');
+  if (pendingApp) {
+    const infoReq = await apiJson(`/api/applications/${pendingApp.id}/request-info`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${adminLogin.data.token}` },
+      body: JSON.stringify({ reviewerNote: 'Please upload floor power load spec.' }),
+    });
+    assert.equal(infoReq.status, 200);
+    assert.equal(infoReq.data.status, 'info_requested');
+    assert.equal(infoReq.data.reviewerNote, 'Please upload floor power load spec.');
+  }
 
   const submittedFeedback = await apiJson('/api/feedback', {
     method: 'POST',
@@ -175,10 +292,6 @@ test('Exhibitor profile view tracking and admin feedback resolution', async () =
   assert.equal(submittedFeedback.status, 201);
   assert.equal(submittedFeedback.data.status, 'open');
 
-  const adminLogin = await apiJson('/api/auth/login', {
-    method: 'POST',
-    body: JSON.stringify({ email: 'organizer@eventsphere.io', password: 'ExpoAdmin2026!' }),
-  });
   const resolved = await apiJson(`/api/feedback/${submittedFeedback.data.id}`, {
     method: 'PUT',
     headers: { Authorization: `Bearer ${adminLogin.data.token}` },
