@@ -113,7 +113,7 @@ export const ExpoAnalyticsDashboard: React.FC<ExpoAnalyticsDashboardProps> = ({
   const hoveredPoint = hoverIdx !== null ? filteredSeries[hoverIdx] : null;
 
   return (
-    <div className="relative z-20 min-h-screen bg-[#F4F7F5]/96 px-4 pt-24 pb-16 text-[#09140E] dark:bg-[#040705]/96 dark:text-[#ECFDF5] sm:px-6">
+    <div className="relative z-20 min-h-screen bg-[#E9F0EC]/96 px-4 pt-24 pb-16 text-[#091911] dark:bg-[#040705]/96 dark:text-[#DDF2E7] sm:px-6">
       <motion.div
         initial={{ opacity: 0, y: 14 }}
         animate={{ opacity: 1, y: 0 }}
@@ -121,7 +121,7 @@ export const ExpoAnalyticsDashboard: React.FC<ExpoAnalyticsDashboardProps> = ({
         className="mx-auto max-w-7xl space-y-6"
       >
         {/* Header & Export Toolbar */}
-        <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200 pb-5 dark:border-[#10B981]/18">
+        <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[#104E35]/18 pb-5 dark:border-[#2A6F52]/34">
           <div>
             <p className="font-mono text-xs font-semibold tracking-wider text-[#059669] dark:text-[#34D399]">
               Telemetry &amp; Reporting
@@ -296,7 +296,7 @@ export const ExpoAnalyticsDashboard: React.FC<ExpoAnalyticsDashboardProps> = ({
             </svg>
 
             {hoveredPoint && (
-              <div className="mt-2 flex flex-wrap items-center gap-4 rounded-lg border border-slate-200 bg-[#F4F7F5] px-3 py-2 font-mono text-xs dark:border-[#10B981]/20 dark:bg-[#040705]">
+              <div className="mt-2 flex flex-wrap items-center gap-4 rounded-lg border border-[#104E35]/18 bg-[#E4EDE7] px-3 py-2 font-mono text-xs dark:border-[#2A6F52]/36 dark:bg-[#050A07]">
                 <span className="font-bold">{hoveredPoint.date}</span>
                 <span className="text-[#10B981]">Traffic: {hoveredPoint.boothTraffic}</span>
                 <span className="text-[#6EE7B7]">Profile Views: {hoveredPoint.profileViews}</span>
@@ -312,7 +312,7 @@ export const ExpoAnalyticsDashboard: React.FC<ExpoAnalyticsDashboardProps> = ({
             <h2 className="font-display text-lg font-bold">Top Booth Traffic &amp; Allocation</h2>
             <div className="mt-3 overflow-x-auto">
               <table className="w-full text-left text-xs">
-                <thead className="border-b border-slate-200 font-mono text-[11px] text-[#466153] dark:border-[#10B981]/18 dark:text-[#8EAD9E]">
+                <thead className="border-b border-[#104E35]/16 font-mono text-[11px] text-[#355243] dark:border-[#2A6F52]/32 dark:text-[#8EAD9E]">
                   <tr>
                     <th className="py-2">Booth</th>
                     <th className="py-2">Exhibitor</th>
@@ -320,7 +320,7 @@ export const ExpoAnalyticsDashboard: React.FC<ExpoAnalyticsDashboardProps> = ({
                     <th className="py-2 text-right">Visits</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100 dark:divide-white/6">
+                <tbody className="divide-y divide-[#104E35]/12 dark:divide-[#2A6F52]/24">
                   {[...snapshot.booths]
                     .sort((a, b) => b.trafficCount - a.trafficCount)
                     .slice(0, 8)
@@ -328,7 +328,7 @@ export const ExpoAnalyticsDashboard: React.FC<ExpoAnalyticsDashboardProps> = ({
                       <tr
                         key={b.id}
                         onClick={() => onInspectBooth(b.id)}
-                        className="cursor-pointer hover:bg-[#F4F7F5] dark:hover:bg-[#10B981]/8"
+                        className="cursor-pointer hover:bg-[#E4EDE7] dark:hover:bg-[#10B981]/8"
                       >
                         <td className="py-2 font-mono font-bold">{b.number}</td>
                         <td className="py-2">{b.exhibitorName || b.zone}</td>

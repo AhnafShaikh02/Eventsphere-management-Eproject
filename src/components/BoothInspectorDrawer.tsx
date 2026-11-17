@@ -115,10 +115,10 @@ export const BoothInspectorDrawer: React.FC<BoothInspectorDrawerProps> = ({
       animate={{ x: 0 }}
       transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
       aria-label={`Booth ${booth.number} inspector`}
-      className="no-print fixed top-16 right-0 bottom-0 z-40 flex w-full max-w-md flex-col border-l border-slate-200 bg-white text-[#09140E] shadow-2xl dark:border-[#10B981]/22 dark:bg-[#040705] dark:text-[#ECFDF5]"
+      className="no-print fixed top-16 right-0 bottom-0 z-40 flex w-full max-w-md flex-col border-l border-[#104E35]/20 bg-[#F0F5F2] text-[#091911] shadow-2xl dark:border-[#2A6F52]/40 dark:bg-[#050A07] dark:text-[#DDF2E7]"
     >
       {/* Header */}
-      <div className="flex items-start justify-between gap-3 border-b border-slate-200 px-5 py-4 dark:border-[#10B981]/16">
+      <div className="flex items-start justify-between gap-3 border-b border-[#104E35]/16 px-5 py-4 dark:border-[#2A6F52]/32">
         <div>
           <div className="flex items-center gap-2">
             <span
@@ -176,7 +176,7 @@ export const BoothInspectorDrawer: React.FC<BoothInspectorDrawerProps> = ({
         </div>
 
         {/* Reservation CTA */}
-        <div className="rounded-xl border border-slate-200 bg-[#F4F7F5] p-4 dark:border-[#10B981]/18 dark:bg-[#09120D]">
+        <div className="rounded-xl border border-[#104E35]/16 bg-[#E6EFE9] p-4 dark:border-[#2A6F52]/34 dark:bg-[#08110C]">
           {booth.status === 'available' ? (
             <>
               <div className="text-sm font-semibold">Open for Immediate Allocation</div>
@@ -229,7 +229,7 @@ export const BoothInspectorDrawer: React.FC<BoothInspectorDrawerProps> = ({
 
         {/* Exhibitor Showcase Details */}
         {exhibitor && (
-          <div className="rounded-xl border border-slate-200 bg-white p-4 dark:border-[#10B981]/18 dark:bg-[#09120D]/80">
+          <div className="rounded-xl border border-[#104E35]/16 bg-[#E6EFE9] p-4 dark:border-[#2A6F52]/34 dark:bg-[#08110C]/90">
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-2">
                 <Building2 className="h-4 w-4 text-[#34D399]" />
@@ -259,7 +259,7 @@ export const BoothInspectorDrawer: React.FC<BoothInspectorDrawerProps> = ({
               </div>
             )}
 
-            <div className="mt-3 flex items-center justify-between border-t border-slate-200 pt-2.5 text-xs dark:border-[#10B981]/15">
+            <div className="mt-3 flex items-center justify-between border-t border-[#104E35]/14 pt-2.5 text-xs dark:border-[#2A6F52]/28">
               <span className="font-mono text-[#466153] dark:text-[#8EAD9E]">
                 {exhibitor.profileViews} profile views
               </span>
@@ -274,7 +274,7 @@ export const BoothInspectorDrawer: React.FC<BoothInspectorDrawerProps> = ({
         )}
 
         {/* Personal Field Notes */}
-        <div className="rounded-xl border border-slate-200 bg-[#F4F7F5] p-4 dark:border-[#10B981]/18 dark:bg-[#09120D]/80">
+        <div className="rounded-xl border border-[#104E35]/16 bg-[#E6EFE9] p-4 dark:border-[#2A6F52]/34 dark:bg-[#08110C]/90">
           <Textarea
             label="Personal Booth Notes (Synced Offline & Cloud)"
             rows={2}
@@ -293,20 +293,20 @@ export const BoothInspectorDrawer: React.FC<BoothInspectorDrawerProps> = ({
         </div>
 
         {/* Live Direct Messaging */}
-        <div className="rounded-xl border border-slate-200 bg-[#F4F7F5] p-4 dark:border-[#10B981]/18 dark:bg-[#09120D]/80">
-          <div className="text-xs font-semibold text-[#466153] dark:text-[#8EAD9E]">
+        <div className="rounded-xl border border-[#104E35]/16 bg-[#E6EFE9] p-4 dark:border-[#2A6F52]/34 dark:bg-[#08110C]/90">
+          <div className="text-xs font-semibold text-[#355243] dark:text-[#8EAD9E]">
             Live Message · {channelLabel}
           </div>
           <div className="mt-2 max-h-36 space-y-2 overflow-y-auto">
             {threadMessages.length === 0 ? (
-              <p className="text-xs text-[#466153] dark:text-[#8EAD9E]">
+              <p className="text-xs text-[#355243] dark:text-[#8EAD9E]">
                 No messages yet. Start a live thread with {channelLabel}.
               </p>
             ) : (
               threadMessages.map((m) => (
                 <div
                   key={m.id}
-                  className="rounded-lg border border-slate-200 bg-white p-2.5 text-xs dark:border-[#10B981]/15 dark:bg-[#040705]"
+                  className="rounded-lg border border-[#104E35]/16 bg-[#F0F5F2] p-2.5 text-xs dark:border-[#2A6F52]/30 dark:bg-[#050A07]"
                 >
                   <div className="flex items-center justify-between gap-2 font-semibold">
                     <span>{m.senderName}</span>

@@ -18,7 +18,7 @@ export const PublicFooter: React.FC<PublicFooterProps> = ({
   onOpenSupport,
 }) => {
   return (
-    <footer className="pointer-events-auto relative z-10 border-t border-slate-200/90 bg-white/95 text-[#09140E] dark:border-[#10B981]/18 dark:bg-[#040705]/96 dark:text-[#ECFDF5]">
+    <footer className="pointer-events-auto relative z-10 border-t border-[#104E35]/18 bg-[#EEF4F0]/95 text-[#091911] dark:border-[#2A6F52]/36 dark:bg-[#040705]/96 dark:text-[#DDF2E7]">
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
         <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
           <div className="space-y-3">
@@ -168,7 +168,7 @@ export const PublicFooter: React.FC<PublicFooterProps> = ({
           </div>
         </div>
 
-        <div className="mt-10 flex flex-wrap items-center justify-between gap-4 border-t border-slate-200 pt-6 text-xs text-[#466153] dark:border-[#10B981]/15 dark:text-[#8EAD9E]">
+        <div className="mt-10 flex flex-wrap items-center justify-between gap-4 border-t border-[#104E35]/16 pt-6 text-xs text-[#355243] dark:border-[#2A6F52]/30 dark:text-[#8EAD9E]">
           <span>© {new Date().getFullYear()} EventSphere Management. Enterprise Expo Platform.</span>
           <span className="font-mono text-[11px]">
             Real-time 3D Floor · Atomic Reservations · Role-Based Access

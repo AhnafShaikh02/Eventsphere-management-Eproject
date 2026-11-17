@@ -12,6 +12,7 @@ import {
   createHallFloorTexture,
   createKeynoteStageGroup,
   createSphereDomeGroup,
+  createZoneSectionsGroup,
   getBoothWorldPosition,
   updateBoothGroupAppearance,
 } from './expoModels';
@@ -30,6 +31,12 @@ export interface ExpoHallCanvasHandle {
   captureSnapshot: () => string | null;
 }
 
+export interface ZoomTelemetry {
+  distance: number;
+  zoomPercent: number;
+  zoomRatio: number;
+}
+
 interface ExpoHallCanvasProps {
   booths: ExpoBooth[];
   selectedBoothId: string | null;
@@ -40,6 +47,7 @@ interface ExpoHallCanvasProps {
   showTrussAndVisitors: boolean;
   statusFilter: StatusFilter;
   onSelectBooth: (boothId: string) => void;
+  onZoomChange?: (zoom: ZoomTelemetry) => void;
 }
 
 function detectSoftwareGl(gl: WebGLRenderingContext | WebGL2RenderingContext): boolean {
@@ -60,6 +68,7 @@ export const ExpoHallCanvas = React.forwardRef<ExpoHallCanvasHandle, ExpoHallCan
       showTrussAndVisitors,
       statusFilter,
       onSelectBooth,
+      onZoomChange,
     },
     ref,
   ) => {
@@ -96,6 +105,8 @@ export const ExpoHallCanvas = React.forwardRef<ExpoHallCanvasHandle, ExpoHallCan
 
     const onSelectBoothRef = useRef(onSelectBooth);
     onSelectBoothRef.current = onSelectBooth;
+    const onZoomChangeRef = useRef(onZoomChange);
+    onZoomChangeRef.current = onZoomChange;
 
     const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
     const controlsRef = useRef<OrbitControls | null>(null);
@@ -116,22 +127,26 @@ export const ExpoHallCanvas = React.forwardRef<ExpoHallCanvasHandle, ExpoHallCan
         const ctrl = controlsRef.current;
         if (!cam || !ctrl) return;
         const dir = new THREE.Vector3().subVectors(cam.position, ctrl.target);
-        dir.multiplyScalar(0.76);
-        if (dir.length() > 5.2) {
-          cam.position.copy(ctrl.target).add(dir);
-          ctrl.update();
-        }
+        const nextLen = Math.max(5.5, dir.length() * 0.76);
+        dir.setLength(nextLen);
+        focusTargetRef.current = {
+          active: true,
+          pos: ctrl.target.clone().add(dir),
+          lookAt: ctrl.target.clone(),
+        };
       },
       zoomOut: () => {
         const cam = cameraRef.current;
         const ctrl = controlsRef.current;
         if (!cam || !ctrl) return;
         const dir = new THREE.Vector3().subVectors(cam.position, ctrl.target);
-        dir.multiplyScalar(1.28);
-        if (dir.length() < 92) {
-          cam.position.copy(ctrl.target).add(dir);
-          ctrl.update();
-        }
+        const nextLen = Math.min(82, dir.length() * 1.28);
+        dir.setLength(nextLen);
+        focusTargetRef.current = {
+          active: true,
+          pos: ctrl.target.clone().add(dir),
+          lookAt: ctrl.target.clone(),
+        };
       },
       resetView: () => {
         focusTargetRef.current = {
@@ -236,7 +251,7 @@ export const ExpoHallCanvas = React.forwardRef<ExpoHallCanvasHandle, ExpoHallCan
       controls.dampingFactor = 0.07;
       controls.maxPolarAngle = Math.PI * 0.475;
       controls.minDistance = 5.5;
-      controls.maxDistance = 88;
+      controls.maxDistance = 82;
       controls.target.set(0, 1.2, 0);
       controls.enabled = stateRef.current.cameraMode === 'explore';
       controlsRef.current = controls;
@@ -312,11 +327,11 @@ export const ExpoHallCanvas = React.forwardRef<ExpoHallCanvasHandle, ExpoHallCan
       const gridMats = Array.isArray(gridHelper.material) ? gridHelper.material : [gridHelper.material];
       gridMats.forEach((m) => {
         m.transparent = true;
-        m.opacity = 0.26;
+        m.opacity = 0.14;
       });
       scene.add(gridHelper);
 
-      // Center aisle runner carpet (obsidian pine-black with emerald perimeter)
+      // Center aisle runner carpet (obsidian pine-black with subtle perimeter)
       const runnerGeo = new THREE.PlaneGeometry(2.8, 35.2);
       const runnerMat = new THREE.MeshStandardMaterial({
         color: 0x09140e,
@@ -332,9 +347,13 @@ export const ExpoHallCanvas = React.forwardRef<ExpoHallCanvasHandle, ExpoHallCan
       const stageGroup = createKeynoteStageGroup(maxAniso);
       scene.add(stageGroup);
 
-      // Geodesic EventSphere Dome & Luminous Aisle Guides
-      const { domeGroup, meridianRingA, meridianRingB } = createSphereDomeGroup();
+      // Subtle Geodesic EventSphere Dome & Zoom-Responsive Floor Zone Sections
+      const domeBundle = createSphereDomeGroup();
+      const { domeGroup, meridianRingA, meridianRingB } = domeBundle;
       scene.add(domeGroup);
+
+      const zoneBundle = createZoneSectionsGroup();
+      scene.add(zoneBundle.zoneGroup);
 
       // Truss & Instanced Crowd
       const { trussGroup, visitorMesh, visitorHeadMesh, visitorSeeds } = createExpoTrussAndCrowd();
@@ -520,6 +539,7 @@ export const ExpoHallCanvas = React.forwardRef<ExpoHallCanvasHandle, ExpoHallCan
       let disposed = false;
       let prevTime = performance.now();
       let prevNight = stateRef.current.nightMode;
+      let lastReportedZoom = -1;
 
       const afterDraw = (cb: () => void) => {
         const ctx = renderer.getContext() as WebGL2RenderingContext;
@@ -680,6 +700,42 @@ export const ExpoHallCanvas = React.forwardRef<ExpoHallCanvasHandle, ExpoHallCan
             }
           }
           controls.update();
+        }
+
+        // Zoom-responsive 3D borders & floor section criteria:
+        // Adapt grid, zone outlines, and dome wireframe smoothly to camera distance
+        const refTarget = cur.cameraMode === 'explore' ? controls.target : scratchLook;
+        const camDist = camera.position.distanceTo(refTarget);
+        const zoomRatio = THREE.MathUtils.clamp((camDist - 6) / 62, 0, 1); // 0 = zoomed in close, 1 = far overview
+        const zoomPercent = Math.round(THREE.MathUtils.lerp(220, 45, zoomRatio));
+
+        // Close-up: fine grid stays crisp, dome wireframe & wide zone outlines recede so they don't obstruct booths.
+        // Far overview: dense inner grid fades down to prevent visual clutter, while outer hall/section borders stay legible.
+        const gridOpacity = cur.showFloorGrid
+          ? THREE.MathUtils.lerp(0.18, 0.04, THREE.MathUtils.smoothstep(zoomRatio, 0.35, 0.95))
+          : 0;
+        gridMats.forEach((m) => {
+          m.opacity = gridOpacity;
+        });
+
+        const dayScale = cur.nightMode ? 1.0 : 0.72;
+        zoneBundle.zoneGroup.visible = cur.showFloorGrid || zoomRatio > 0.14;
+        zoneBundle.zoneBorderMat.opacity =
+          THREE.MathUtils.lerp(0.08, 0.26, THREE.MathUtils.smoothstep(zoomRatio, 0.08, 0.6)) * dayScale;
+        zoneBundle.hallBorderMat.opacity =
+          THREE.MathUtils.lerp(0.12, 0.32, THREE.MathUtils.smoothstep(zoomRatio, 0.05, 0.55)) * dayScale;
+
+        const domeVisibilityFactor = THREE.MathUtils.smoothstep(zoomRatio, 0.16, 0.65);
+        domeBundle.wireMat.opacity = 0.11 * domeVisibilityFactor * dayScale;
+        domeBundle.arcMatA.opacity = 0.18 * domeVisibilityFactor * dayScale;
+        domeBundle.arcMatB.opacity = 0.14 * domeVisibilityFactor * dayScale;
+        domeBundle.floorRingMat.opacity = THREE.MathUtils.lerp(0.08, 0.22, zoomRatio) * dayScale;
+        domeBundle.laneMatA.opacity = THREE.MathUtils.lerp(0.24, 0.44, zoomRatio) * dayScale;
+        domeBundle.laneMatB.opacity = THREE.MathUtils.lerp(0.22, 0.40, zoomRatio) * dayScale;
+
+        if (onZoomChangeRef.current && Math.abs(zoomPercent - lastReportedZoom) >= 2) {
+          lastReportedZoom = zoomPercent;
+          onZoomChangeRef.current({ distance: camDist, zoomPercent, zoomRatio });
         }
 
         renderer.render(scene, camera);

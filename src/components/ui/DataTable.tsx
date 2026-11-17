@@ -21,9 +21,9 @@ export function DataTable<T extends { id: string }>({
   onRowClick?: (row: T) => void;
 }) {
   return (
-    <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white dark:border-[#10B981]/20 dark:bg-[#09120D]">
+    <div className="overflow-x-auto rounded-2xl border border-[#104E35]/18 bg-[#F0F5F2] dark:border-[#2A6F52]/38 dark:bg-[#08110C]">
       <table className="w-full text-left text-xs sm:text-sm">
-        <thead className="border-b border-slate-200 bg-[#F4F7F5] font-mono text-[11px] font-semibold uppercase tracking-wider text-[#466153] dark:border-[#10B981]/18 dark:bg-[#040705] dark:text-[#8EAD9E]">
+        <thead className="border-b border-[#104E35]/16 bg-[#E4EDE7] font-mono text-[11px] font-semibold uppercase tracking-wider text-[#355243] dark:border-[#2A6F52]/35 dark:bg-[#050A07] dark:text-[#8EAD9E]">
           <tr>
             {columns.map((col) => (
               <th
@@ -35,7 +35,7 @@ export function DataTable<T extends { id: string }>({
             ))}
           </tr>
         </thead>
-        <tbody className="divide-y divide-slate-100 dark:divide-[#10B981]/10">
+        <tbody className="divide-y divide-[#104E35]/12 dark:divide-[#2A6F52]/24">
           {rows.length === 0 ? (
             <tr>
               <td

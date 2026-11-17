@@ -30,7 +30,7 @@ export const PWAInstallButton: React.FC = () => {
         <button
           type="button"
           onClick={() => setShowIOSGuide(true)}
-          className="inline-flex min-h-[38px] items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 whitespace-nowrap shrink-0"
+          className="inline-flex min-h-[38px] items-center gap-2 rounded-lg border border-[#104E35]/20 bg-[#E4EDE7] px-3 py-1.5 text-xs font-medium text-[#091911] hover:bg-[#D4E3DA] dark:border-[#2A6F52]/40 dark:bg-[#08110C] dark:text-[#DDF2E7] whitespace-nowrap shrink-0"
         >
           <Download className="h-3.5 w-3.5" aria-hidden="true" />
           <span>Install on iOS</span>
@@ -38,7 +38,7 @@ export const PWAInstallButton: React.FC = () => {
 
         {showIOSGuide && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
-            <div className="surface-luxe w-full max-w-sm rounded-2xl border border-[#D4E2DA] bg-white p-6 text-[#09140E] shadow-2xl dark:border-[#10B981]/25 dark:bg-[#09120D] dark:text-[#ECFDF5]">
+            <div className="surface-luxe w-full max-w-sm rounded-2xl border border-[#104E35]/22 bg-[#F0F5F2] p-6 text-[#091911] shadow-2xl dark:border-[#2A6F52]/40 dark:bg-[#08110C] dark:text-[#DDF2E7]">
               <h3 className="font-display text-lg font-bold">Install EventSphere</h3>
               <p className="mt-2 text-sm text-[#466153] dark:text-[#8EAD9E]">
                 1. Tap the <strong>Share</strong> icon in Safari.<br />

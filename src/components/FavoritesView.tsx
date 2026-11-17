@@ -32,14 +32,14 @@ export const FavoritesView: React.FC<FavoritesViewProps> = ({
   );
 
   return (
-    <div className="relative z-20 min-h-screen bg-gradient-to-b from-[#F4F7F5]/97 via-[#EFF5F1]/97 to-[#E6EFE9]/97 px-4 pt-24 pb-16 text-[#09140E] dark:bg-gradient-to-b dark:from-[#040705]/97 dark:via-[#060E09]/97 dark:to-[#030604]/97 dark:text-[#ECFDF5] sm:px-6">
+    <div className="relative z-20 min-h-screen bg-gradient-to-b from-[#E9F0EC]/97 via-[#E5EEE8]/97 to-[#DDE9E2]/97 px-4 pt-24 pb-16 text-[#091911] dark:bg-gradient-to-b dark:from-[#040705]/97 dark:via-[#060E09]/97 dark:to-[#030604]/97 dark:text-[#DDF2E7] sm:px-6">
       <motion.div
         initial={{ opacity: 0, y: 14 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
         className="mx-auto max-w-6xl space-y-8"
       >
-        <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[#10B981]/18 pb-5 dark:border-[#10B981]/20">
+        <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[#104E35]/18 pb-5 dark:border-[#2A6F52]/34">
           <div>
             <p className="font-mono text-xs font-semibold tracking-wider text-[#059669] dark:text-[#34D399]">
               Offline-Ready Bookmarks
@@ -79,7 +79,7 @@ export const FavoritesView: React.FC<FavoritesViewProps> = ({
                 savedBooths.map((b) => (
                   <div
                     key={b.id}
-                    className="rounded-xl border border-slate-200 bg-[#F4F7F5] p-4 dark:border-[#10B981]/18 dark:bg-[#040705]"
+                    className="rounded-xl border border-[#104E35]/16 bg-[#E6EFE9] p-4 dark:border-[#2A6F52]/34 dark:bg-[#050A07]"
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div>
@@ -92,11 +92,11 @@ export const FavoritesView: React.FC<FavoritesViewProps> = ({
                             Booth {b.number} · {b.exhibitorName || 'Open Space'}
                           </span>
                         </div>
-                        <div className="mt-1 font-mono text-xs text-[#466153] dark:text-[#8EAD9E]">
+                        <div className="mt-1 font-mono text-xs text-[#355243] dark:text-[#8EAD9E]">
                           {b.zone} · {b.size} · ${b.priceUsd.toLocaleString()}
                         </div>
                         {notes[b.id] && (
-                          <p className="mt-2 rounded-lg border border-slate-200 bg-white p-2 text-xs text-[#09140E] dark:border-[#10B981]/18 dark:bg-[#09120D] dark:text-[#C4DFD1]">
+                          <p className="mt-2 rounded-lg border border-[#104E35]/16 bg-[#F0F5F2] p-2 text-xs text-[#091911] dark:border-[#2A6F52]/32 dark:bg-[#08110C] dark:text-[#C4DFD1]">
                             Note: {notes[b.id]}
                           </p>
                         )}
@@ -142,7 +142,7 @@ export const FavoritesView: React.FC<FavoritesViewProps> = ({
                 savedSessions.map((s) => (
                   <div
                     key={s.id}
-                    className="flex items-center justify-between gap-3 rounded-xl border border-slate-200 bg-[#F4F7F5] p-4 dark:border-[#10B981]/18 dark:bg-[#040705]"
+                    className="flex items-center justify-between gap-3 rounded-xl border border-[#104E35]/16 bg-[#E6EFE9] p-4 dark:border-[#2A6F52]/34 dark:bg-[#050A07]"
                   >
                     <div>
                       <div className="font-mono text-xs font-semibold text-[#059669] dark:text-[#34D399]">

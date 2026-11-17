@@ -384,7 +384,7 @@ export const OrganizerPortal: React.FC<OrganizerPortalProps> = ({
                 {snapshot.activityLogs.slice(0, 8).map((log) => (
                   <div
                     key={log.id}
-                    className="rounded-xl border border-slate-200 bg-[#F4F7F5] p-3 text-xs dark:border-[#10B981]/16 dark:bg-[#040705]"
+                    className="rounded-xl border border-[#104E35]/18 bg-[#E4EDE7] p-3 text-xs dark:border-[#2A6F52]/34 dark:bg-[#050A07]"
                   >
                     <div className="flex items-center justify-between gap-2 font-mono text-[10px]">
                       <span className="font-bold text-[#059669] dark:text-[#34D399]">{log.action}</span>
@@ -482,7 +482,7 @@ export const OrganizerPortal: React.FC<OrganizerPortalProps> = ({
                       {expo.description}
                     </p>
                   </div>
-                  <div className="mt-4 flex flex-wrap gap-2 border-t border-slate-200 pt-3 dark:border-[#10B981]/16">
+                  <div className="mt-4 flex flex-wrap gap-2 border-t border-[#104E35]/16 pt-3 dark:border-[#2A6F52]/30">
                     <Button
                       variant="outline"
                       size="sm"
@@ -823,7 +823,7 @@ export const OrganizerPortal: React.FC<OrganizerPortalProps> = ({
                 key={b.id}
                 type="button"
                 onClick={() => onInspectBoothOnFloor(b.id)}
-                className="flex flex-col items-start justify-between rounded-xl border border-slate-200 bg-[#F4F7F5] p-3 text-left transition-transform hover:-translate-y-0.5 hover:border-[#10B981] dark:border-[#10B981]/20 dark:bg-[#040705]"
+                className="flex flex-col items-start justify-between rounded-xl border border-[#104E35]/18 bg-[#E4EDE7] p-3 text-left transition-transform hover:-translate-y-0.5 hover:border-[#10B981] dark:border-[#2A6F52]/36 dark:bg-[#050A07]"
               >
                 <div className="flex w-full items-center justify-between">
                   <span className="font-mono text-sm font-bold">{b.number}</span>
@@ -893,7 +893,7 @@ export const OrganizerPortal: React.FC<OrganizerPortalProps> = ({
                       {s.speaker} · {s.speakerRole}
                     </p>
                   </div>
-                  <div className="mt-4 flex flex-wrap gap-2 border-t border-slate-200 pt-3 dark:border-[#10B981]/16">
+                  <div className="mt-4 flex flex-wrap gap-2 border-t border-[#104E35]/16 pt-3 dark:border-[#2A6F52]/30">
                     <Button
                       size="sm"
                       variant="outline"
@@ -987,7 +987,7 @@ export const OrganizerPortal: React.FC<OrganizerPortalProps> = ({
                       {sp.bio}
                     </p>
                   </div>
-                  <div className="mt-4 flex gap-2 border-t border-slate-200 pt-3 dark:border-[#10B981]/16">
+                  <div className="mt-4 flex gap-2 border-t border-[#104E35]/16 pt-3 dark:border-[#2A6F52]/30">
                     <Button
                       size="sm"
                       variant="outline"
@@ -1099,11 +1099,11 @@ export const OrganizerPortal: React.FC<OrganizerPortalProps> = ({
               ]}
             />
           </div>
-          <div className="max-h-72 space-y-2 overflow-y-auto rounded-xl border border-slate-200 bg-[#F4F7F5] p-3 dark:border-[#10B981]/16 dark:bg-[#040705]">
+          <div className="max-h-72 space-y-2 overflow-y-auto rounded-xl border border-[#104E35]/18 bg-[#E4EDE7] p-3 dark:border-[#2A6F52]/34 dark:bg-[#050A07]">
             {snapshot.messages
               .filter((m) => m.recipientChannel === chatChannel)
               .map((m) => (
-                <div key={m.id} className="rounded-lg border border-slate-200 bg-white p-2.5 text-xs dark:border-[#10B981]/14 dark:bg-[#09120D]">
+                <div key={m.id} className="rounded-lg border border-[#104E35]/16 bg-[#F0F5F2] p-2.5 text-xs dark:border-[#2A6F52]/30 dark:bg-[#09120D]">
                   <div className="flex justify-between font-semibold">
                     <span>{m.senderName}</span>
                     <span className="font-mono text-[10px] text-[#466153] dark:text-[#8EAD9E]">
@@ -1143,7 +1143,7 @@ export const OrganizerPortal: React.FC<OrganizerPortalProps> = ({
               value={chatDraft}
               onChange={(e) => setChatDraft(e.target.value)}
               placeholder="Send real-time organizer message..."
-              className="flex-1 rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-sm dark:border-[#10B981]/22 dark:bg-[#040705]"
+              className="flex-1 rounded-xl border border-[#104E35]/20 bg-[#EEF4F0] px-3.5 py-2 text-sm text-[#091911] placeholder:text-[#577363] focus:border-[#10B981] focus:outline-none dark:border-[#2A6F52]/38 dark:bg-[#050A07] dark:text-[#DDF2E7] dark:placeholder:text-[#6D907E]"
             />
             <Button type="submit" variant="primary" leftIcon={<Send className="h-3.5 w-3.5" />}>
               Send

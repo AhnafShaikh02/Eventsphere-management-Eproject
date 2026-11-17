@@ -2,7 +2,7 @@ import React from 'react';
 import { Search, X } from 'lucide-react';
 
 const CONTROL_BASE =
-  'w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-[#09140E] placeholder:text-[#466153]/65 transition-colors focus:border-[#059669] focus:outline-none focus:ring-2 focus:ring-[#10B981]/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-[#10B981]/22 dark:bg-[#040705] dark:text-[#ECFDF5] dark:placeholder:text-[#8EAD9E]/55 dark:focus:border-[#34D399]';
+  'w-full rounded-xl border border-[#104E35]/22 bg-[#F4F8F5] px-3.5 py-2.5 text-sm text-[#091911] placeholder:text-[#355243]/65 transition-colors focus:border-[#059669] focus:outline-none focus:ring-2 focus:ring-[#10B981]/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-[#2A6F52]/40 dark:bg-[#050A07] dark:text-[#DDF2E7] dark:placeholder:text-[#8EAD9E]/60 dark:focus:border-[#34D399]';
 
 interface FieldWrapperProps {
   label?: string;
@@ -181,7 +181,7 @@ export const Checkbox: React.FC<CheckboxProps> = ({ label, className = '', ...re
   <label className={`flex cursor-pointer items-start gap-2.5 text-xs text-[#466153] dark:text-[#8EAD9E] ${className}`}>
     <input
       type="checkbox"
-      className="mt-0.5 h-4 w-4 shrink-0 rounded border-slate-300 accent-[#10B981] focus:ring-2 focus:ring-[#10B981]/40"
+      className="mt-0.5 h-4 w-4 shrink-0 rounded border-[#104E35]/30 accent-[#10B981] focus:ring-2 focus:ring-[#10B981]/40"
       {...rest}
     />
     <span className="leading-relaxed">{label}</span>
@@ -215,8 +215,8 @@ export const RadioGroup: React.FC<RadioGroupProps> = ({
             key={opt.value}
             className={`flex cursor-pointer items-start gap-2.5 rounded-xl border p-3 transition-colors ${
               active
-                ? 'border-[#10B981] bg-[#10B981]/10 dark:border-[#34D399] dark:bg-[#10B981]/12'
-                : 'border-slate-200 bg-[#F4F7F5] hover:border-[#10B981]/40 dark:border-[#10B981]/18 dark:bg-[#040705]'
+                ? 'border-[#059669]/60 bg-[#10B981]/10 dark:border-[#34D399]/55 dark:bg-[#10B981]/12'
+                : 'border-[#104E35]/18 bg-[#E8F0EB] hover:border-[#059669]/40 dark:border-[#2A6F52]/38 dark:bg-[#050A07]'
             }`}
           >
             <input

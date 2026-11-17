@@ -21,8 +21,8 @@ export const Card: React.FC<CardProps> = ({
   return (
     <div
       className={[
-        'surface-luxe rounded-2xl border border-slate-200/90 bg-white text-[#09140E] dark:border-[#10B981]/20 dark:bg-[#09120D] dark:text-[#ECFDF5]',
-        interactive ? 'transition-all duration-200 hover:-translate-y-0.5 hover:border-[#10B981]/50' : '',
+        'surface-luxe rounded-2xl border border-[#104E35]/18 bg-[#F0F5F2] text-[#091911] dark:border-[#2A6F52]/38 dark:bg-[#08110C] dark:text-[#DDF2E7]',
+        interactive ? 'transition-all duration-200 hover:-translate-y-0.5 hover:border-[#059669]/45 dark:hover:border-[#34D399]/45' : '',
         padMap[padding],
         className,
       ]
@@ -49,7 +49,7 @@ const BADGE_TONES: Record<BadgeTone, string> = {
   amber:
     'border-amber-500/35 bg-amber-500/12 text-amber-800 dark:border-amber-400/35 dark:bg-amber-400/14 dark:text-amber-300',
   neutral:
-    'border-slate-300 bg-[#F4F7F5] text-[#466153] dark:border-[#10B981]/20 dark:bg-[#040705] dark:text-[#8EAD9E]',
+    'border-[#104E35]/20 bg-[#E4EDE7] text-[#355243] dark:border-[#2A6F52]/38 dark:bg-[#050A07] dark:text-[#8EAD9E]',
 };
 
 export const Badge: React.FC<{
@@ -93,7 +93,7 @@ export const StatCard: React.FC<{
         </div>
         {icon && (
           <div
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-[#F4F7F5] dark:border-[#10B981]/20 dark:bg-[#040705]"
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[#104E35]/18 bg-[#E4EDE7] dark:border-[#2A6F52]/38 dark:bg-[#050A07]"
             style={{ color: accentMap[tone] }}
           >
             {icon}
@@ -119,7 +119,7 @@ export const Tabs: React.FC<{
 }> = ({ items, activeId, onChange, className = '' }) => (
   <div
     role="tablist"
-    className={`inline-flex flex-wrap gap-1.5 rounded-xl border border-slate-200 bg-[#F4F7F5] p-1 dark:border-[#10B981]/20 dark:bg-[#040705] ${className}`}
+    className={`inline-flex flex-wrap gap-1.5 rounded-xl border border-[#104E35]/18 bg-[#E4EDE7] p-1 dark:border-[#2A6F52]/38 dark:bg-[#050A07] ${className}`}
   >
     {items.map((item) => {
       const active = item.id === activeId;
@@ -170,12 +170,12 @@ export const EmptyState: React.FC<{
   description: string;
   action?: React.ReactNode;
 }> = ({ icon, title, description, action }) => (
-  <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-300 bg-[#F4F7F5]/70 px-6 py-10 text-center dark:border-[#10B981]/25 dark:bg-[#040705]/60">
-    <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-[#10B981]/25 bg-white text-[#059669] dark:bg-[#09120D] dark:text-[#34D399]">
+  <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-[#104E35]/24 bg-[#E4EDE7]/65 px-6 py-10 text-center dark:border-[#2A6F52]/40 dark:bg-[#050A07]/70">
+    <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-[#104E35]/22 bg-[#F0F5F2] text-[#059669] dark:border-[#2A6F52]/40 dark:bg-[#08110C] dark:text-[#34D399]">
       {icon}
     </div>
     <h3 className="mt-3 font-display text-base font-bold">{title}</h3>
-    <p className="mt-1 max-w-md text-xs leading-relaxed text-[#466153] dark:text-[#8EAD9E]">
+    <p className="mt-1 max-w-md text-xs leading-relaxed text-[#355243] dark:text-[#8EAD9E]">
       {description}
     </p>
     {action && <div className="mt-4">{action}</div>}
@@ -184,7 +184,7 @@ export const EmptyState: React.FC<{
 
 export const Skeleton: React.FC<{ className?: string }> = ({ className = 'h-4 w-full' }) => (
   <div
-    className={`rounded-lg bg-slate-200/80 dark:bg-[#10B981]/12 ${className}`}
+    className={`rounded-lg bg-[#D3E2D8] dark:bg-[#10B981]/12 ${className}`}
     aria-hidden="true"
   />
 );
@@ -213,7 +213,7 @@ export const DropdownMenu: React.FC<{
       {open && (
         <div
           onClick={() => setOpen(false)}
-          className={`surface-luxe absolute top-full z-50 mt-2 min-w-[220px] rounded-2xl border border-slate-200 bg-white p-1.5 text-[#09140E] shadow-2xl dark:border-[#10B981]/25 dark:bg-[#070E0A] dark:text-[#ECFDF5] ${
+          className={`surface-luxe absolute top-full z-50 mt-2 min-w-[220px] rounded-2xl border border-[#104E35]/20 bg-[#F0F5F2] p-1.5 text-[#091911] shadow-2xl dark:border-[#2A6F52]/40 dark:bg-[#08110C] dark:text-[#DDF2E7] ${
             align === 'right' ? 'right-0' : 'left-0'
           }`}
         >

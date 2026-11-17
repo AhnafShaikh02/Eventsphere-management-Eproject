@@ -245,16 +245,16 @@ export function createBoothGroup(
   carpetInset.receiveShadow = true;
   group.add(carpetInset);
 
-  // 3. Glowing status perimeter trim + architectural backdrop wall
+  // 3. Sleek architectural status perimeter trim + backdrop wall
   const trimMat = new THREE.MeshStandardMaterial({
     color: statusColor,
     emissive: statusColor,
-    emissiveIntensity: 0.48,
-    roughness: 0.3,
+    emissiveIntensity: 0.22,
+    roughness: 0.35,
     metalness: 0.25,
   });
-  const perimeter = new THREE.Mesh(new THREE.BoxGeometry(w + 0.08, 0.05, d + 0.08), trimMat);
-  perimeter.position.y = 0.165;
+  const perimeter = new THREE.Mesh(new THREE.BoxGeometry(w + 0.04, 0.024, d + 0.04), trimMat);
+  perimeter.position.y = 0.162;
   group.add(perimeter);
 
   // Rear exhibition media wall (leaving Island booths open on 4 sides)
@@ -410,10 +410,10 @@ export function updateBoothGroupAppearance(
   const statusColor = STATUS_COLORS[booth.status];
   refs.trimMat.color.setHex(statusColor);
   refs.trimMat.emissive.setHex(statusColor);
-  refs.trimMat.emissiveIntensity = dimmed ? 0.08 : isSelected ? 0.95 : 0.45;
+  refs.trimMat.emissiveIntensity = dimmed ? 0.05 : isSelected ? 0.85 : 0.22;
   refs.baseMat.opacity = dimmed ? 0.32 : 1;
   refs.baseMat.transparent = dimmed;
-  refs.fasciaMat.emissiveIntensity = dimmed ? 0.06 : isSelected ? 0.55 : 0.28;
+  refs.fasciaMat.emissiveIntensity = dimmed ? 0.06 : isSelected ? 0.52 : 0.24;
   refs.fasciaMat.opacity = dimmed ? 0.35 : 1;
   refs.fasciaMat.transparent = dimmed;
 
@@ -675,42 +675,34 @@ export function createSphereDomeGroup(): {
   domeGroup: THREE.Group;
   meridianRingA: THREE.Mesh;
   meridianRingB: THREE.Mesh;
+  wireMat: THREE.LineBasicMaterial;
+  floorRingMat: THREE.MeshBasicMaterial;
+  arcMatA: THREE.MeshBasicMaterial;
+  arcMatB: THREE.MeshBasicMaterial;
+  laneMatA: THREE.MeshBasicMaterial;
+  laneMatB: THREE.MeshBasicMaterial;
 } {
   const domeGroup = new THREE.Group();
 
-  // Outer Geodesic Wireframe Dome cradling the Expo Hall
-  const domeGeo = new THREE.IcosahedronGeometry(22.5, 2);
+  // Subtle single-tier outer geodesic dome cradling the Expo Hall without cluttering the floor
+  const domeGeo = new THREE.IcosahedronGeometry(23.6, 1);
   const wireGeo = new THREE.WireframeGeometry(domeGeo);
   domeGeo.dispose();
   const wireMat = new THREE.LineBasicMaterial({
     color: 0x10b981,
     transparent: true,
-    opacity: 0.26,
+    opacity: 0.1,
   });
   const domeWire = new THREE.LineSegments(wireGeo, wireMat);
   domeWire.position.set(0, 1.5, -1);
   domeGroup.add(domeWire);
 
-  // Subtle mint-jade inner geodesic lattice slightly rotated for layered depth
-  const innerDomeGeo = new THREE.IcosahedronGeometry(21.2, 1);
-  const innerWireGeo = new THREE.WireframeGeometry(innerDomeGeo);
-  innerDomeGeo.dispose();
-  const innerWireMat = new THREE.LineBasicMaterial({
-    color: 0x34d399,
-    transparent: true,
-    opacity: 0.16,
-  });
-  const innerDomeWire = new THREE.LineSegments(innerWireGeo, innerWireMat);
-  innerDomeWire.position.set(0, 1.5, -1);
-  innerDomeWire.rotation.y = 0.4;
-  domeGroup.add(innerDomeWire);
-
-  // Illuminated floor perimeter ring
-  const floorRingGeo = new THREE.RingGeometry(21.8, 22.15, 96);
+  // Subtle floor perimeter halo ring
+  const floorRingGeo = new THREE.RingGeometry(22.2, 22.36, 96);
   const floorRingMat = new THREE.MeshBasicMaterial({
     color: 0x34d399,
     transparent: true,
-    opacity: 0.48,
+    opacity: 0.2,
     side: THREE.DoubleSide,
   });
   const floorRing = new THREE.Mesh(floorRingGeo, floorRingMat);
@@ -718,12 +710,12 @@ export function createSphereDomeGroup(): {
   floorRing.position.set(0, 0.025, -1);
   domeGroup.add(floorRing);
 
-  // Two angled orbital meridian arcs that rotate slowly overhead
-  const arcGeo = new THREE.TorusGeometry(22.9, 0.055, 8, 96);
+  // Two sleek orbital meridian arcs overhead
+  const arcGeo = new THREE.TorusGeometry(23.8, 0.03, 8, 96);
   const arcMatA = new THREE.MeshBasicMaterial({
     color: 0x34d399,
     transparent: true,
-    opacity: 0.38,
+    opacity: 0.18,
   });
   const meridianRingA = new THREE.Mesh(arcGeo, arcMatA);
   meridianRingA.position.set(0, 1.5, -1);
@@ -733,35 +725,91 @@ export function createSphereDomeGroup(): {
   const arcMatB = new THREE.MeshBasicMaterial({
     color: 0x2dd4bf,
     transparent: true,
-    opacity: 0.3,
+    opacity: 0.14,
   });
   const meridianRingB = new THREE.Mesh(arcGeo.clone(), arcMatB);
   meridianRingB.position.set(0, 1.5, -1);
   meridianRingB.rotation.set(-Math.PI * 0.24, -0.5, -0.22);
   domeGroup.add(meridianRingB);
 
-  // Twin luminous emerald/jade aisle guide rails flanking the center corridor
-  const laneGeo = new THREE.PlaneGeometry(0.11, 36);
-  const laneEmeraldMat = new THREE.MeshBasicMaterial({
+  // Refined center corridor guide hairlines
+  const laneGeo = new THREE.PlaneGeometry(0.055, 35.2);
+  const laneMatA = new THREE.MeshBasicMaterial({
     color: 0x10b981,
     transparent: true,
-    opacity: 0.78,
+    opacity: 0.42,
   });
-  const laneMintMat = new THREE.MeshBasicMaterial({
+  const laneMatB = new THREE.MeshBasicMaterial({
     color: 0x6ee7b7,
     transparent: true,
-    opacity: 0.75,
+    opacity: 0.38,
   });
-  const laneLeft = new THREE.Mesh(laneGeo, laneEmeraldMat);
+  const laneLeft = new THREE.Mesh(laneGeo, laneMatA);
   laneLeft.rotation.x = -Math.PI / 2;
-  laneLeft.position.set(-1.42, 0.02, -1);
+  laneLeft.position.set(-1.42, 0.034, -0.8);
   domeGroup.add(laneLeft);
 
-  const laneRight = new THREE.Mesh(laneGeo, laneMintMat);
+  const laneRight = new THREE.Mesh(laneGeo, laneMatB);
   laneRight.rotation.x = -Math.PI / 2;
-  laneRight.position.set(1.42, 0.02, -1);
+  laneRight.position.set(1.42, 0.034, -0.8);
   domeGroup.add(laneRight);
 
-  return { domeGroup, meridianRingA, meridianRingB };
+  return {
+    domeGroup,
+    meridianRingA,
+    meridianRingB,
+    wireMat,
+    floorRingMat,
+    arcMatA,
+    arcMatB,
+    laneMatA,
+    laneMatB,
+  };
 }
+
+export function createZoneSectionsGroup(): {
+  zoneGroup: THREE.Group;
+  zoneBorderMat: THREE.LineBasicMaterial;
+  hallBorderMat: THREE.LineBasicMaterial;
+} {
+  const zoneGroup = new THREE.Group();
+
+  const zoneBorderMat = new THREE.LineBasicMaterial({
+    color: 0x34d399,
+    transparent: true,
+    opacity: 0.22,
+  });
+  const hallBorderMat = new THREE.LineBasicMaterial({
+    color: 0x10b981,
+    transparent: true,
+    opacity: 0.28,
+  });
+
+  // Outer floor slab boundary hairline (matches 35 x 35.5 slab without heavy edges)
+  const hallPlane = new THREE.PlaneGeometry(34.4, 34.8);
+  const hallEdges = new THREE.EdgesGeometry(hallPlane);
+  hallPlane.dispose();
+  const hallBorder = new THREE.LineSegments(hallEdges, hallBorderMat);
+  hallBorder.rotation.x = -Math.PI / 2;
+  hallBorder.position.set(0, 0.034, -0.75);
+  zoneGroup.add(hallBorder);
+
+  // Subtle 4-row Expo Zone section outlines (left & right wings flanking center aisle)
+  const rowZCenters = [-6.4, -0.8, 4.8, 10.4];
+  const wingPlane = new THREE.PlaneGeometry(13.2, 4.7);
+  const wingEdges = new THREE.EdgesGeometry(wingPlane);
+  wingPlane.dispose();
+
+  for (const rz of rowZCenters) {
+    for (const wx of [-8.2, 8.2]) {
+      const sectionOutline = new THREE.LineSegments(wingEdges, zoneBorderMat);
+      sectionOutline.rotation.x = -Math.PI / 2;
+      sectionOutline.position.set(wx, 0.035, rz);
+      zoneGroup.add(sectionOutline);
+    }
+  }
+
+  return { zoneGroup, zoneBorderMat, hallBorderMat };
+}
+
 

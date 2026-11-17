@@ -232,7 +232,7 @@ export const ExhibitorPortal: React.FC<ExhibitorPortalProps> = ({
                   {myBooths.map((b) => (
                     <div
                       key={b.id}
-                      className="flex items-center justify-between rounded-xl border border-slate-200 bg-[#F4F7F5] p-3.5 dark:border-[#10B981]/18 dark:bg-[#040705]"
+                      className="flex items-center justify-between rounded-xl border border-[#104E35]/18 bg-[#E4EDE7] p-3.5 dark:border-[#2A6F52]/34 dark:bg-[#050A07]"
                     >
                       <div>
                         <div className="font-display text-sm font-bold">
@@ -339,7 +339,7 @@ export const ExhibitorPortal: React.FC<ExhibitorPortalProps> = ({
                     type="button"
                     onClick={() => setProfileForm((p) => ({ ...p, logoColor: hex }))}
                     className={`h-8 w-8 rounded-lg border-2 ${
-                      profileForm.logoColor === hex ? 'border-white scale-110 shadow' : 'border-transparent opacity-75'
+                      profileForm.logoColor === hex ? 'border-[#091911] ring-2 ring-[#10B981]/45 scale-110 shadow dark:border-[#A7F3D0]' : 'border-transparent opacity-75'
                     }`}
                     style={{ backgroundColor: hex }}
                   />
@@ -575,7 +575,7 @@ export const ExhibitorPortal: React.FC<ExhibitorPortalProps> = ({
               value={newProduct}
               onChange={(e) => setNewProduct(e.target.value)}
               placeholder="Add product or live demo module..."
-              className="flex-1 rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-sm dark:border-[#10B981]/22 dark:bg-[#040705]"
+              className="flex-1 rounded-xl border border-[#104E35]/20 bg-[#EEF4F0] px-3.5 py-2 text-sm text-[#091911] placeholder:text-[#577363] focus:border-[#10B981] focus:outline-none dark:border-[#2A6F52]/38 dark:bg-[#050A07] dark:text-[#DDF2E7] dark:placeholder:text-[#6D907E]"
             />
             <Button type="submit" variant="primary" leftIcon={<Plus className="h-4 w-4" />}>
               Add Product
@@ -586,7 +586,7 @@ export const ExhibitorPortal: React.FC<ExhibitorPortalProps> = ({
             {myExhibitor.products.map((prod) => (
               <div
                 key={prod}
-                className="flex items-center justify-between rounded-xl border border-slate-200 bg-[#F4F7F5] px-4 py-3 text-sm font-semibold dark:border-[#10B981]/18 dark:bg-[#040705]"
+                className="flex items-center justify-between rounded-xl border border-[#104E35]/18 bg-[#E4EDE7] px-4 py-3 text-sm font-semibold dark:border-[#2A6F52]/34 dark:bg-[#050A07]"
               >
                 <span>{prod}</span>
                 <Button
@@ -635,7 +635,7 @@ export const ExhibitorPortal: React.FC<ExhibitorPortalProps> = ({
               value={newStaff}
               onChange={(e) => setNewStaff(e.target.value)}
               placeholder="Staff full name..."
-              className="flex-1 rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-sm dark:border-[#10B981]/22 dark:bg-[#040705]"
+              className="flex-1 rounded-xl border border-[#104E35]/20 bg-[#EEF4F0] px-3.5 py-2 text-sm text-[#091911] placeholder:text-[#577363] focus:border-[#10B981] focus:outline-none dark:border-[#2A6F52]/38 dark:bg-[#050A07] dark:text-[#DDF2E7] dark:placeholder:text-[#6D907E]"
             />
             <Button type="submit" variant="primary" leftIcon={<Plus className="h-4 w-4" />}>
               Add Staff
@@ -646,7 +646,7 @@ export const ExhibitorPortal: React.FC<ExhibitorPortalProps> = ({
             {myExhibitor.staff.map((member) => (
               <div
                 key={member}
-                className="flex items-center justify-between rounded-xl border border-slate-200 bg-[#F4F7F5] px-4 py-3 text-sm font-semibold dark:border-[#10B981]/18 dark:bg-[#040705]"
+                className="flex items-center justify-between rounded-xl border border-[#104E35]/18 bg-[#E4EDE7] px-4 py-3 text-sm font-semibold dark:border-[#2A6F52]/34 dark:bg-[#050A07]"
               >
                 <span>{member}</span>
                 <Button
@@ -686,11 +686,11 @@ export const ExhibitorPortal: React.FC<ExhibitorPortalProps> = ({
               ]}
             />
           </div>
-          <div className="max-h-72 space-y-2 overflow-y-auto rounded-xl border border-slate-200 bg-[#F4F7F5] p-3 dark:border-[#10B981]/16 dark:bg-[#040705]">
+          <div className="max-h-72 space-y-2 overflow-y-auto rounded-xl border border-[#104E35]/18 bg-[#E4EDE7] p-3 dark:border-[#2A6F52]/34 dark:bg-[#050A07]">
             {snapshot.messages
               .filter((m) => m.recipientChannel === chatChannel)
               .map((m) => (
-                <div key={m.id} className="rounded-lg border border-slate-200 bg-white p-2.5 text-xs dark:border-[#10B981]/14 dark:bg-[#09120D]">
+                <div key={m.id} className="rounded-lg border border-[#104E35]/16 bg-[#F0F5F2] p-2.5 text-xs dark:border-[#2A6F52]/30 dark:bg-[#09120D]">
                   <div className="flex justify-between font-semibold">
                     <span>{m.senderName}</span>
                     <span className="font-mono text-[10px] text-[#466153] dark:text-[#8EAD9E]">
@@ -724,7 +724,7 @@ export const ExhibitorPortal: React.FC<ExhibitorPortalProps> = ({
               value={chatDraft}
               onChange={(e) => setChatDraft(e.target.value)}
               placeholder="Write a message..."
-              className="flex-1 rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-sm dark:border-[#10B981]/22 dark:bg-[#040705]"
+              className="flex-1 rounded-xl border border-[#104E35]/20 bg-[#EEF4F0] px-3.5 py-2 text-sm text-[#091911] placeholder:text-[#577363] focus:border-[#10B981] focus:outline-none dark:border-[#2A6F52]/38 dark:bg-[#050A07] dark:text-[#DDF2E7] dark:placeholder:text-[#6D907E]"
             />
             <Button type="submit" variant="primary" leftIcon={<Send className="h-3.5 w-3.5" />}>
               Send
@@ -750,7 +750,7 @@ export const ExhibitorPortal: React.FC<ExhibitorPortalProps> = ({
             </Button>
           </div>
           {snapshot.notifications.map((n) => (
-            <div key={n.id} className="rounded-xl border border-slate-200 bg-[#F4F7F5] p-3 text-xs dark:border-[#10B981]/18 dark:bg-[#040705]">
+            <div key={n.id} className="rounded-xl border border-[#104E35]/18 bg-[#E4EDE7] p-3 text-xs dark:border-[#2A6F52]/34 dark:bg-[#050A07]">
               <div className="flex justify-between font-bold">
                 <span>{n.title}</span>
                 <Badge tone="emerald">{n.kind}</Badge>

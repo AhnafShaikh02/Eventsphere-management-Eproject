@@ -105,8 +105,8 @@ export const TopNav: React.FC<TopNavProps> = ({
         aria-label="Primary navigation"
         className={`surface-luxe relative mx-auto flex max-w-7xl items-center justify-between gap-4 rounded-2xl border px-4 py-2.5 transition-all duration-200 sm:px-5 ${
           isScrolled
-            ? 'border-slate-200/95 bg-white/96 text-[#09140E] shadow-lg dark:border-[#10B981]/25 dark:bg-[#060C08]/95 dark:text-[#ECFDF5]'
-            : 'border-slate-200/85 bg-white/92 text-[#09140E] dark:border-[#10B981]/20 dark:bg-[#060C08]/90 dark:text-[#ECFDF5]'
+            ? 'border-[#104E35]/20 bg-[#EEF4F0]/96 text-[#091911] shadow-lg dark:border-[#2A6F52]/40 dark:bg-[#060C08]/95 dark:text-[#DDF2E7]'
+            : 'border-[#104E35]/16 bg-[#EEF4F0]/90 text-[#091911] dark:border-[#2A6F52]/34 dark:bg-[#060C08]/90 dark:text-[#DDF2E7]'
         }`}
       >
         {/* Scroll progress hairline */}
@@ -206,17 +206,17 @@ export const TopNav: React.FC<TopNavProps> = ({
                 trigger={
                   <button
                     type="button"
-                    className="inline-flex min-h-[34px] items-center gap-2 rounded-xl border border-slate-300 bg-[#F4F7F5] px-2.5 py-1 text-xs font-semibold text-[#09140E] hover:border-[#10B981] dark:border-[#10B981]/25 dark:bg-[#09120D] dark:text-[#ECFDF5] whitespace-nowrap shrink-0"
+                    className="inline-flex min-h-[34px] items-center gap-2 rounded-xl border border-[#104E35]/20 bg-[#E4EDE7] px-2.5 py-1 text-xs font-semibold text-[#091911] hover:border-[#059669]/55 dark:border-[#2A6F52]/40 dark:bg-[#08110C] dark:text-[#DDF2E7] whitespace-nowrap shrink-0"
                   >
                     <span className="flex h-5 w-5 items-center justify-center rounded-full bg-gradient-to-br from-[#059669] to-[#34D399] font-mono text-[10px] font-bold text-[#02120B]">
                       {currentUser.name.slice(0, 1).toUpperCase()}
                     </span>
                     <span className="max-w-[96px] truncate">{currentUser.name}</span>
-                    <ChevronDown className="h-3.5 w-3.5 text-[#466153] dark:text-[#8EAD9E]" />
+                    <ChevronDown className="h-3.5 w-3.5 text-[#355243] dark:text-[#8EAD9E]" />
                   </button>
                 }
               >
-                <div className="border-b border-slate-200 px-3 py-2 dark:border-[#10B981]/18">
+                <div className="border-b border-[#104E35]/16 px-3 py-2 dark:border-[#2A6F52]/32">
                   <div className="text-xs font-bold">{currentUser.name}</div>
                   <div className="font-mono text-[10px] text-[#466153] dark:text-[#8EAD9E]">
                     {currentUser.email} · {getRoleLabel(currentUser.role)}
@@ -296,7 +296,7 @@ export const TopNav: React.FC<TopNavProps> = ({
 
       {/* Mobile Drawer */}
       {mobileOpen && (
-        <div className="surface-luxe mx-auto mt-2 max-w-7xl rounded-2xl border border-slate-200 bg-white p-4 text-[#09140E] shadow-2xl dark:border-[#10B981]/25 dark:bg-[#060C08] dark:text-[#ECFDF5] lg:hidden">
+        <div className="surface-luxe mx-auto mt-2 max-w-7xl rounded-2xl border border-[#104E35]/20 bg-[#F0F5F2] p-4 text-[#091911] shadow-2xl dark:border-[#2A6F52]/40 dark:bg-[#060C08] dark:text-[#DDF2E7] lg:hidden">
           <div className="grid gap-1.5">
             {navLinks.map((item) => (
               <button
@@ -309,14 +309,14 @@ export const TopNav: React.FC<TopNavProps> = ({
                 className={`rounded-xl px-3.5 py-2.5 text-left text-sm font-semibold ${
                   item.active
                     ? 'bg-[#10B981]/14 text-[#047857] dark:text-[#34D399]'
-                    : 'hover:bg-[#F4F7F5] dark:hover:bg-[#10B981]/10'
+                    : 'hover:bg-[#E4EDE7] dark:hover:bg-[#10B981]/10'
                 }`}
               >
                 {item.label}
               </button>
             ))}
           </div>
-          <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-slate-200 pt-3 dark:border-[#10B981]/18">
+          <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-[#104E35]/16 pt-3 dark:border-[#2A6F52]/32">
             {currentUser ? (
               <>
                 <Button

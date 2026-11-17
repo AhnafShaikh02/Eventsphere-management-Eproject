@@ -515,6 +515,38 @@ export const eventSphereApi = {
 
   markNotificationsRead: (token: string) =>
     apiRequest<{ ok: boolean }>('/api/notifications/read', { method: 'POST' }, token),
+
+  assistantChat: (
+    payload: {
+      messages: Array<{ role: 'user' | 'model'; text: string }>;
+      persona: 'concierge' | 'exhibitor' | 'organizer';
+      fastMode?: boolean;
+      activeView?: string;
+      selectedBoothId?: string | null;
+      voiceMode?: boolean;
+    },
+    token?: string | null,
+  ) =>
+    apiRequest<{ reply: string; model: string; mentionedBoothIds: string[] }>(
+      '/api/assistant/chat',
+      { method: 'POST', body: JSON.stringify(payload) },
+      token,
+    ),
+
+  assistantTranscribe: (payload: { audioBase64: string; mimeType: string }) =>
+    apiRequest<{ text: string }>('/api/assistant/transcribe', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }),
+
+  assistantTts: (payload: {
+    text: string;
+    voiceName?: 'Kore' | 'Puck' | 'Charon' | 'Fenrir' | 'Zephyr';
+  }) =>
+    apiRequest<{ audioBase64: string; mimeType: string }>('/api/assistant/tts', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }),
 };
 
 export async function pushCloudBackup(

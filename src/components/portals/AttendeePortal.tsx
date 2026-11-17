@@ -63,7 +63,7 @@ const TicketQRMatrix: React.FC<{ code: string }> = ({ code }) => {
   }, [code]);
 
   return (
-    <div className="grid h-20 w-20 grid-cols-7 gap-0.5 rounded-lg bg-white p-1.5 shadow-inner">
+    <div className="grid h-20 w-20 grid-cols-7 gap-0.5 rounded-lg border border-[#104E35]/20 bg-[#E6EFE9] p-1.5 shadow-inner dark:border-[#2A6F52]/38">
       {cells.map((filled, idx) => (
         <span
           key={idx}
@@ -207,7 +207,7 @@ export const AttendeePortal: React.FC<AttendeePortalProps> = ({
                   return (
                     <div
                       key={s.id}
-                      className="flex items-center justify-between gap-3 rounded-xl border border-slate-200 bg-[#F4F7F5] p-3 text-xs dark:border-[#10B981]/18 dark:bg-[#040705]"
+                      className="flex items-center justify-between gap-3 rounded-xl border border-[#104E35]/18 bg-[#E4EDE7] p-3 text-xs dark:border-[#2A6F52]/34 dark:bg-[#050A07]"
                     >
                       <div className="min-w-0">
                         <div className="font-mono text-[11px] font-semibold text-[#059669] dark:text-[#34D399]">
@@ -286,7 +286,7 @@ export const AttendeePortal: React.FC<AttendeePortalProps> = ({
                         {expo.description}
                       </p>
                     </div>
-                    <div className="mt-4 flex flex-wrap gap-2 border-t border-slate-200 pt-3 dark:border-[#10B981]/16">
+                    <div className="mt-4 flex flex-wrap gap-2 border-t border-[#104E35]/16 pt-3 dark:border-[#2A6F52]/30">
                       {registered ? (
                         <>
                           <Button size="sm" variant="secondary" onClick={() => setSection('tickets')}>
@@ -401,7 +401,7 @@ export const AttendeePortal: React.FC<AttendeePortalProps> = ({
                       </div>
                       <TicketQRMatrix code={ticket.ticketCode} />
                     </div>
-                    <div className="mt-4 flex justify-end border-t border-slate-200 pt-3 dark:border-[#10B981]/16">
+                    <div className="mt-4 flex justify-end border-t border-[#104E35]/16 pt-3 dark:border-[#2A6F52]/30">
                       <Button
                         size="sm"
                         variant="outline"
@@ -474,7 +474,7 @@ export const AttendeePortal: React.FC<AttendeePortalProps> = ({
                         Products: {ex.products.join(' · ') || 'Showcasing live'}
                       </div>
                     </div>
-                    <div className="mt-4 flex items-center justify-between border-t border-slate-200 pt-3 dark:border-[#10B981]/16">
+                    <div className="mt-4 flex items-center justify-between border-t border-[#104E35]/16 pt-3 dark:border-[#2A6F52]/30">
                       <span className="font-mono text-xs">
                         {booth ? `Booth ${booth.number}` : 'Virtual Partner'}
                       </span>
@@ -510,7 +510,7 @@ export const AttendeePortal: React.FC<AttendeePortalProps> = ({
                 key={b.id}
                 type="button"
                 onClick={() => onInspectBoothOnFloor(b.id)}
-                className="flex flex-col items-start rounded-xl border border-slate-200 bg-[#F4F7F5] p-3 text-left hover:border-[#10B981] dark:border-[#10B981]/20 dark:bg-[#040705]"
+                className="flex flex-col items-start rounded-xl border border-[#104E35]/18 bg-[#E4EDE7] p-3 text-left hover:border-[#10B981] dark:border-[#2A6F52]/36 dark:bg-[#050A07]"
               >
                 <div className="flex w-full items-center justify-between">
                   <span className="font-mono text-xs font-bold">{b.number}</span>
@@ -557,7 +557,7 @@ export const AttendeePortal: React.FC<AttendeePortalProps> = ({
                         {s.speaker} · {s.speakerRole}
                       </p>
                     </div>
-                    <div className="mt-4 flex flex-wrap gap-2 border-t border-slate-200 pt-3 dark:border-[#10B981]/16">
+                    <div className="mt-4 flex flex-wrap gap-2 border-t border-[#104E35]/16 pt-3 dark:border-[#2A6F52]/30">
                       <Button
                         size="sm"
                         variant={reg ? 'secondary' : 'primary'}
@@ -600,7 +600,7 @@ export const AttendeePortal: React.FC<AttendeePortalProps> = ({
                 savedBooths.map((b) => (
                   <div
                     key={b.id}
-                    className="rounded-xl border border-slate-200 bg-[#F4F7F5] p-3 text-xs dark:border-[#10B981]/18 dark:bg-[#040705]"
+                    className="rounded-xl border border-[#104E35]/18 bg-[#E4EDE7] p-3 text-xs dark:border-[#2A6F52]/34 dark:bg-[#050A07]"
                   >
                     <div className="flex items-center justify-between font-bold">
                       <span>Booth {b.number} · {b.exhibitorName || b.zone}</span>
@@ -626,7 +626,7 @@ export const AttendeePortal: React.FC<AttendeePortalProps> = ({
                 bookmarkedSessions.map((s) => (
                   <div
                     key={s.id}
-                    className="rounded-xl border border-slate-200 bg-[#F4F7F5] p-3 text-xs dark:border-[#10B981]/18 dark:bg-[#040705]"
+                    className="rounded-xl border border-[#104E35]/18 bg-[#E4EDE7] p-3 text-xs dark:border-[#2A6F52]/34 dark:bg-[#050A07]"
                   >
                     <div className="font-mono text-[11px] text-[#059669] dark:text-[#34D399]">
                       {s.startTime}–{s.endTime} · {s.location}
@@ -657,7 +657,7 @@ export const AttendeePortal: React.FC<AttendeePortalProps> = ({
             </Button>
           </div>
           {snapshot.notifications.map((n) => (
-            <div key={n.id} className="rounded-xl border border-slate-200 bg-[#F4F7F5] p-3 text-xs dark:border-[#10B981]/18 dark:bg-[#040705]">
+            <div key={n.id} className="rounded-xl border border-[#104E35]/18 bg-[#E4EDE7] p-3 text-xs dark:border-[#2A6F52]/34 dark:bg-[#050A07]">
               <div className="flex justify-between font-bold">
                 <span>{n.title}</span>
                 <Badge tone="teal">{n.kind}</Badge>

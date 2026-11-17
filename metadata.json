@@ -1,6 +1,6 @@
 {
-  "name": "Helios Observatory",
-  "description": "Interactive 3D Three.js Solar System explorer with scroll-guided planetary journeys, deep-space orbital telemetry, offline PWA access, cloud backup sync, and analytics.",
+  "name": "EventSphere Management",
+  "description": "Interactive 3D expo floor plan, real-time Socket.io booth reservations, exhibitor portal, session schedules, and organizer analytics.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

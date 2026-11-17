@@ -52,9 +52,9 @@ export const Modal: React.FC<ModalProps> = ({
         initial={{ opacity: 0, scale: 0.96, y: 10 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
-        className={`surface-luxe max-h-[90vh] w-full ${MAX_WIDTH_MAP[maxWidth]} flex flex-col overflow-hidden rounded-2xl border border-[#10B981]/25 bg-white text-[#09140E] dark:border-[#10B981]/25 dark:bg-[#040705] dark:text-[#ECFDF5]`}
+        className={`surface-luxe max-h-[90vh] w-full ${MAX_WIDTH_MAP[maxWidth]} flex flex-col overflow-hidden rounded-2xl border border-[#104E35]/22 bg-[#F0F5F2] text-[#091911] dark:border-[#2A6F52]/42 dark:bg-[#060D09] dark:text-[#DDF2E7]`}
       >
-        <div className="flex items-center justify-between gap-3 border-b border-slate-200 px-6 py-4 dark:border-[#10B981]/20">
+        <div className="flex items-center justify-between gap-3 border-b border-[#104E35]/16 px-6 py-4 dark:border-[#2A6F52]/32">
           <div className="flex items-center gap-2.5">
             {icon && <span className="text-[#059669] dark:text-[#34D399]">{icon}</span>}
             <h2 className="font-display text-lg font-bold tracking-tight">{title}</h2>

@@ -75,7 +75,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({
     >
       <div className="space-y-4">
         {snapshotDataUrl && (
-          <div className="overflow-hidden rounded-xl border border-slate-200 dark:border-[#10B981]/22">
+          <div className="overflow-hidden rounded-xl border border-[#104E35]/18 dark:border-[#2A6F52]/38">
             <img
               src={snapshotDataUrl}
               alt={`3D expo floor snapshot highlighting Booth ${booth.number}`}
@@ -85,7 +85,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({
           </div>
         )}
 
-        <p className="rounded-xl border border-slate-200 bg-[#F4F7F5] p-3 text-xs leading-relaxed text-[#466153] dark:border-[#10B981]/20 dark:bg-[#09120D] dark:text-[#C4DFD1]">
+        <p className="rounded-xl border border-[#104E35]/16 bg-[#E6EFE9] p-3 text-xs leading-relaxed text-[#355243] dark:border-[#2A6F52]/34 dark:bg-[#08110C] dark:text-[#C4DFD1]">
           {shareText}
         </p>
 

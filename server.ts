@@ -1,4 +1,5 @@
 import 'dotenv/config';
+import { GoogleGenAI } from '@google/genai';
 import bcrypt from 'bcryptjs';
 import express from 'express';
 import type { NextFunction, Request, Response } from 'express';
@@ -822,6 +823,7 @@ async function startServer() {
     cors: { origin: '*' },
   });
 
+  app.use('/api/assistant', express.json({ limit: '8mb' }));
   app.use(express.json({ limit: '512kb' }));
 
   const serverStartedAt = Date.now();
@@ -1974,6 +1976,323 @@ async function startServer() {
     vault[syncKey] = record;
     saveVault(vault);
     res.json({ ok: true, syncKey, updatedAt, checksum });
+  });
+
+  // EventSphere Gemini AI Concierge (Text + Voice)
+  type AssistantPersona = 'concierge' | 'exhibitor' | 'organizer';
+  const VALID_VOICES = new Set(['Kore', 'Puck', 'Charon', 'Fenrir', 'Zephyr']);
+
+  const getGeminiClient = () => {
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey || !apiKey.trim()) {
+      return null;
+    }
+    return new GoogleGenAI({
+      apiKey: apiKey.trim(),
+      httpOptions: {
+        headers: {
+          'User-Agent': 'aistudio-build',
+        },
+      },
+    });
+  };
+
+  const buildEventSphereSystemInstruction = (
+    persona: AssistantPersona,
+    viewer: AuthUserClaims | undefined,
+    activeView?: string,
+    selectedBoothId?: string | null,
+    voiceMode?: boolean,
+  ): string => {
+    const availableBooths = db.booths.filter((b) => b.status === 'available');
+    const reservedBooths = db.booths.filter((b) => b.status === 'reserved' || b.status === 'occupied');
+    const pendingBooths = db.booths.filter((b) => b.status === 'pending');
+
+    const expoSummary = db.expos
+      .map(
+        (e) =>
+          `- ${e.title} (${e.status.toUpperCase()}) | ${e.date} to ${e.endDate} | ${e.location} | Category: ${e.category} | Registered: ${e.registeredUserIds.length}/${e.capacity || 800}`,
+      )
+      .join('\n');
+
+    const boothSummary = db.booths
+      .map(
+        (b) =>
+          `- Booth ${b.number} (${b.id}): ${b.status.toUpperCase()} | Zone: ${b.zone} | Size: ${b.size} | $${b.priceUsd}${b.exhibitorName ? ` | Exhibitor: ${b.exhibitorName}` : ''}`,
+      )
+      .join('\n');
+
+    const exhibitorSummary = db.exhibitors
+      .map(
+        (ex) =>
+          `- ${ex.companyName} (${ex.category}): ${ex.tagline}. Products: ${ex.products.join(', ')}. Staff: ${ex.staff.join(', ')}.`,
+      )
+      .join('\n');
+
+    const sessionSummary = db.sessions
+      .map(
+        (s) =>
+          `- ${s.startTime}-${s.endTime}: "${s.title}" by ${s.speaker} (${s.speakerRole}) @ ${s.location} | Topic: ${s.topic} | Seats: ${s.registeredUserIds.length}/${s.capacity}`,
+      )
+      .join('\n');
+
+    const selectedBooth = selectedBoothId ? db.booths.find((b) => b.id === selectedBoothId) : null;
+
+    const personaDirective =
+      persona === 'exhibitor'
+        ? 'You are the EventSphere Exhibitor Advisor. Specialize in helping companies pick the ideal booth size (3x3m Standard $2,800, 6x3m Corner $4,200, 6x6m Island $6,800), compare floor zones, explain the application/approval flow, and reserve open booths.'
+        : persona === 'organizer'
+          ? 'You are the EventSphere Operations Guide. Specialize in expo management, booth allocation, schedule broadcasts, exhibitor application approvals, live analytics, and GDPR/JWT/Socket.io platform architecture.'
+          : 'You are the EventSphere Floor Concierge. Specialize in helping attendees and visitors discover expos, locate exhibitors and booths on the 3D floor, plan keynote schedules, get digital QR passes, and navigate the 3D hall.';
+
+    return `${personaDirective}
+
+Website Context & Live Floor State:
+- Platform: EventSphere Management — interactive 3D expo floor plan, real-time Socket.io booth reservations, exhibitor showcase directory, session timetable, and organizer analytics.
+- Navigation Views: "Home" (Scroll Tour over 3D Expo Sphere), "Explore Expos", "3D Floor" (interactive OrbitControls + Zoom + Zone Borders), "Exhibitors", "Schedule", "Analytics", and Role Portals (Attendee Hub, Exhibitor Portal, Organizer Command Center).
+- Current User: ${viewer ? `${viewer.name} (${viewer.role}, ${viewer.email})` : 'Guest Visitor (not signed in)'}
+- Current Page View: ${activeView || 'voyage'}
+${selectedBooth ? `- Currently Selected Booth: Booth ${selectedBooth.number} (${selectedBooth.status}, ${selectedBooth.zone}, ${selectedBooth.size}, $${selectedBooth.priceUsd}${selectedBooth.exhibitorName ? `, ${selectedBooth.exhibitorName}` : ''})` : ''}
+
+Live Expos (${db.expos.length}):
+${expoSummary}
+
+Live Booth Floor Summary (${availableBooths.length} available, ${reservedBooths.length} reserved/occupied, ${pendingBooths.length} pending out of ${db.booths.length} total):
+${boothSummary}
+
+Verified Exhibitors (${db.exhibitors.length}):
+${exhibitorSummary}
+
+Keynote & Technical Sessions (${db.sessions.length}):
+${sessionSummary}
+
+Response Guidelines:
+- Answer strictly using accurate live EventSphere website data above. Never invent fake booths, fake prices, or fake sessions.
+- Mention exact booth codes like "Booth A2" or "Booth B1" when relevant so the UI can link directly to them on the 3D floor.
+- ${voiceMode ? 'Voice Mode is active: keep responses concise (2–4 natural spoken sentences), clear, and easy to listen to without heavy markdown symbols.' : 'Keep responses crisp, well-structured, and actionable.'}`;
+  };
+
+  const formatGeminiError = (err: unknown): { status: number; message: string } => {
+    const raw = err instanceof Error ? err.message : String(err || 'Gemini request failed');
+    const lower = raw.toLowerCase();
+    if (lower.includes('api_key_invalid') || lower.includes('permission_denied') || lower.includes('api key')) {
+      return {
+        status: 400,
+        message: 'Gemini API key is missing or invalid. Please check GEMINI_API_KEY in Settings > Secrets.',
+      };
+    }
+    if (lower.includes('resource_exhausted') || lower.includes('429') || lower.includes('quota')) {
+      return {
+        status: 429,
+        message: 'Gemini quota limit reached. Please retry shortly or check your API key tier in Settings > Secrets.',
+      };
+    }
+    if (lower.includes('not_found') || lower.includes('404')) {
+      return {
+        status: 404,
+        message: `Requested Gemini model unavailable: ${raw}`,
+      };
+    }
+    return { status: 500, message: raw };
+  };
+
+  app.post('/api/assistant/chat', async (req: Request, res: Response) => {
+    const ai = getGeminiClient();
+    if (!ai) {
+      res.status(503).json({
+        error: 'GEMINI_API_KEY is not configured. Add GEMINI_API_KEY in Settings > Secrets to enable the EventSphere AI assistant.',
+      });
+      return;
+    }
+
+    const viewer = decodeOptionalAuth(req);
+    const { messages, persona, fastMode, activeView, selectedBoothId, voiceMode } = req.body as {
+      messages?: Array<{ role: 'user' | 'model'; text: string }>;
+      persona?: AssistantPersona;
+      fastMode?: boolean;
+      activeView?: string;
+      selectedBoothId?: string | null;
+      voiceMode?: boolean;
+    };
+
+    if (!Array.isArray(messages) || messages.length === 0) {
+      res.status(400).json({ error: 'Conversation messages array is required.' });
+      return;
+    }
+
+    const sanitized = messages
+      .filter((m) => m && (m.role === 'user' || m.role === 'model') && typeof m.text === 'string' && m.text.trim())
+      .slice(-20);
+
+    const latest = sanitized[sanitized.length - 1];
+    if (!latest || latest.role !== 'user') {
+      res.status(400).json({ error: 'Last message must be from the user.' });
+      return;
+    }
+
+    const history = sanitized.slice(0, -1).map((m) => ({
+      role: m.role,
+      parts: [{ text: m.text.trim() }],
+    }));
+
+    const selectedPersona: AssistantPersona =
+      persona === 'exhibitor' || persona === 'organizer' ? persona : 'concierge';
+    const model = fastMode ? 'gemini-3.1-flash-lite' : 'gemini-4-hydrogen';
+    const systemInstruction = buildEventSphereSystemInstruction(
+      selectedPersona,
+      viewer,
+      activeView,
+      selectedBoothId,
+      voiceMode,
+    );
+
+    try {
+      const chat = ai.chats.create({
+        model,
+        config: { systemInstruction },
+        history,
+      });
+      const response = await chat.sendMessage({ message: latest.text.trim() });
+      const replyText = (response.text || '').trim();
+      if (!replyText) {
+        res.status(502).json({ error: 'Assistant returned an empty response.' });
+        return;
+      }
+
+      const mentionedBoothIds = db.booths
+        .filter((b) => new RegExp(`\\b(?:booth\\s+)?${b.number}\\b`, 'i').test(replyText))
+        .map((b) => b.id);
+
+      res.json({
+        reply: replyText,
+        model,
+        mentionedBoothIds: Array.from(new Set(mentionedBoothIds)).slice(0, 6),
+      });
+    } catch (err) {
+      const parsed = formatGeminiError(err);
+      res.status(parsed.status).json({ error: parsed.message });
+    }
+  });
+
+  app.post('/api/assistant/transcribe', async (req: Request, res: Response) => {
+    const ai = getGeminiClient();
+    if (!ai) {
+      res.status(503).json({
+        error: 'GEMINI_API_KEY is not configured. Add GEMINI_API_KEY in Settings > Secrets to use voice input.',
+      });
+      return;
+    }
+
+    const { audioBase64, mimeType } = req.body as {
+      audioBase64?: string;
+      mimeType?: string;
+    };
+
+    if (!audioBase64 || typeof audioBase64 !== 'string') {
+      res.status(400).json({ error: 'audioBase64 payload is required.' });
+      return;
+    }
+
+    const safeMime = (mimeType || 'audio/webm').split(';')[0].trim() || 'audio/webm';
+
+    try {
+      const response = await ai.models.generateContent({
+        model: 'gemini-3.5-transcribe',
+        contents: {
+          parts: [
+            {
+              inlineData: {
+                mimeType: safeMime,
+                data: audioBase64,
+              },
+            },
+            {
+              text: 'Transcribe the spoken user question about the EventSphere expo accurately. Return only the spoken words.',
+            },
+          ],
+        },
+      });
+      const text = (response.text || '').trim();
+      if (!text) {
+        res.status(422).json({ error: 'Could not detect clear speech in the audio clip. Please try again.' });
+        return;
+      }
+      res.json({ text });
+    } catch (err) {
+      const parsed = formatGeminiError(err);
+      res.status(parsed.status).json({ error: parsed.message });
+    }
+  });
+
+  app.post('/api/assistant/tts', async (req: Request, res: Response) => {
+    const ai = getGeminiClient();
+    if (!ai) {
+      res.status(503).json({
+        error: 'GEMINI_API_KEY is not configured. Add GEMINI_API_KEY in Settings > Secrets to enable voice replies.',
+      });
+      return;
+    }
+
+    const { text, voiceName } = req.body as {
+      text?: string;
+      voiceName?: string;
+    };
+
+    if (!text || !text.trim()) {
+      res.status(400).json({ error: 'Text is required for speech synthesis.' });
+      return;
+    }
+
+    const cleanSpokenText = text
+      .replace(/\[BOOTH:([A-Z0-9]+)\]/gi, 'Booth $1')
+      .replace(/[*_`#>]/g, '')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .slice(0, 1200);
+
+    const chosenVoice = voiceName && VALID_VOICES.has(voiceName) ? voiceName : 'Kore';
+
+    try {
+      const response = await ai.models.generateContent({
+        model: 'gemini-3.8-flash-lite-tts',
+        contents: [
+          {
+            role: 'user',
+            parts: [
+              {
+                text: cleanSpokenText,
+                speechMetadata: {
+                  style: 'Clear, friendly, concise exhibition concierge',
+                },
+              },
+            ],
+          },
+        ],
+        config: {
+          responseModalities: ['AUDIO'],
+          speechConfig: {
+            voiceConfig: {
+              prebuiltVoiceConfig: { voiceName: chosenVoice },
+            },
+          },
+        },
+      });
+
+      const inlineData = response.candidates?.[0]?.content?.parts?.[0]?.inlineData;
+      const audioBase64 = inlineData?.data;
+      if (!audioBase64) {
+        res.status(502).json({ error: 'Voice synthesizer did not return audio data.' });
+        return;
+      }
+
+      res.json({
+        audioBase64,
+        mimeType: inlineData?.mimeType || 'audio/wav',
+      });
+    } catch (err) {
+      const parsed = formatGeminiError(err);
+      res.status(parsed.status).json({ error: parsed.message });
+    }
   });
 
   if (process.env.NODE_ENV !== 'production') {

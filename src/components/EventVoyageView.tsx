@@ -9,6 +9,8 @@ import {
   CheckCircle2,
   Cloud,
   Compass,
+  Eye,
+  EyeOff,
   Layers,
   MapPin,
   Moon,
@@ -21,6 +23,7 @@ import {
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import type { EventSphereSnapshot, UserAccount, UserRole } from '../types/eventsphere';
+import type { ZoomTelemetry } from '../three/ExpoHallCanvas';
 import { STATUS_HEX } from '../three/expoModels';
 import { PWAInstallButton } from './PWAStatusWidgets';
 import { PublicFooter } from './PublicFooter';
@@ -35,6 +38,7 @@ interface EventVoyageViewProps {
   nightMode: boolean;
   showTrussAndVisitors: boolean;
   favoriteCount: number;
+  zoomTelemetry?: ZoomTelemetry;
   onToggleNightMode: () => void;
   onToggleTrussAndVisitors: () => void;
   onEnterExplore: () => void;
@@ -57,6 +61,7 @@ export const EventVoyageView: React.FC<EventVoyageViewProps> = ({
   nightMode,
   showTrussAndVisitors,
   favoriteCount,
+  zoomTelemetry,
   onToggleNightMode,
   onToggleTrussAndVisitors,
   onEnterExplore,
@@ -73,6 +78,7 @@ export const EventVoyageView: React.FC<EventVoyageViewProps> = ({
 }) => {
   const rootRef = useRef<HTMLDivElement | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
+  const [peekFloor, setPeekFloor] = useState(false);
   const [statSync, setStatSync] = useState(2);
   const [statUsers, setStatUsers] = useState(300);
   const [statUptime, setStatUptime] = useState(99);
@@ -209,15 +215,23 @@ export const EventVoyageView: React.FC<EventVoyageViewProps> = ({
     document.getElementById(sectionId)?.scrollIntoView({ behavior: 'smooth' });
   };
 
+  const zoomPercent = zoomTelemetry?.zoomPercent ?? 100;
+  const zoomBorderTone =
+    zoomPercent >= 140
+      ? 'border-[#104E35]/22 dark:border-[#2A6F52]/42'
+      : zoomPercent <= 75
+        ? 'border-[#104E35]/12 dark:border-[#2A6F52]/24'
+        : 'border-[#104E35]/16 dark:border-[#2A6F52]/34';
+
   const panelClass =
-    'surface-luxe pointer-events-auto rounded-2xl border border-slate-200/90 bg-white/94 p-6 text-[#09140E] dark:border-[#10B981]/20 dark:bg-[#070E0A]/93 dark:text-[#ECFDF5] sm:p-8';
+    `surface-luxe zoom-adaptive-frame pointer-events-auto ${zoomBorderTone} bg-[#EEF4F0]/92 text-[#091911] dark:bg-[#07100B]/88 dark:text-[#DDF2E7]`;
 
   return (
     <div ref={rootRef} className="relative z-10 pointer-events-none">
-      {/* Bottom-left Booth Status Key */}
+      {/* Bottom-left Booth Status Key & Live Zoom Readout */}
       <div
         aria-label="Booth status key"
-        className="no-print surface-luxe pointer-events-auto fixed bottom-4 left-4 z-30 hidden items-center gap-4 rounded-xl border border-slate-200/90 bg-white/94 px-3.5 py-2 text-xs font-medium text-[#466153] dark:border-[#10B981]/20 dark:bg-[#040705]/94 dark:text-[#8EAD9E] xl:flex"
+        className={`no-print surface-luxe pointer-events-auto fixed bottom-4 left-4 z-30 hidden items-center gap-3.5 rounded-xl border ${zoomBorderTone} bg-[#EEF4F0]/90 px-3 py-1.5 text-xs font-medium text-[#355243] dark:bg-[#050A07]/88 dark:text-[#8EAD9E] xl:flex`}
       >
         <span className="flex items-center gap-1.5">
           <span className="inline-block h-2.5 w-2.5 rounded-xs bg-[#34D399]" />
@@ -231,13 +245,40 @@ export const EventVoyageView: React.FC<EventVoyageViewProps> = ({
           <span className="inline-block h-2.5 w-2.5 rounded-xs bg-[#A78BFA]" />
           Pending ({pendingCount})
         </span>
+        <span className="border-l border-[#104E35]/16 pl-3 font-mono text-[11px] text-[#059669] dark:border-[#2A6F52]/32 dark:text-[#34D399]">
+          {zoomPercent}% view
+        </span>
       </div>
 
       {/* SECTION 1: HERO — ASYMMETRIC SHOWCASE FRAMING LIVE 3D GEODESIC EXPO SPHERE */}
-      <section className="mx-auto flex min-h-[100svh] max-w-7xl flex-col justify-center px-4 pt-24 pb-12 sm:px-6">
-        <div className="grid items-center gap-10 lg:grid-cols-12">
+      <section className="zoom-adaptive-section flex min-h-[100svh] flex-col justify-center pt-22 pb-10">
+        <div className="mb-3 flex justify-end">
+          <button
+            type="button"
+            onClick={() => setPeekFloor((v) => !v)}
+            className={`pointer-events-auto inline-flex items-center gap-1.5 rounded-lg border ${zoomBorderTone} bg-[#EEF4F0]/90 px-3 py-1.5 text-xs font-semibold text-[#091911] transition-colors hover:border-[#059669]/50 dark:bg-[#07100B]/86 dark:text-[#DDF2E7]`}
+          >
+            {peekFloor ? (
+              <>
+                <Eye className="h-3.5 w-3.5 text-[#10B981]" />
+                <span>Show Hero Panels</span>
+              </>
+            ) : (
+              <>
+                <EyeOff className="h-3.5 w-3.5 text-[#059669] dark:text-[#34D399]" />
+                <span>Peek Unobstructed 3D Floor</span>
+              </>
+            )}
+          </button>
+        </div>
+
+        <div
+          className={`grid items-center gap-6 transition-all duration-300 lg:grid-cols-12 ${
+            peekFloor ? 'pointer-events-none opacity-10 scale-[0.985]' : 'opacity-100 scale-100'
+          }`}
+        >
           {/* LEFT COLUMN */}
-          <div className="surface-luxe pointer-events-auto rounded-3xl border border-slate-200/90 bg-white/92 p-7 text-[#09140E] dark:border-[#10B981]/22 dark:bg-gradient-to-br dark:from-[#060C08]/94 dark:via-[#08150E]/90 dark:to-[#040705]/94 dark:text-[#ECFDF5] sm:p-10 lg:col-span-6">
+          <div className={`surface-luxe zoom-adaptive-frame pointer-events-auto border ${zoomBorderTone} bg-[#EEF4F0]/90 text-[#091911] dark:bg-gradient-to-br dark:from-[#060C08]/88 dark:via-[#08150E]/84 dark:to-[#040705]/88 dark:text-[#DDF2E7] lg:col-span-5`}>
             <div className="rv go">
               <p className="hero-stagger font-mono text-xs font-semibold tracking-wider text-[#059669] dark:text-[#34D399]">
                 {snapshot.expos[0]?.title || 'Global Expo Operations'} · Real-Time 3D Floor
@@ -293,25 +334,25 @@ export const EventVoyageView: React.FC<EventVoyageViewProps> = ({
               </div>
 
               {/* Trust Bar */}
-              <div className="hero-stagger mt-7 flex flex-wrap items-center gap-4 rounded-2xl border border-slate-200/90 bg-[#F4F7F5]/90 px-4 py-3.5 dark:border-[#10B981]/18 dark:bg-[#08120D]/92">
+              <div className="hero-stagger mt-7 flex flex-wrap items-center gap-4 rounded-2xl border border-[#104E35]/16 bg-[#E4EDE7]/90 px-4 py-3.5 dark:border-[#2A6F52]/34 dark:bg-[#08120D]/92">
                 <div className="flex -space-x-2.5 shrink-0" aria-hidden="true">
                   {[
                     { label: 'OR', bg: '#10B981', fg: '#02120B' },
                     { label: 'EX', bg: '#34D399', fg: '#02120B' },
                     { label: 'AT', bg: '#2DD4BF', fg: '#02120B' },
-                    { label: 'SP', bg: '#059669', fg: '#ECFDF5' },
+                    { label: 'SP', bg: '#059669', fg: '#DDF2E7' },
                   ].map((av) => (
                     <span
                       key={av.label}
-                      className="flex h-9 w-9 items-center justify-center rounded-full border-2 border-white font-mono text-[11px] font-bold dark:border-[#060C08]"
+                      className="flex h-9 w-9 items-center justify-center rounded-full border-2 border-[#E4EDE7] font-mono text-[11px] font-bold dark:border-[#060C08]"
                       style={{ backgroundColor: av.bg, color: av.fg }}
                     >
                       {av.label}
                     </span>
                   ))}
                 </div>
-                <div className="min-w-0 text-xs leading-snug text-[#466153] dark:text-[#A7C4B5]">
-                  <p className="font-semibold text-[#09140E] dark:text-[#ECFDF5]">
+                <div className="min-w-0 text-xs leading-snug text-[#355243] dark:text-[#A7C4B5]">
+                  <p className="font-semibold text-[#091911] dark:text-[#DDF2E7]">
                     {snapshot.expos.length} active expos · {snapshot.exhibitors.length} verified exhibitors
                   </p>
                   <p className="mt-0.5 text-[11px] tabular-nums">
@@ -321,7 +362,7 @@ export const EventVoyageView: React.FC<EventVoyageViewProps> = ({
               </div>
 
               {/* Compact Quick-Control Utility Dock */}
-              <div className="hero-stagger mt-6 flex flex-wrap items-center gap-2 border-t border-slate-200/80 pt-4 dark:border-[#10B981]/15">
+              <div className="hero-stagger mt-6 flex flex-wrap items-center gap-2 border-t border-[#104E35]/14 pt-4 dark:border-[#2A6F52]/28">
                 <Button
                   variant="outline"
                   size="sm"
@@ -387,13 +428,13 @@ export const EventVoyageView: React.FC<EventVoyageViewProps> = ({
             </div>
           </div>
 
-          {/* RIGHT COLUMN: FLOATING LIVE-DATA CARDS FRAMING 3D SPHERE */}
-          <div className="pointer-events-none relative flex min-h-[470px] flex-col justify-between gap-4 lg:col-span-6 lg:min-h-[540px]">
-            <div className="flex flex-wrap items-start justify-between gap-4">
+          {/* RIGHT COLUMN: FLOATING LIVE-DATA CARDS FRAMING UNOBSTRUCTED 3D SPHERE */}
+          <div className="pointer-events-none relative flex min-h-[430px] flex-col justify-between gap-4 lg:col-span-7 lg:min-h-[520px] lg:pl-14">
+            <div className="flex flex-wrap items-start justify-between gap-3">
               <button
                 type="button"
                 onClick={onFocusStage}
-                className="hero-float-panel surface-luxe pointer-events-auto inline-flex items-center gap-2 rounded-xl border border-slate-200/90 bg-white/94 px-3.5 py-2 text-xs font-semibold text-[#09140E] transition-transform hover:-translate-y-0.5 hover:border-[#34D399] dark:border-[#10B981]/25 dark:bg-[#070E0A]/92 dark:text-[#ECFDF5]"
+                className={`hero-float-panel surface-luxe pointer-events-auto inline-flex items-center gap-2 rounded-xl border ${zoomBorderTone} bg-[#EEF4F0]/90 px-3.5 py-2 text-xs font-semibold text-[#091911] transition-transform hover:-translate-y-0.5 hover:border-[#059669]/55 dark:bg-[#07100B]/86 dark:text-[#DDF2E7]`}
               >
                 <span className="h-2 w-2 rounded-xs bg-[#34D399]" aria-hidden="true" />
                 <span>Main Stage</span>
@@ -403,7 +444,7 @@ export const EventVoyageView: React.FC<EventVoyageViewProps> = ({
               <button
                 type="button"
                 onClick={onOpenAnalytics}
-                className="hero-float-panel float-card surface-luxe pointer-events-auto w-full max-w-[270px] rounded-2xl border border-slate-200/90 bg-white/94 p-4 text-left text-[#09140E] transition-colors hover:border-[#34D399] dark:border-[#10B981]/25 dark:bg-gradient-to-br dark:from-[#08120D]/94 dark:to-[#040806]/94 dark:text-[#ECFDF5]"
+                className={`hero-float-panel float-card surface-luxe pointer-events-auto w-full max-w-[255px] rounded-2xl border ${zoomBorderTone} bg-[#EEF4F0]/90 p-3.5 text-left text-[#091911] transition-colors hover:border-[#059669]/55 dark:bg-gradient-to-br dark:from-[#08120D]/88 dark:to-[#040806]/88 dark:text-[#DDF2E7]`}
               >
                 <div className="flex items-center justify-between text-xs font-semibold">
                   <span>Live Analytics</span>
@@ -450,11 +491,11 @@ export const EventVoyageView: React.FC<EventVoyageViewProps> = ({
               </button>
             </div>
 
-            <div className="flex items-center justify-end pr-2">
+            <div className="flex items-center justify-end pr-1">
               <button
                 type="button"
                 onClick={onEnterExplore}
-                className="hero-float-panel surface-luxe pointer-events-auto inline-flex items-center gap-2 rounded-xl border border-slate-200/90 bg-white/94 px-3.5 py-2 text-xs font-semibold text-[#09140E] transition-transform hover:-translate-y-0.5 hover:border-[#10B981] dark:border-[#10B981]/25 dark:bg-[#070E0A]/92 dark:text-[#ECFDF5]"
+                className={`hero-float-panel surface-luxe pointer-events-auto inline-flex items-center gap-2 rounded-xl border ${zoomBorderTone} bg-[#EEF4F0]/90 px-3.5 py-2 text-xs font-semibold text-[#091911] transition-transform hover:-translate-y-0.5 hover:border-[#059669]/55 dark:bg-[#07100B]/86 dark:text-[#DDF2E7]`}
               >
                 <span className="h-2 w-2 rounded-xs bg-[#10B981]" aria-hidden="true" />
                 <span>Expo Hall · {snapshot.booths.length} Booths</span>
@@ -462,8 +503,8 @@ export const EventVoyageView: React.FC<EventVoyageViewProps> = ({
               </button>
             </div>
 
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="hero-float-panel float-card-alt surface-luxe pointer-events-auto rounded-2xl border border-slate-200/90 bg-white/94 p-4 text-[#09140E] dark:border-[#10B981]/25 dark:bg-gradient-to-br dark:from-[#08120D]/94 dark:to-[#040806]/94 dark:text-[#ECFDF5]">
+            <div className="grid gap-3.5 sm:grid-cols-2">
+              <div className={`hero-float-panel float-card-alt surface-luxe pointer-events-auto rounded-2xl border ${zoomBorderTone} bg-[#EEF4F0]/90 p-3.5 text-[#091911] dark:bg-gradient-to-br dark:from-[#08120D]/88 dark:to-[#040806]/88 dark:text-[#DDF2E7]`}>
                 <div className="flex items-center justify-between text-xs font-semibold">
                   <span>Networking Lounge</span>
                   <span className="font-mono text-[10px] text-[#059669] dark:text-[#34D399]">
@@ -476,7 +517,7 @@ export const EventVoyageView: React.FC<EventVoyageViewProps> = ({
                     {snapshot.exhibitors.slice(0, 4).map((ex) => (
                       <span
                         key={ex.id}
-                        className="flex h-7 w-7 items-center justify-center rounded-full border border-white font-mono text-[9px] font-bold text-[#040705] dark:border-[#070E0A]"
+                        className="flex h-7 w-7 items-center justify-center rounded-full border border-[#E4EDE7] font-mono text-[9px] font-bold text-[#040705] dark:border-[#070E0A]"
                         style={{ backgroundColor: ex.logoColor || '#34D399' }}
                         title={ex.companyName}
                       >
@@ -495,7 +536,7 @@ export const EventVoyageView: React.FC<EventVoyageViewProps> = ({
                   </Button>
                 </div>
 
-                <p className="mt-2.5 truncate text-[11px] text-[#466153] dark:text-[#8EAD9E]">
+                <p className="mt-2.5 truncate text-[11px] text-[#355243] dark:text-[#8EAD9E]">
                   {featuredSession ? featuredSession.title : 'Keynote & Exhibitor Networking'}
                 </p>
               </div>
@@ -503,11 +544,11 @@ export const EventVoyageView: React.FC<EventVoyageViewProps> = ({
               <button
                 type="button"
                 onClick={onEnterExplore}
-                className="hero-float-panel surface-luxe pointer-events-auto rounded-2xl border border-slate-200/90 bg-white/94 p-4 text-left text-[#09140E] transition-colors hover:border-[#34D399] dark:border-[#10B981]/25 dark:bg-gradient-to-br dark:from-[#08120D]/94 dark:to-[#040806]/94 dark:text-[#ECFDF5]"
+                className={`hero-float-panel surface-luxe pointer-events-auto rounded-2xl border ${zoomBorderTone} bg-[#EEF4F0]/90 p-3.5 text-left text-[#091911] transition-colors hover:border-[#059669]/55 dark:bg-gradient-to-br dark:from-[#08120D]/88 dark:to-[#040806]/88 dark:text-[#DDF2E7]`}
               >
                 <div className="flex items-center justify-between text-xs font-semibold">
                   <span>Exhibitor Roster</span>
-                  <span className="font-mono text-[10px] text-[#466153] dark:text-[#8EAD9E]">
+                  <span className="font-mono text-[10px] text-[#355243] dark:text-[#8EAD9E]">
                     {snapshot.booths.length} booths
                   </span>
                 </div>
@@ -531,10 +572,10 @@ export const EventVoyageView: React.FC<EventVoyageViewProps> = ({
                     },
                   ].map((row) => (
                     <div key={row.label} className="flex items-center gap-2">
-                      <span className="w-16 shrink-0 text-[#466153] dark:text-[#8EAD9E]">
+                      <span className="w-16 shrink-0 text-[#355243] dark:text-[#8EAD9E]">
                         {row.label}
                       </span>
-                      <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-slate-200 dark:bg-white/10">
+                      <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-[#D3E2D8] dark:bg-[#2A6F52]/28">
                         <div
                           className="h-full rounded-full transition-all duration-500"
                           style={{ width: `${row.pct}%`, background: row.grad }}
@@ -553,7 +594,7 @@ export const EventVoyageView: React.FC<EventVoyageViewProps> = ({
       </section>
 
       {/* SECTION 2: FEATURED EXPOS & CATEGORY FILTER */}
-      <section id="expos" className="gsap-section mx-auto max-w-7xl px-4 py-16 sm:px-6">
+      <section id="expos" className="gsap-section zoom-adaptive-section py-14">
         <div className={panelClass}>
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
@@ -583,20 +624,20 @@ export const EventVoyageView: React.FC<EventVoyageViewProps> = ({
             {filteredExpos.map((expo) => {
               const isRegistered = currentUser ? expo.registeredUserIds.includes(currentUser.id) : false;
               return (
-                <Card key={expo.id} interactive padding="md" className="flex flex-col justify-between bg-[#F4F7F5] dark:bg-[#040705]">
+                <Card key={expo.id} interactive padding="md" className="flex flex-col justify-between bg-[#E6EFE9] dark:bg-[#050A07]">
                   <div>
                     <div className="flex items-center justify-between gap-2">
                       <Badge tone={expo.status === 'live' ? 'emerald' : 'teal'}>
                         {expo.status}
                       </Badge>
-                      <span className="font-mono text-[11px] text-[#466153] dark:text-[#8EAD9E]">
+                      <span className="font-mono text-[11px] text-[#355243] dark:text-[#8EAD9E]">
                         {expo.category}
                       </span>
                     </div>
                     <h3 className="mt-3 font-display text-lg font-bold tracking-tight">
                       {expo.title}
                     </h3>
-                    <div className="mt-2 space-y-1 text-xs text-[#466153] dark:text-[#8EAD9E]">
+                    <div className="mt-2 space-y-1 text-xs text-[#355243] dark:text-[#8EAD9E]">
                       <div className="flex items-center gap-1.5">
                         <Calendar className="h-3.5 w-3.5 text-[#10B981]" />
                         <span>
@@ -612,12 +653,12 @@ export const EventVoyageView: React.FC<EventVoyageViewProps> = ({
                         <span>{expo.registeredUserIds.length} registered attendees</span>
                       </div>
                     </div>
-                    <p className="mt-3 text-xs leading-relaxed text-[#466153] dark:text-[#8EAD9E]">
+                    <p className="mt-3 text-xs leading-relaxed text-[#355243] dark:text-[#8EAD9E]">
                       {expo.description}
                     </p>
                   </div>
 
-                  <div className="mt-5 flex flex-wrap items-center gap-2 border-t border-slate-200 pt-4 dark:border-[#10B981]/15">
+                  <div className="mt-5 flex flex-wrap items-center gap-2 border-t border-[#104E35]/14 pt-4 dark:border-[#2A6F52]/28">
                     {isRegistered ? (
                       <Button
                         variant="secondary"
@@ -650,7 +691,7 @@ export const EventVoyageView: React.FC<EventVoyageViewProps> = ({
       </section>
 
       {/* SECTION 3: FEATURED EXHIBITORS & INTERACTIVE BOOTH MATRIX */}
-      <section id="exhibitors" className="gsap-section mx-auto max-w-7xl px-4 py-12 sm:px-6">
+      <section id="exhibitors" className="gsap-section zoom-adaptive-section py-10">
         <div className={panelClass}>
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
@@ -671,7 +712,7 @@ export const EventVoyageView: React.FC<EventVoyageViewProps> = ({
               {filteredExhibitors.slice(0, 4).map((ex) => {
                 const booth = snapshot.booths.find((b) => b.exhibitorId === ex.id);
                 return (
-                  <Card key={ex.id} interactive padding="md" className="bg-[#F4F7F5] dark:bg-[#040705]">
+                  <Card key={ex.id} interactive padding="md" className="bg-[#E6EFE9] dark:bg-[#050A07]">
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex items-center gap-2.5">
                         <span
@@ -682,18 +723,18 @@ export const EventVoyageView: React.FC<EventVoyageViewProps> = ({
                         </span>
                         <div>
                           <h3 className="font-display text-sm font-bold">{ex.companyName}</h3>
-                          <div className="font-mono text-[11px] text-[#466153] dark:text-[#8EAD9E]">
+                          <div className="font-mono text-[11px] text-[#355243] dark:text-[#8EAD9E]">
                             {ex.category}
                           </div>
                         </div>
                       </div>
                       {booth && <Badge tone="emerald">Booth {booth.number}</Badge>}
                     </div>
-                    <p className="mt-2.5 text-xs leading-relaxed text-[#466153] dark:text-[#8EAD9E]">
+                    <p className="mt-2.5 text-xs leading-relaxed text-[#355243] dark:text-[#8EAD9E]">
                       {ex.tagline}
                     </p>
-                    <div className="mt-3 flex items-center justify-between border-t border-slate-200 pt-2.5 text-xs dark:border-[#10B981]/14">
-                      <span className="font-mono text-[11px] text-[#466153] dark:text-[#8EAD9E]">
+                    <div className="mt-3 flex items-center justify-between border-t border-[#104E35]/14 pt-2.5 text-xs dark:border-[#2A6F52]/28">
+                      <span className="font-mono text-[11px] text-[#355243] dark:text-[#8EAD9E]">
                         {ex.products.length} products · {ex.profileViews} views
                       </span>
                       {booth && (
@@ -708,7 +749,7 @@ export const EventVoyageView: React.FC<EventVoyageViewProps> = ({
             </div>
 
             {/* Interactive 24-Booth Matrix */}
-            <Card padding="md" className="flex flex-col justify-between bg-[#F4F7F5] dark:bg-[#040705] lg:col-span-5">
+            <Card padding="md" className="flex flex-col justify-between bg-[#E6EFE9] dark:bg-[#050A07] lg:col-span-5">
               <div>
                 <div className="flex items-center justify-between">
                   <h3 className="font-display text-base font-bold">Live 24-Booth Floor Matrix</h3>
@@ -716,10 +757,10 @@ export const EventVoyageView: React.FC<EventVoyageViewProps> = ({
                     Click any booth
                   </span>
                 </div>
-                <p className="mt-1 text-xs text-[#466153] dark:text-[#8EAD9E]">
+                <p className="mt-1 text-xs text-[#355243] dark:text-[#8EAD9E]">
                   Synchronized with server state over Socket.io. Emerald spaces are open for instant reservation.
                 </p>
-                <div className="mt-4 grid grid-cols-6 gap-2 rounded-xl border border-slate-200 bg-white p-3 dark:border-[#10B981]/18 dark:bg-[#09120D]">
+                <div className="mt-4 grid grid-cols-6 gap-2 rounded-xl border border-[#104E35]/16 bg-[#F0F5F2] p-3 dark:border-[#2A6F52]/34 dark:bg-[#08110C]">
                   {snapshot.booths.slice(0, 24).map((b) => (
                     <button
                       key={b.id}
@@ -752,7 +793,7 @@ export const EventVoyageView: React.FC<EventVoyageViewProps> = ({
       </section>
 
       {/* SECTION 4: LIVE EVENT SCHEDULE */}
-      <section id="schedule" className="gsap-section mx-auto max-w-7xl px-4 py-12 sm:px-6">
+      <section id="schedule" className="gsap-section zoom-adaptive-section py-10">
         <div className={panelClass}>
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
@@ -778,7 +819,7 @@ export const EventVoyageView: React.FC<EventVoyageViewProps> = ({
             {snapshot.sessions.map((s) => {
               const bookmarked = currentUser ? s.bookmarkedUserIds.includes(currentUser.id) : false;
               return (
-                <Card key={s.id} padding="md" className="flex flex-col justify-between bg-[#F4F7F5] dark:bg-[#040705]">
+                <Card key={s.id} padding="md" className="flex flex-col justify-between bg-[#E6EFE9] dark:bg-[#050A07]">
                   <div>
                     <div className="flex items-center justify-between gap-2">
                       <span className="inline-flex items-center gap-1.5 font-mono text-xs font-semibold text-[#059669] dark:text-[#34D399]">
@@ -788,14 +829,14 @@ export const EventVoyageView: React.FC<EventVoyageViewProps> = ({
                       <Badge tone="teal">{s.topic}</Badge>
                     </div>
                     <h3 className="mt-2 font-display text-base font-bold">{s.title}</h3>
-                    <p className="mt-1 text-xs text-[#466153] dark:text-[#8EAD9E]">
+                    <p className="mt-1 text-xs text-[#355243] dark:text-[#8EAD9E]">
                       {s.speaker} · {s.speakerRole}
                     </p>
-                    <p className="mt-1 font-mono text-[11px] text-[#466153] dark:text-[#8EAD9E]">
+                    <p className="mt-1 font-mono text-[11px] text-[#355243] dark:text-[#8EAD9E]">
                       {s.location} · {s.registeredUserIds.length}/{s.capacity} seats
                     </p>
                   </div>
-                  <div className="mt-4 flex items-center justify-between border-t border-slate-200 pt-3 dark:border-[#10B981]/14">
+                  <div className="mt-4 flex items-center justify-between border-t border-[#104E35]/14 pt-3 dark:border-[#2A6F52]/28">
                     <span className="font-mono text-[11px] text-[#466153] dark:text-[#8EAD9E]">
                       {s.bookmarkedUserIds.length} bookmarked
                     </span>
@@ -818,7 +859,7 @@ export const EventVoyageView: React.FC<EventVoyageViewProps> = ({
       </section>
 
       {/* SECTION 5: HOW IT WORKS + PLATFORM METRICS + ROLE PORTALS */}
-      <section id="about" className="gsap-section mx-auto max-w-7xl px-4 py-12 sm:px-6">
+      <section id="about" className="gsap-section zoom-adaptive-section py-10">
         <div className={panelClass} data-stats-trigger="true">
           <div className="text-center">
             <p className="font-mono text-xs font-semibold uppercase tracking-wider text-[#059669] dark:text-[#34D399]">
@@ -838,26 +879,26 @@ export const EventVoyageView: React.FC<EventVoyageViewProps> = ({
             ].map((item) => (
               <div
                 key={item.step}
-                className="rounded-xl border border-slate-200 bg-[#F4F7F5] p-5 dark:border-[#10B981]/16 dark:bg-[#040705]"
+                className="rounded-xl border border-[#104E35]/16 bg-[#E6EFE9] p-5 dark:border-[#2A6F52]/32 dark:bg-[#050A07]"
               >
                 <div className="font-mono text-xs font-bold text-[#059669] dark:text-[#34D399]">
                   {item.step}
                 </div>
                 <h3 className="mt-2 font-display text-lg font-bold">{item.title}</h3>
-                <p className="mt-1 text-xs leading-relaxed text-[#466153] dark:text-[#8EAD9E]">
+                <p className="mt-1 text-xs leading-relaxed text-[#355243] dark:text-[#8EAD9E]">
                   {item.copy}
                 </p>
               </div>
             ))}
           </div>
 
-          <div className="mt-10 grid gap-6 border-t border-slate-200 pt-8 text-center dark:border-[#10B981]/15 sm:grid-cols-3">
+          <div className="mt-10 grid gap-6 border-t border-[#104E35]/14 pt-8 text-center dark:border-[#2A6F52]/28 sm:grid-cols-3">
             <div>
               <div className="font-display text-5xl font-extrabold tabular-nums">
                 {statSync}
                 <span className="text-[#34D399]">s</span>
               </div>
-              <p className="mt-1 text-xs text-[#466153] dark:text-[#8EAD9E]">
+              <p className="mt-1 text-xs text-[#355243] dark:text-[#8EAD9E]">
                 for schedule &amp; booth changes to reach every connected screen
               </p>
             </div>
@@ -866,7 +907,7 @@ export const EventVoyageView: React.FC<EventVoyageViewProps> = ({
                 {statUsers}
                 <span className="text-[#10B981]">+</span>
               </div>
-              <p className="mt-1 text-xs text-[#466153] dark:text-[#8EAD9E]">
+              <p className="mt-1 text-xs text-[#355243] dark:text-[#8EAD9E]">
                 concurrent floor users supported · {snapshot.concurrentUsers} live now
               </p>
             </div>
@@ -875,7 +916,7 @@ export const EventVoyageView: React.FC<EventVoyageViewProps> = ({
                 {statUptime}
                 <span className="text-[#2DD4BF]">%</span>
               </div>
-              <p className="mt-1 text-xs text-[#466153] dark:text-[#8EAD9E]">
+              <p className="mt-1 text-xs text-[#355243] dark:text-[#8EAD9E]">
                 availability target with offline PWA &amp; automated daily backups
               </p>
             </div>
@@ -884,7 +925,7 @@ export const EventVoyageView: React.FC<EventVoyageViewProps> = ({
       </section>
 
       {/* SECTION 6: FAQ + ROLE ONBOARDING CARDS */}
-      <section id="faq" className="gsap-section mx-auto max-w-7xl px-4 py-12 pb-20 sm:px-6">
+      <section id="faq" className="gsap-section zoom-adaptive-section py-10 pb-20">
         <div className="grid gap-6 lg:grid-cols-5">
           <div className={`${panelClass} lg:col-span-2`}>
             <h2 className="font-display text-2xl font-extrabold tracking-tight">
@@ -911,10 +952,10 @@ export const EventVoyageView: React.FC<EventVoyageViewProps> = ({
               ].map((item) => (
                 <details
                   key={item.q}
-                  className="rounded-xl border border-slate-200 bg-[#F4F7F5] px-4 py-3 dark:border-[#10B981]/16 dark:bg-[#040705]"
+                  className="rounded-xl border border-[#104E35]/16 bg-[#E6EFE9] px-4 py-3 dark:border-[#2A6F52]/32 dark:bg-[#050A07]"
                 >
                   <summary className="cursor-pointer font-semibold">{item.q}</summary>
-                  <p className="mt-2 text-xs leading-relaxed text-[#466153] dark:text-[#8EAD9E]">
+                  <p className="mt-2 text-xs leading-relaxed text-[#355243] dark:text-[#8EAD9E]">
                     {item.a}
                   </p>
                 </details>
@@ -926,7 +967,7 @@ export const EventVoyageView: React.FC<EventVoyageViewProps> = ({
             <h2 className="font-display text-2xl font-extrabold tracking-tight">
               Choose your EventSphere workspace.
             </h2>
-            <p className="mt-1 text-sm text-[#466153] dark:text-[#8EAD9E]">
+            <p className="mt-1 text-sm text-[#355243] dark:text-[#8EAD9E]">
               Enter a dedicated role portal with guarded access and tailored workflows.
             </p>
             <div className="mt-6 grid gap-4 sm:grid-cols-3">
@@ -955,7 +996,7 @@ export const EventVoyageView: React.FC<EventVoyageViewProps> = ({
               ].map((card) => (
                 <div
                   key={card.role}
-                  className="flex flex-col justify-between rounded-xl border border-slate-200 bg-[#F4F7F5] p-5 dark:border-[#10B981]/18 dark:bg-[#040705]"
+                  className="flex flex-col justify-between rounded-xl border border-[#104E35]/16 bg-[#E6EFE9] p-5 dark:border-[#2A6F52]/34 dark:bg-[#050A07]"
                 >
                   <div>
                     <div

@@ -155,12 +155,12 @@ export const CloudBackupModal: React.FC<CloudBackupModalProps> = ({
         </div>
 
         {syncMeta.lastSyncedAt && (
-          <div className="rounded-xl border border-slate-200 bg-[#F4F7F5] px-3 py-2 font-mono text-[11px] text-[#466153] dark:border-[#10B981]/20 dark:bg-[#09120D] dark:text-[#8EAD9E]">
+          <div className="rounded-xl border border-[#104E35]/16 bg-[#E6EFE9] px-3 py-2 font-mono text-[11px] text-[#355243] dark:border-[#2A6F52]/34 dark:bg-[#08110C] dark:text-[#8EAD9E]">
             Last synced: {new Date(syncMeta.lastSyncedAt).toLocaleString()} · SHA {syncMeta.checksum}
           </div>
         )}
 
-        <div className="flex items-center justify-between border-t border-slate-200 pt-4 text-xs dark:border-[#10B981]/20">
+        <div className="flex items-center justify-between border-t border-[#104E35]/16 pt-4 text-xs dark:border-[#2A6F52]/32">
           <Button
             variant="text"
             leftIcon={<Download className="h-3.5 w-3.5" />}

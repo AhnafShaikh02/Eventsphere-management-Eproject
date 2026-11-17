@@ -268,7 +268,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
       {currentUser ? (
         <div className="space-y-5">
-          <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200 bg-[#F4F7F5] p-4 dark:border-[#10B981]/20 dark:bg-[#09120D]">
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[#104E35]/18 bg-[#E4EDE7] p-4 dark:border-[#2A6F52]/36 dark:bg-[#09120D]">
             <div className="flex items-center gap-3">
               <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-[#059669] to-[#34D399] text-[#02120B]">
                 <User className="h-5 w-5" />
@@ -347,7 +347,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   className={`group flex flex-col justify-between rounded-2xl border p-4 text-left transition-all ${
                     active
                       ? 'border-[#10B981] bg-[#10B981]/10 shadow-[0_12px_30px_rgba(16,185,129,0.16)] dark:border-[#34D399] dark:bg-[#10B981]/12'
-                      : 'border-slate-200 bg-[#F4F7F5] hover:border-[#10B981]/45 dark:border-[#10B981]/18 dark:bg-[#09120D]'
+                      : 'border-[#104E35]/18 bg-[#E4EDE7] hover:border-[#10B981]/50 dark:border-[#2A6F52]/36 dark:bg-[#09120D]'
                   }`}
                 >
                   <div>
@@ -376,7 +376,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             })}
           </div>
 
-          <div className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-200 pt-4 dark:border-[#10B981]/18">
+          <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[#104E35]/16 pt-4 dark:border-[#2A6F52]/32">
             <div className="flex flex-wrap items-center gap-2">
               <Button
                 variant="primary"
@@ -396,7 +396,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             </div>
           </div>
 
-          <div className="rounded-xl border border-slate-200 bg-[#F4F7F5] p-3.5 dark:border-[#10B981]/18 dark:bg-[#09120D]">
+          <div className="rounded-xl border border-[#104E35]/18 bg-[#E4EDE7] p-3.5 dark:border-[#2A6F52]/36 dark:bg-[#09120D]">
             <div className="flex items-center justify-between text-[11px] font-semibold text-[#466153] dark:text-[#8EAD9E]">
               <span>Instant Verification Accounts (JWT + bcrypt)</span>
               <Calendar className="h-3.5 w-3.5 text-[#10B981]" />
@@ -542,7 +542,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               </div>
 
               {selectedRole === 'exhibitor' && (
-                <div className="space-y-3 rounded-xl border border-slate-200 bg-[#F4F7F5] p-3.5 dark:border-[#10B981]/18 dark:bg-[#09120D]">
+                <div className="space-y-3 rounded-xl border border-[#104E35]/18 bg-[#E4EDE7] p-3.5 dark:border-[#2A6F52]/36 dark:bg-[#09120D]">
                   <div className="font-mono text-[11px] font-semibold text-[#059669] dark:text-[#34D399]">
                     Exhibitor Showcase Details
                   </div>
@@ -592,7 +592,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                             type="button"
                             onClick={() => setLogoColor(hex)}
                             className={`h-7 w-7 rounded-lg border-2 ${
-                              logoColor === hex ? 'border-white scale-110 shadow' : 'border-transparent opacity-75'
+                              logoColor === hex ? 'border-[#091911] ring-2 ring-[#10B981]/45 scale-110 shadow dark:border-[#A7F3D0]' : 'border-transparent opacity-75'
                             }`}
                             style={{ backgroundColor: hex }}
                             aria-label={`Brand color ${hex}`}

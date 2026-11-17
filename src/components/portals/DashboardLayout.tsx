@@ -83,15 +83,15 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   );
 
   return (
-    <div className="relative z-20 min-h-screen bg-[#F4F7F5]/97 pt-20 text-[#09140E] dark:bg-[#040705]/97 dark:text-[#ECFDF5]">
+    <div className="relative z-20 min-h-screen bg-[#E9F0EC]/97 pt-20 text-[#091911] dark:bg-[#040705]/97 dark:text-[#DDF2E7]">
       <div className="mx-auto flex max-w-[1440px] gap-0 px-3 pb-10 sm:px-6 lg:gap-6">
         {/* Desktop Sidebar */}
         <aside
-          className={`surface-luxe sticky top-24 hidden h-[calc(100vh-7rem)] shrink-0 flex-col rounded-2xl border border-slate-200/90 bg-white transition-all duration-200 dark:border-[#10B981]/20 dark:bg-[#09120D] lg:flex ${
+          className={`surface-luxe sticky top-24 hidden h-[calc(100vh-7rem)] shrink-0 flex-col rounded-2xl border border-[#104E35]/18 bg-[#F0F5F2] transition-all duration-200 dark:border-[#2A6F52]/36 dark:bg-[#08110C] lg:flex ${
             collapsed ? 'w-[72px]' : 'w-64'
           }`}
         >
-          <div className="flex items-center justify-between gap-2 border-b border-slate-200 px-3.5 py-3.5 dark:border-[#10B981]/16">
+          <div className="flex items-center justify-between gap-2 border-b border-[#104E35]/16 px-3.5 py-3.5 dark:border-[#2A6F52]/30">
             {!collapsed && (
               <div className="min-w-0">
                 <div className="font-mono text-[10px] font-bold uppercase tracking-wider text-[#059669] dark:text-[#34D399]">
@@ -116,7 +116,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
 
           {renderNavList()}
 
-          <div className="border-t border-slate-200 p-3 dark:border-[#10B981]/16">
+          <div className="border-t border-[#104E35]/16 p-3 dark:border-[#2A6F52]/30">
             {!collapsed && (
               <div className="mb-2.5 truncate px-1 text-xs">
                 <div className="font-semibold truncate">{currentUser.name}</div>
@@ -145,8 +145,8 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
               if (e.target === e.currentTarget) setMobileDrawerOpen(false);
             }}
           >
-            <div className="flex h-full w-72 flex-col border-r border-[#10B981]/20 bg-white text-[#09140E] dark:bg-[#040705] dark:text-[#ECFDF5]">
-              <div className="flex items-center justify-between border-b border-slate-200 px-4 py-4 dark:border-[#10B981]/18">
+            <div className="flex h-full w-72 flex-col border-r border-[#104E35]/20 bg-[#F0F5F2] text-[#091911] dark:border-[#2A6F52]/38 dark:bg-[#040705] dark:text-[#DDF2E7]">
+              <div className="flex items-center justify-between border-b border-[#104E35]/16 px-4 py-4 dark:border-[#2A6F52]/30">
                 <div>
                   <div className="font-mono text-[10px] font-bold uppercase text-[#059669] dark:text-[#34D399]">
                     {getRoleLabel(currentUser.role)} Portal
@@ -163,7 +163,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                 </Button>
               </div>
               {renderNavList(() => setMobileDrawerOpen(false))}
-              <div className="border-t border-slate-200 p-4 dark:border-[#10B981]/18">
+              <div className="border-t border-[#104E35]/16 p-4 dark:border-[#2A6F52]/30">
                 <Button
                   variant="destructive"
                   size="sm"
@@ -181,7 +181,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
         {/* Main Workspace Canvas */}
         <main className="min-w-0 flex-1 space-y-5 pt-2">
           {/* Top Portal Breadcrumb & Actions */}
-          <div className="surface-luxe flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200/90 bg-white px-4 py-3 dark:border-[#10B981]/20 dark:bg-[#09120D] sm:px-5">
+          <div className="surface-luxe flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-[#104E35]/18 bg-[#F0F5F2] px-4 py-3 dark:border-[#2A6F52]/36 dark:bg-[#08110C] sm:px-5">
             <div className="flex items-center gap-3">
               <Button
                 variant="icon"

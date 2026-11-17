@@ -5,6 +5,7 @@ import { io } from 'socket.io-client';
 import { AuthModal } from './components/AuthModal';
 import { BoothInspectorDrawer } from './components/BoothInspectorDrawer';
 import { CloudBackupModal } from './components/CloudBackupModal';
+import { EventSphereAssistant } from './components/EventSphereAssistant';
 import { EventVoyageView } from './components/EventVoyageView';
 import { ExpoAnalyticsDashboard } from './components/ExpoAnalyticsDashboard';
 import { FavoritesView } from './components/FavoritesView';
@@ -31,7 +32,12 @@ import {
   saveSyncMeta,
   saveWorkspace,
 } from './services/eventSphereClient';
-import { ExpoHallCanvas, type ExpoHallCanvasHandle, type StatusFilter } from './three/ExpoHallCanvas';
+import {
+  ExpoHallCanvas,
+  type ExpoHallCanvasHandle,
+  type StatusFilter,
+  type ZoomTelemetry,
+} from './three/ExpoHallCanvas';
 import type {
   AppNotification,
   ChatMessage,
@@ -61,6 +67,11 @@ export default function App() {
 
   const [activeView, setActiveView] = useState<ActiveView>('voyage');
   const [scrollProgress, setScrollProgress] = useState(0);
+  const [zoomTelemetry, setZoomTelemetry] = useState<ZoomTelemetry>({
+    distance: 26,
+    zoomPercent: 100,
+    zoomRatio: 0.35,
+  });
 
   const [selectedBoothId, setSelectedBoothId] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
@@ -424,7 +435,7 @@ export default function App() {
   const pendingCount = snapshot.booths.filter((b) => b.status === 'pending').length;
 
   return (
-    <div className="min-h-screen bg-[#F4F7F5] text-[#09140E] dark:bg-[#040705] dark:text-[#ECFDF5]">
+    <div className="min-h-screen bg-[#E9F0EC] text-[#091911] dark:bg-[#040705] dark:text-[#DDF2E7]">
       {/* Persistent 3D Expo Hall Canvas */}
       <ExpoHallCanvas
         ref={canvasRef}
@@ -437,6 +448,7 @@ export default function App() {
         showTrussAndVisitors={workspace.preferences.trussAndVisitors}
         statusFilter={statusFilter}
         onSelectBooth={handleSelectBooth}
+        onZoomChange={setZoomTelemetry}
       />
 
       {/* Enterprise Navbar */}
@@ -478,6 +490,7 @@ export default function App() {
           nightMode={workspace.preferences.nightMode}
           showTrussAndVisitors={workspace.preferences.trussAndVisitors}
           favoriteCount={workspace.favoriteBoothIds.length}
+          zoomTelemetry={zoomTelemetry}
           onToggleNightMode={() =>
             setWorkspace((prev) => ({
               ...prev,
@@ -540,6 +553,7 @@ export default function App() {
           showFloorGrid={workspace.preferences.showFloorGrid}
           showTrussAndVisitors={workspace.preferences.trussAndVisitors}
           statusFilter={statusFilter}
+          zoomPercent={zoomTelemetry.zoomPercent}
           availableCount={availableCount}
           reservedCount={reservedCount}
           occupiedCount={occupiedCount}
@@ -583,7 +597,7 @@ export default function App() {
       {activeView === 'portals' && (
         <>
           {!currentUser || !authToken ? (
-            <div className="relative z-20 flex min-h-screen items-center justify-center bg-[#F4F7F5]/96 px-4 pt-24 pb-16 dark:bg-[#040705]/96">
+            <div className="relative z-20 flex min-h-screen items-center justify-center bg-[#E9F0EC]/96 px-4 pt-24 pb-16 dark:bg-[#040705]/96">
               <Card padding="lg" className="w-full max-w-xl text-center">
                 <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-[#10B981]/15 text-[#059669] dark:text-[#34D399]">
                   <Lock className="h-6 w-6" />
@@ -831,6 +845,21 @@ export default function App() {
           await refreshStateFromServer();
           return true;
         }}
+      />
+
+      {/* EventSphere Voice + Text Gemini Assistant */}
+      <EventSphereAssistant
+        booths={snapshot.booths}
+        currentUser={currentUser}
+        authToken={authToken}
+        activeView={activeView}
+        selectedBoothId={selectedBoothId}
+        exploreHudVisible={activeView === 'explore'}
+        onFocusBoothIn3D={(boothId) => {
+          setActiveView('explore');
+          handleSelectBooth(boothId);
+        }}
+        onToast={showToast}
       />
 
       {/* PWA Offline Indicator & Live Toast */}

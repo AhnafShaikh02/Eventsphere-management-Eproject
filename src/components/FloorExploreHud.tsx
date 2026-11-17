@@ -20,6 +20,7 @@ interface FloorExploreHudProps {
   showFloorGrid: boolean;
   showTrussAndVisitors: boolean;
   statusFilter: StatusFilter;
+  zoomPercent?: number;
   availableCount: number;
   reservedCount: number;
   occupiedCount: number;
@@ -42,6 +43,7 @@ export const FloorExploreHud: React.FC<FloorExploreHudProps> = ({
   showFloorGrid,
   showTrussAndVisitors,
   statusFilter,
+  zoomPercent = 100,
   availableCount,
   reservedCount,
   occupiedCount,
@@ -77,17 +79,19 @@ export const FloorExploreHud: React.FC<FloorExploreHudProps> = ({
     return () => window.removeEventListener('keydown', onKey);
   }, []);
 
+  const zoomTierLabel = zoomPercent >= 145 ? 'Detail' : zoomPercent <= 75 ? 'Overview' : 'Floor';
+
   if (collapsed) {
     return (
-      <div className="no-print fixed right-4 bottom-4 z-30">
+      <div className="no-print fixed bottom-3 left-1/2 z-30 -translate-x-1/2">
         <Button
           variant="outline"
-          size="md"
-          leftIcon={<ChevronUp className="h-4 w-4 text-[#10B981]" />}
+          size="sm"
+          leftIcon={<ChevronUp className="h-3.5 w-3.5 text-[#10B981]" />}
           onClick={() => setCollapsed(false)}
-          className="surface-luxe shadow-lg"
+          className="surface-luxe shadow-md"
         >
-          Show 3D Controls (H)
+          Show 3D Controls (H) · {zoomPercent}%
         </Button>
       </div>
     );
@@ -101,9 +105,9 @@ export const FloorExploreHud: React.FC<FloorExploreHudProps> = ({
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-        className="surface-luxe pointer-events-auto w-full max-w-6xl rounded-2xl border border-slate-200/90 bg-white/95 px-4 py-3 text-[#09140E] dark:border-[#10B981]/22 dark:bg-[#040705]/95 dark:text-[#ECFDF5]"
+        className="surface-luxe pointer-events-auto w-full max-w-[min(64rem,94vw)] rounded-xl border border-[#104E35]/18 bg-[#EEF4F0]/90 px-3.5 py-2.5 text-[#091911] dark:border-[#2A6F52]/38 dark:bg-[#050A07]/90 dark:text-[#DDF2E7]"
       >
-        <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center justify-between gap-2.5">
           {/* Status Filter Buttons */}
           <div className="flex flex-wrap items-center gap-1.5">
             {(
@@ -121,10 +125,10 @@ export const FloorExploreHud: React.FC<FloorExploreHudProps> = ({
                   key={item.id}
                   type="button"
                   onClick={() => onChangeStatusFilter(item.id)}
-                  className={`inline-flex min-h-[34px] items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs font-semibold transition-colors whitespace-nowrap shrink-0 ${
+                  className={`inline-flex min-h-[32px] items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs font-semibold transition-colors whitespace-nowrap shrink-0 ${
                     active
-                      ? 'border-[#059669] bg-[#10B981]/16 text-[#09140E] dark:border-[#34D399] dark:bg-[#10B981]/18 dark:text-[#ECFDF5]'
-                      : 'border-slate-200 bg-[#F4F7F5] text-[#466153] hover:text-[#09140E] dark:border-[#10B981]/15 dark:bg-[#09120D] dark:text-[#8EAD9E]'
+                      ? 'border-[#059669]/55 bg-[#10B981]/14 text-[#091911] dark:border-[#34D399]/50 dark:bg-[#10B981]/16 dark:text-[#DDF2E7]'
+                      : 'border-[#104E35]/16 bg-[#E4EDE7]/90 text-[#355243] hover:text-[#091911] dark:border-[#2A6F52]/32 dark:bg-[#08110C]/90 dark:text-[#8EAD9E]'
                   }`}
                 >
                   <span
@@ -142,6 +146,13 @@ export const FloorExploreHud: React.FC<FloorExploreHudProps> = ({
             <Button variant="icon" size="sm" onClick={onZoomIn} title="Zoom in" aria-label="Zoom in">
               <ZoomIn className="h-3.5 w-3.5" />
             </Button>
+            <span
+              title="Live 3D zoom level — floor borders adapt automatically"
+              className="inline-flex h-8 items-center gap-1 rounded-lg border border-[#104E35]/18 bg-[#E4EDE7]/90 px-2 font-mono text-[11px] font-semibold text-[#059669] dark:border-[#2A6F52]/36 dark:bg-[#08110C]/90 dark:text-[#34D399]"
+            >
+              <span>{zoomPercent}%</span>
+              <span className="hidden sm:inline text-[#355243] dark:text-[#8EAD9E]">· {zoomTierLabel}</span>
+            </span>
             <Button variant="icon" size="sm" onClick={onZoomOut} title="Zoom out" aria-label="Zoom out">
               <ZoomOut className="h-3.5 w-3.5" />
             </Button>
