@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import type {
   AdminAttendeeRow,
+  AdminMonitoringSummary,
   BoothStatus,
   EventSphereSnapshot,
   ExhibitorApplication,
@@ -34,6 +35,7 @@ import type {
 } from '../../types/eventsphere';
 import { STATUS_HEX } from '../../three/expoModels';
 import { eventSphereApi } from '../../services/eventSphereClient';
+import { PrivacyAndComplianceCard } from '../PrivacyAndComplianceCard';
 import {
   Badge,
   Button,
@@ -85,13 +87,21 @@ export const OrganizerPortal: React.FC<OrganizerPortalProps> = ({
   const [boothStatusFilter, setBoothStatusFilter] = useState<'all' | BoothStatus>('all');
   const [busy, setBusy] = useState(false);
 
-  // Attendees fetched from admin-only directory
+  // Attendees & system monitoring fetched from admin-only endpoints
   const [attendees, setAttendees] = useState<AdminAttendeeRow[]>([]);
+  const [monitoring, setMonitoring] = useState<AdminMonitoringSummary | null>(null);
   useEffect(() => {
     eventSphereApi.getAdminAttendees(authToken).then((res) => {
       if (res.ok) setAttendees(res.data.attendees);
     });
   }, [authToken, snapshot.expos]);
+
+  useEffect(() => {
+    if (section !== 'settings') return;
+    eventSphereApi.getAdminMonitoring(authToken).then((res) => {
+      if (res.ok) setMonitoring(res.data);
+    });
+  }, [authToken, section]);
 
   // Modals
   const [expoModal, setExpoModal] = useState<{ mode: 'create' | 'edit'; expo?: ExpoEvent } | null>(null);
@@ -823,18 +833,20 @@ export const OrganizerPortal: React.FC<OrganizerPortalProps> = ({
                 key={b.id}
                 type="button"
                 onClick={() => onInspectBoothOnFloor(b.id)}
-                className="flex flex-col items-start justify-between rounded-xl border border-[#104E35]/18 bg-[#E4EDE7] p-3 text-left transition-transform hover:-translate-y-0.5 hover:border-[#10B981] dark:border-[#2A6F52]/36 dark:bg-[#050A07]"
+                className={`booth-tile-wrap booth-status-${b.status} text-left`}
               >
-                <div className="flex w-full items-center justify-between">
-                  <span className="font-mono text-sm font-bold">{b.number}</span>
-                  <span className="h-2.5 w-2.5 rounded-xs" style={{ backgroundColor: STATUS_HEX[b.status] }} />
-                </div>
-                <div className="mt-2 truncate w-full text-[11px] font-semibold">
-                  {b.exhibitorName || b.status}
-                </div>
-                <div className="font-mono text-[10px] text-[#466153] dark:text-[#8EAD9E]">
-                  ${b.priceUsd.toLocaleString()}
-                </div>
+                <span className="booth-tile-inner flex-col items-start justify-between p-3">
+                  <div className="flex w-full items-center justify-between">
+                    <span className="font-mono text-sm font-bold">{b.number}</span>
+                    <span className="h-2.5 w-2.5 rounded-xs" style={{ backgroundColor: STATUS_HEX[b.status] }} />
+                  </div>
+                  <div className="mt-2 truncate w-full text-[11px] font-semibold">
+                    {b.exhibitorName || b.status}
+                  </div>
+                  <div className="font-mono text-[10px] text-[#466153] dark:text-[#8EAD9E]">
+                    ${b.priceUsd.toLocaleString()}
+                  </div>
+                </span>
               </button>
             ))}
           </div>
@@ -1187,15 +1199,84 @@ export const OrganizerPortal: React.FC<OrganizerPortalProps> = ({
       )}
 
       {section === 'settings' && (
-        <Card padding="lg" className="space-y-4">
-          <h2 className="font-display text-lg font-bold">Organizer Account &amp; Governance</h2>
-          <p className="text-xs text-[#466153] dark:text-[#8EAD9E]">
-            Signed in as <strong>{currentUser.name}</strong> ({currentUser.email}). Organizer setup invite verification and daily atomic JSON snapshots are active.
-          </p>
-          <Button variant="primary" onClick={onOpenProfileModal}>
-            Edit Account Profile
-          </Button>
-        </Card>
+        <div className="space-y-5">
+          <Card padding="lg" className="space-y-4">
+            <h2 className="font-display text-lg font-bold">Organizer Account &amp; Governance</h2>
+            <p className="text-xs text-[#466153] dark:text-[#8EAD9E]">
+              Signed in as <strong>{currentUser.name}</strong> ({currentUser.email}). Organizer setup invite verification, AES-256-GCM encryption at rest, and automated backups are active.
+            </p>
+            <Button variant="primary" onClick={onOpenProfileModal}>
+              Edit Account Profile
+            </Button>
+          </Card>
+
+          <Card padding="lg" className="space-y-4">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <h2 className="font-display text-lg font-bold">Reliability, Performance Monitoring &amp; Backups</h2>
+                <p className="text-xs text-[#466153] dark:text-[#8EAD9E]">
+                  Live telemetry across API latency, MongoDB/JSON storage, memory usage, and snapshot backups.
+                </p>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                loading={busy}
+                onClick={async () => {
+                  setBusy(true);
+                  const res = await eventSphereApi.triggerManualBackup(authToken);
+                  if (res.ok) {
+                    onToast(`Snapshot saved: ${res.data.filename}`);
+                    const mRes = await eventSphereApi.getAdminMonitoring(authToken);
+                    if (mRes.ok) setMonitoring(mRes.data);
+                  } else {
+                    onToast(res.error);
+                  }
+                  setBusy(false);
+                }}
+              >
+                Create Snapshot Backup
+              </Button>
+            </div>
+
+            {monitoring && (
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                <div className="rounded-xl border border-[var(--es-border)] bg-[#E4EDE7]/70 p-3 text-xs dark:bg-[#050A07]/70">
+                  <div className="font-mono text-[10px] text-[#466153] dark:text-[#8EAD9E]">LATENCY (AVG / P95)</div>
+                  <div className="mt-1 font-mono text-sm font-bold tabular-nums">
+                    {monitoring.avgLatencyMs}ms / {monitoring.p95LatencyMs}ms
+                  </div>
+                </div>
+                <div className="rounded-xl border border-[var(--es-border)] bg-[#E4EDE7]/70 p-3 text-xs dark:bg-[#050A07]/70">
+                  <div className="font-mono text-[10px] text-[#466153] dark:text-[#8EAD9E]">DATABASE ENGINE</div>
+                  <div className="mt-1 font-mono text-sm font-bold">
+                    {monitoring.database.mode} {monitoring.database.database ? `(${monitoring.database.database})` : ''}
+                  </div>
+                </div>
+                <div className="rounded-xl border border-[var(--es-border)] bg-[#E4EDE7]/70 p-3 text-xs dark:bg-[#050A07]/70">
+                  <div className="font-mono text-[10px] text-[#466153] dark:text-[#8EAD9E]">ERROR RATE &amp; MEMORY</div>
+                  <div className="mt-1 font-mono text-sm font-bold tabular-nums">
+                    {monitoring.errorRatePct}% · {monitoring.memoryRssMb} MB RSS
+                  </div>
+                </div>
+                <div className="rounded-xl border border-[var(--es-border)] bg-[#E4EDE7]/70 p-3 text-xs dark:bg-[#050A07]/70">
+                  <div className="font-mono text-[10px] text-[#466153] dark:text-[#8EAD9E]">SNAPSHOT BACKUPS</div>
+                  <div className="mt-1 font-mono text-sm font-bold tabular-nums">
+                    {monitoring.backupFiles.length} snapshots · {monitoring.encryptionAtRest.toUpperCase()}
+                  </div>
+                </div>
+              </div>
+            )}
+          </Card>
+
+          <PrivacyAndComplianceCard
+            currentUser={currentUser}
+            authToken={authToken}
+            onRefreshState={onRefreshState}
+            onLogout={onLogout}
+            onToast={onToast}
+          />
+        </div>
       )}
 
       {/* Modals */}

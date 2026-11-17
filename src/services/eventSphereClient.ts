@@ -254,12 +254,29 @@ export const eventSphereApi = {
     }),
 
   forgotPassword: (email: string) =>
-    apiRequest<{ ok: boolean; message: string; demoResetCode?: string }>('/api/auth/forgot-password', {
-      method: 'POST',
-      body: JSON.stringify({ email }),
-    }),
+    apiRequest<{ ok: boolean; message: string; cooldownSeconds?: number; expiresInSeconds?: number }>(
+      '/api/auth/forgot-password',
+      {
+        method: 'POST',
+        body: JSON.stringify({ email }),
+      },
+    ),
 
-  resetPassword: (payload: { email: string; token: string; newPassword: string }) =>
+  verifyResetOtp: (payload: { email: string; otp: string }) =>
+    apiRequest<{ ok: boolean; resetSessionToken: string; message: string }>(
+      '/api/auth/verify-reset-otp',
+      {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      },
+    ),
+
+  resetPassword: (payload: {
+    email: string;
+    resetSessionToken: string;
+    newPassword: string;
+    confirmPassword: string;
+  }) =>
     apiRequest<{ ok: boolean; message: string }>('/api/auth/reset-password', {
       method: 'POST',
       body: JSON.stringify(payload),
@@ -547,6 +564,32 @@ export const eventSphereApi = {
       method: 'POST',
       body: JSON.stringify(payload),
     }),
+
+  updatePrivacyConsent: (
+    token: string,
+    payload: { gdprConsent?: boolean; analyticsTelemetry?: boolean; marketingEmails?: boolean },
+  ) =>
+    apiRequest<{ user: UserAccount }>(
+      '/api/auth/privacy/consent',
+      { method: 'PUT', body: JSON.stringify(payload) },
+      token,
+    ),
+
+  exportPrivacyData: (token: string) =>
+    apiRequest<Record<string, unknown>>('/api/auth/privacy/export', {}, token),
+
+  deleteAccount: (token: string) =>
+    apiRequest<{ ok: boolean; message: string }>('/api/auth/account', { method: 'DELETE' }, token),
+
+  getAdminMonitoring: (token: string) =>
+    apiRequest<import('../types/eventsphere').AdminMonitoringSummary>('/api/admin/monitoring', {}, token),
+
+  triggerManualBackup: (token: string) =>
+    apiRequest<{ ok: boolean; filename: string; createdAt: string }>(
+      '/api/admin/backup',
+      { method: 'POST' },
+      token,
+    ),
 };
 
 export async function pushCloudBackup(

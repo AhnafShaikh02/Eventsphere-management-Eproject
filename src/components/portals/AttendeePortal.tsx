@@ -30,6 +30,7 @@ import {
   StatCard,
   Textarea,
 } from '../ui';
+import { PrivacyAndComplianceCard } from '../PrivacyAndComplianceCard';
 import { DashboardLayout, type PortalNavItem } from './DashboardLayout';
 
 interface AttendeePortalProps {
@@ -510,14 +511,16 @@ export const AttendeePortal: React.FC<AttendeePortalProps> = ({
                 key={b.id}
                 type="button"
                 onClick={() => onInspectBoothOnFloor(b.id)}
-                className="flex flex-col items-start rounded-xl border border-[#104E35]/18 bg-[#E4EDE7] p-3 text-left hover:border-[#10B981] dark:border-[#2A6F52]/36 dark:bg-[#050A07]"
+                className={`booth-tile-wrap booth-status-${b.status} text-left`}
               >
-                <div className="flex w-full items-center justify-between">
-                  <span className="font-mono text-xs font-bold">{b.number}</span>
-                  <span className="h-2 w-2 rounded-xs" style={{ backgroundColor: STATUS_HEX[b.status] }} />
-                </div>
-                <span className="mt-1.5 truncate w-full text-[11px]">
-                  {b.exhibitorName || b.status}
+                <span className="booth-tile-inner flex-col items-start p-3">
+                  <div className="flex w-full items-center justify-between">
+                    <span className="font-mono text-xs font-bold">{b.number}</span>
+                    <span className="h-2 w-2 rounded-xs" style={{ backgroundColor: STATUS_HEX[b.status] }} />
+                  </div>
+                  <span className="mt-1.5 truncate w-full text-[11px] text-[#355243] dark:text-[#8EAD9E]">
+                    {b.exhibitorName || b.status}
+                  </span>
                 </span>
               </button>
             ))}
@@ -715,15 +718,25 @@ export const AttendeePortal: React.FC<AttendeePortalProps> = ({
       )}
 
       {section === 'settings' && (
-        <Card padding="lg" className="space-y-4">
-          <h2 className="font-display text-lg font-bold">Profile Settings</h2>
-          <p className="text-xs text-[#466153] dark:text-[#8EAD9E]">
-            Signed in as <strong>{currentUser.name}</strong> ({currentUser.email}).
-          </p>
-          <Button variant="primary" onClick={onOpenProfileModal}>
-            Edit Attendee Profile
-          </Button>
-        </Card>
+        <div className="space-y-5">
+          <Card padding="lg" className="space-y-4">
+            <h2 className="font-display text-lg font-bold">Profile Settings</h2>
+            <p className="text-xs text-[#466153] dark:text-[#8EAD9E]">
+              Signed in as <strong>{currentUser.name}</strong> ({currentUser.email}).
+            </p>
+            <Button variant="primary" onClick={onOpenProfileModal}>
+              Edit Attendee Profile
+            </Button>
+          </Card>
+
+          <PrivacyAndComplianceCard
+            currentUser={currentUser}
+            authToken={authToken}
+            onRefreshState={onRefreshState}
+            onLogout={onLogout}
+            onToast={onToast}
+          />
+        </div>
       )}
 
       <ConfirmDialog

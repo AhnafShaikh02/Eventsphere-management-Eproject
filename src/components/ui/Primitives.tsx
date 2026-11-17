@@ -1,4 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+gsap.registerPlugin(ScrollTrigger);
 
 export interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
   padding?: 'none' | 'sm' | 'md' | 'lg';
@@ -21,8 +25,8 @@ export const Card: React.FC<CardProps> = ({
   return (
     <div
       className={[
-        'surface-luxe rounded-2xl border border-[#104E35]/18 bg-[#F0F5F2] text-[#091911] dark:border-[#2A6F52]/38 dark:bg-[#08110C] dark:text-[#DDF2E7]',
-        interactive ? 'transition-all duration-200 hover:-translate-y-0.5 hover:border-[#059669]/45 dark:hover:border-[#34D399]/45' : '',
+        'surface-luxe portal-card-glow rounded-2xl border border-[var(--es-border)] bg-[#F0F5F2] text-[#091911] dark:bg-[#08110C] dark:text-[#DDF2E7]',
+        interactive ? 'transition-all duration-200 hover:-translate-y-0.5 hover:border-[var(--es-border-strong)]' : '',
         padMap[padding],
         className,
       ]
@@ -64,6 +68,41 @@ export const Badge: React.FC<{
   </span>
 );
 
+function parseAnimatedStat(raw: string | number) {
+  if (typeof raw === 'number' && Number.isFinite(raw)) {
+    return {
+      isNumeric: true,
+      prefix: '',
+      target: raw,
+      suffix: '',
+      decimals: Number.isInteger(raw) ? 0 : 1,
+      useLocale: true,
+    };
+  }
+
+  const str = String(raw ?? '').trim();
+  const match = str.match(/^([^\d-]*)(-?[\d,]+(?:\.\d+)?)(.*)$/);
+  if (!match) {
+    return { isNumeric: false, raw: str };
+  }
+
+  const [, prefix, numPart, suffix] = match;
+  const numeric = Number(numPart.replace(/,/g, ''));
+  if (!Number.isFinite(numeric)) {
+    return { isNumeric: false, raw: str };
+  }
+
+  const dotIdx = numPart.indexOf('.');
+  return {
+    isNumeric: true,
+    prefix,
+    target: numeric,
+    suffix,
+    decimals: dotIdx >= 0 ? numPart.length - dotIdx - 1 : 0,
+    useLocale: numPart.includes(',') || numeric >= 1000,
+  };
+}
+
 export const StatCard: React.FC<{
   label: string;
   value: string | number;
@@ -77,13 +116,122 @@ export const StatCard: React.FC<{
     teal: '#2DD4BF',
     violet: '#A78BFA',
   };
+  const glowMap = {
+    emerald: 'rgba(16, 185, 129, 0.36)',
+    coral: 'rgba(249, 115, 98, 0.34)',
+    teal: 'rgba(45, 212, 191, 0.36)',
+    violet: 'rgba(167, 139, 250, 0.36)',
+  };
+
+  const cardRef = useRef<HTMLDivElement | null>(null);
+  const valRef = useRef<HTMLDivElement | null>(null);
+  const glowRef = useRef<HTMLDivElement | null>(null);
+  const prevNumRef = useRef<number>(0);
+  const parsed = parseAnimatedStat(value);
+  const [displayValue, setDisplayValue] = useState<string>(String(value));
+
+  useEffect(() => {
+    const reduce = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (!parsed.isNumeric || parsed.target === undefined) {
+      setDisplayValue(String(value));
+      if (!reduce && valRef.current) {
+        gsap.fromTo(
+          valRef.current,
+          { y: 10, opacity: 0, filter: 'blur(4px)' },
+          { y: 0, opacity: 1, filter: 'blur(0px)', duration: 0.45, ease: 'power3.out', clearProps: 'transform,opacity,filter' },
+        );
+      }
+      return;
+    }
+
+    if (reduce) {
+      prevNumRef.current = parsed.target;
+      setDisplayValue(String(value));
+      return;
+    }
+
+    const startVal = prevNumRef.current;
+    const endVal = parsed.target;
+    const stateObj = { current: startVal };
+
+    const formatNumber = (val: number) => {
+      const rounded = parsed.decimals > 0 ? Number(val.toFixed(parsed.decimals)) : Math.round(val);
+      const formatted = parsed.useLocale ? rounded.toLocaleString() : String(rounded);
+      return `${parsed.prefix}${formatted}${parsed.suffix}`;
+    };
+
+    const ctx = gsap.context(() => {
+      const runTween = () => {
+        gsap.to(stateObj, {
+          current: endVal,
+          duration: startVal === 0 ? 0.95 : 0.6,
+          ease: 'power3.out',
+          onUpdate: () => {
+            setDisplayValue(formatNumber(stateObj.current));
+          },
+          onComplete: () => {
+            prevNumRef.current = endVal;
+            setDisplayValue(String(value));
+          },
+        });
+      };
+
+      if (cardRef.current) {
+        const rect = cardRef.current.getBoundingClientRect();
+        if (rect.top < window.innerHeight * 0.95) {
+          runTween();
+        } else {
+          ScrollTrigger.create({
+            trigger: cardRef.current,
+            start: 'top 92%',
+            once: true,
+            onEnter: runTween,
+          });
+        }
+      } else {
+        runTween();
+      }
+
+      if (glowRef.current) {
+        gsap.fromTo(
+          glowRef.current,
+          { opacity: 0.16, scale: 0.85 },
+          {
+            opacity: 0.34,
+            scale: 1.08,
+            duration: 2.8,
+            repeat: -1,
+            yoyo: true,
+            ease: 'sine.inOut',
+          },
+        );
+      }
+    }, cardRef);
+
+    return () => ctx.revert();
+  }, [value, parsed.isNumeric, parsed.target, parsed.prefix, parsed.suffix, parsed.decimals, parsed.useLocale]);
+
   return (
-    <Card padding="md" className="relative overflow-hidden">
-      <div className="flex items-start justify-between gap-3">
-        <div>
+    <div
+      ref={cardRef}
+      data-gsap-stat="true"
+      style={{ '--stat-glow': glowMap[tone] } as React.CSSProperties}
+      className="surface-luxe portal-stat-card relative overflow-hidden rounded-2xl border border-[var(--es-border)] bg-[#F0F5F2] p-5 text-[#091911] dark:bg-[#08110C] dark:text-[#DDF2E7]"
+    >
+      <div
+        ref={glowRef}
+        aria-hidden="true"
+        className="pointer-events-none absolute -top-10 -right-10 h-28 w-28 rounded-full opacity-25 blur-2xl"
+        style={{ background: accentMap[tone] }}
+      />
+      <div className="relative z-10 flex items-start justify-between gap-3">
+        <div className="min-w-0">
           <div className="text-xs font-semibold text-[#466153] dark:text-[#8EAD9E]">{label}</div>
-          <div className="mt-1.5 font-display text-2xl font-extrabold tracking-tight tabular-nums sm:text-3xl">
-            {value}
+          <div
+            ref={valRef}
+            className="mt-1.5 font-display text-2xl font-extrabold tracking-tight tabular-nums sm:text-3xl"
+          >
+            {displayValue}
           </div>
           {sublabel && (
             <div className="mt-1 font-mono text-[11px] text-[#466153] dark:text-[#8EAD9E]">
@@ -93,14 +241,17 @@ export const StatCard: React.FC<{
         </div>
         {icon && (
           <div
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[#104E35]/18 bg-[#E4EDE7] dark:border-[#2A6F52]/38 dark:bg-[#050A07]"
-            style={{ color: accentMap[tone] }}
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[#104E35]/18 bg-[#E4EDE7] shadow-inner dark:border-[#2A6F52]/38 dark:bg-[#050A07]"
+            style={{
+              color: accentMap[tone],
+              boxShadow: `0 0 18px -6px ${glowMap[tone]}`,
+            }}
           >
             {icon}
           </div>
         )}
       </div>
-    </Card>
+    </div>
   );
 };
 

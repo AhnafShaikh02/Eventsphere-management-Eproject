@@ -1,9 +1,12 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { BarChart3, Download, FileJson, Printer } from 'lucide-react';
-import { motion } from 'motion/react';
 import type { EventSphereSnapshot } from '../types/eventsphere';
 import { STATUS_HEX } from '../three/expoModels';
 import { Button, Card, Input, StatCard } from './ui';
+
+gsap.registerPlugin(ScrollTrigger);
 
 interface ExpoAnalyticsDashboardProps {
   snapshot: EventSphereSnapshot;
@@ -24,6 +27,10 @@ export const ExpoAnalyticsDashboard: React.FC<ExpoAnalyticsDashboardProps> = ({
   });
   const [toDate, setToDate] = useState(maxDate);
   const [hoverIdx, setHoverIdx] = useState<number | null>(null);
+
+  const rootRef = useRef<HTMLDivElement | null>(null);
+  const chartCardRef = useRef<HTMLDivElement | null>(null);
+  const progressRef = useRef<HTMLDivElement | null>(null);
 
   const filteredSeries = useMemo(() => {
     return series.filter((pt) => pt.date >= fromDate && pt.date <= toDate);
@@ -55,6 +62,179 @@ export const ExpoAnalyticsDashboard: React.FC<ExpoAnalyticsDashboardProps> = ({
       potentialRevenue,
     };
   }, [filteredSeries, snapshot.booths]);
+
+  // Mount & ScrollTrigger choreography
+  useEffect(() => {
+    const root = rootRef.current;
+    if (!root) return;
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduce) {
+      if (progressRef.current) progressRef.current.style.transform = 'scaleX(1)';
+      return;
+    }
+
+    const ctx = gsap.context(() => {
+      // Top scroll-linked progress glow bar
+      if (progressRef.current) {
+        gsap.fromTo(
+          progressRef.current,
+          { scaleX: 0.06 },
+          {
+            scaleX: 1,
+            ease: 'none',
+            scrollTrigger: {
+              trigger: root,
+              start: 'top top',
+              end: 'bottom bottom',
+              scrub: 0.25,
+            },
+          },
+        );
+      }
+
+      // Header text & toolbar stagger
+      gsap.fromTo(
+        '.analytics-text-reveal',
+        { y: 18, opacity: 0, filter: 'blur(6px)' },
+        {
+          y: 0,
+          opacity: 1,
+          filter: 'blur(0px)',
+          duration: 0.6,
+          stagger: 0.07,
+          ease: 'power3.out',
+          clearProps: 'transform,opacity,filter',
+        },
+      );
+
+      // KPI cards stagger
+      gsap.fromTo(
+        '[data-gsap-stat="true"]',
+        { y: 22, opacity: 0, scale: 0.97 },
+        {
+          y: 0,
+          opacity: 1,
+          scale: 1,
+          duration: 0.56,
+          delay: 0.08,
+          stagger: 0.06,
+          ease: 'power3.out',
+          clearProps: 'transform,opacity',
+        },
+      );
+
+      // Scroll-triggered bottom cards, table rows & animated session popularity bars
+      const scrollSections = gsap.utils.toArray<HTMLElement>('.analytics-scroll-card');
+      scrollSections.forEach((sec) => {
+        gsap.fromTo(
+          sec,
+          { y: 26, opacity: 0, scale: 0.985 },
+          {
+            y: 0,
+            opacity: 1,
+            scale: 1,
+            duration: 0.58,
+            ease: 'power3.out',
+            clearProps: 'transform,opacity',
+            scrollTrigger: {
+              trigger: sec,
+              start: 'top 90%',
+              once: true,
+            },
+          },
+        );
+      });
+
+      const bars = gsap.utils.toArray<HTMLElement>('.analytics-bar-fill');
+      if (bars.length > 0) {
+        gsap.fromTo(
+          bars,
+          { scaleX: 0 },
+          {
+            scaleX: 1,
+            duration: 0.85,
+            stagger: 0.07,
+            ease: 'power3.out',
+            transformOrigin: 'left center',
+            clearProps: 'transform',
+            scrollTrigger: {
+              trigger: '.analytics-bars-group',
+              start: 'top 90%',
+              once: true,
+            },
+          },
+        );
+      }
+
+      const rows = gsap.utils.toArray<HTMLElement>('.analytics-booth-row');
+      if (rows.length > 0) {
+        gsap.fromTo(
+          rows,
+          { x: -12, opacity: 0 },
+          {
+            x: 0,
+            opacity: 1,
+            duration: 0.42,
+            stagger: 0.045,
+            ease: 'power2.out',
+            clearProps: 'transform,opacity',
+            scrollTrigger: {
+              trigger: '.analytics-booth-table',
+              start: 'top 90%',
+              once: true,
+            },
+          },
+        );
+      }
+
+      ScrollTrigger.refresh();
+    }, root);
+
+    return () => ctx.revert();
+  }, []);
+
+  // Re-draw SVG trend polylines whenever date range changes
+  useEffect(() => {
+    const chartEl = chartCardRef.current;
+    if (!chartEl) return;
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduce) return;
+
+    const ctx = gsap.context(() => {
+      const lines = Array.from(chartEl.querySelectorAll<SVGPolylineElement>('.analytics-polyline'));
+      lines.forEach((line, idx) => {
+        const length = typeof line.getTotalLength === 'function' ? line.getTotalLength() : 900;
+        gsap.fromTo(
+          line,
+          { strokeDasharray: length, strokeDashoffset: length },
+          {
+            strokeDashoffset: 0,
+            duration: 0.95,
+            delay: idx * 0.1,
+            ease: 'power2.out',
+            clearProps: 'strokeDasharray,strokeDashoffset',
+          },
+        );
+      });
+
+      gsap.fromTo(
+        chartEl.querySelectorAll('.analytics-node'),
+        { scale: 0, opacity: 0 },
+        {
+          scale: 1,
+          opacity: 1,
+          duration: 0.35,
+          stagger: 0.025,
+          delay: 0.2,
+          ease: 'back.out(1.6)',
+          transformOrigin: 'center center',
+          clearProps: 'transform,opacity',
+        },
+      );
+    }, chartEl);
+
+    return () => ctx.revert();
+  }, [filteredSeries]);
 
   const handleExportCsv = () => {
     const headers = ['Date', 'BoothTraffic', 'SessionBookmarks', 'ExhibitorProfileViews'];
@@ -113,25 +293,32 @@ export const ExpoAnalyticsDashboard: React.FC<ExpoAnalyticsDashboardProps> = ({
   const hoveredPoint = hoverIdx !== null ? filteredSeries[hoverIdx] : null;
 
   return (
-    <div className="relative z-20 min-h-screen bg-[#E9F0EC]/96 px-4 pt-24 pb-16 text-[#091911] dark:bg-[#040705]/96 dark:text-[#DDF2E7] sm:px-6">
-      <motion.div
-        initial={{ opacity: 0, y: 14 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
-        className="mx-auto max-w-7xl space-y-6"
-      >
+    <div
+      ref={rootRef}
+      style={{ '--portal-accent': '#10B981' } as React.CSSProperties}
+      className="relative z-20 min-h-screen bg-[#E9F0EC]/96 px-4 pt-24 pb-16 text-[#091911] dark:bg-[#040705]/96 dark:text-[#DDF2E7] sm:px-6"
+    >
+      <div
+        ref={progressRef}
+        aria-hidden="true"
+        className="portal-scroll-progress fixed top-16 right-0 left-0 z-30"
+        style={{ transform: 'scaleX(0.06)' }}
+      />
+
+      <div className="mx-auto max-w-7xl space-y-6">
         {/* Header & Export Toolbar */}
-        <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[#104E35]/18 pb-5 dark:border-[#2A6F52]/34">
-          <div>
-            <p className="font-mono text-xs font-semibold tracking-wider text-[#059669] dark:text-[#34D399]">
+        <div className="portal-shell-card surface-luxe relative flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-[#104E35]/18 bg-[#F0F5F2]/90 px-5 py-5 dark:border-[#2A6F52]/34 dark:bg-[#08110C]/90">
+          <div aria-hidden="true" className="portal-aura-orb absolute -top-12 right-10 h-32 w-56 rounded-full" />
+          <div className="relative z-10">
+            <p className="analytics-text-reveal font-mono text-xs font-semibold tracking-wider text-[#059669] dark:text-[#34D399]">
               Telemetry &amp; Reporting
             </p>
-            <h1 className="mt-1 font-display text-3xl font-extrabold tracking-tight sm:text-4xl">
+            <h1 className="analytics-text-reveal mt-1 font-display text-3xl font-extrabold tracking-tight sm:text-4xl">
               Live Expo Analytics
             </h1>
           </div>
 
-          <div className="no-print flex flex-wrap items-center gap-2">
+          <div className="no-print relative z-10 flex flex-wrap items-center gap-2">
             <Button
               variant="primary"
               size="sm"
@@ -160,7 +347,7 @@ export const ExpoAnalyticsDashboard: React.FC<ExpoAnalyticsDashboardProps> = ({
         </div>
 
         {/* Date Range Filters */}
-        <Card padding="sm" className="no-print flex flex-wrap items-center justify-between gap-3">
+        <Card padding="sm" className="no-print analytics-text-reveal flex flex-wrap items-center justify-between gap-3">
           <div className="flex flex-wrap items-center gap-2">
             <span className="font-mono text-xs font-semibold text-[#466153] dark:text-[#8EAD9E]">
               Date Range:
@@ -188,7 +375,7 @@ export const ExpoAnalyticsDashboard: React.FC<ExpoAnalyticsDashboardProps> = ({
           </div>
         </Card>
 
-        {/* KPI Strip */}
+        {/* KPI Strip (Animated via GSAP StatCard) */}
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <StatCard
             label="Booth Occupancy"
@@ -217,98 +404,104 @@ export const ExpoAnalyticsDashboard: React.FC<ExpoAnalyticsDashboardProps> = ({
         </div>
 
         {/* Interactive Trend Chart */}
-        <Card padding="lg">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="flex items-center gap-2 font-display text-lg font-bold">
-              <BarChart3 className="h-4 w-4 text-[#34D399]" />
-              <span>Engagement &amp; Traffic Velocity</span>
-            </div>
-            <div className="flex flex-wrap items-center gap-4 text-xs">
-              <span className="flex items-center gap-1.5">
-                <span className="h-2.5 w-2.5 rounded-xs bg-[#10B981]" /> Booth Traffic
-              </span>
-              <span className="flex items-center gap-1.5">
-                <span className="h-2.5 w-2.5 rounded-xs bg-[#6EE7B7]" /> Profile Views
-              </span>
-              <span className="flex items-center gap-1.5">
-                <span className="h-2.5 w-2.5 rounded-xs bg-[#2DD4BF]" /> Session Bookmarks
-              </span>
-            </div>
-          </div>
-
-          <div className="relative mt-4 overflow-x-auto">
-            <svg viewBox={`0 0 ${svgW} ${svgH}`} className="h-56 w-full min-w-[540px]">
-              {[0.25, 0.5, 0.75, 1].map((frac) => {
-                const y = svgH - padY - frac * (svgH - padY * 2);
-                return (
-                  <line
-                    key={frac}
-                    x1={padX}
-                    x2={svgW - padX}
-                    y1={y}
-                    y2={y}
-                    stroke="currentColor"
-                    strokeOpacity={0.1}
-                    strokeDasharray="4 4"
-                  />
-                );
-              })}
-
-              <polyline
-                fill="none"
-                stroke="#10B981"
-                strokeWidth="3"
-                points={buildPolyline((p) => p.boothTraffic)}
-              />
-              <polyline
-                fill="none"
-                stroke="#6EE7B7"
-                strokeWidth="2.5"
-                points={buildPolyline((p) => p.profileViews)}
-              />
-              <polyline
-                fill="none"
-                stroke="#2DD4BF"
-                strokeWidth="2.5"
-                points={buildPolyline((p) => p.sessionBookmarks)}
-              />
-
-              {filteredSeries.map((pt, i) => {
-                const x =
-                  filteredSeries.length === 1
-                    ? svgW / 2
-                    : padX + (i / (filteredSeries.length - 1)) * (svgW - padX * 2);
-                const y = svgH - padY - (pt.boothTraffic / maxVal) * (svgH - padY * 2);
-                return (
-                  <g key={pt.date}>
-                    <circle
-                      cx={x}
-                      cy={y}
-                      r={hoverIdx === i ? 6 : 3.5}
-                      fill="#34D399"
-                      onMouseEnter={() => setHoverIdx(i)}
-                      onMouseLeave={() => setHoverIdx(null)}
-                      className="cursor-pointer"
-                    />
-                  </g>
-                );
-              })}
-            </svg>
-
-            {hoveredPoint && (
-              <div className="mt-2 flex flex-wrap items-center gap-4 rounded-lg border border-[#104E35]/18 bg-[#E4EDE7] px-3 py-2 font-mono text-xs dark:border-[#2A6F52]/36 dark:bg-[#050A07]">
-                <span className="font-bold">{hoveredPoint.date}</span>
-                <span className="text-[#10B981]">Traffic: {hoveredPoint.boothTraffic}</span>
-                <span className="text-[#6EE7B7]">Profile Views: {hoveredPoint.profileViews}</span>
-                <span className="text-[#2DD4BF]">Bookmarks: {hoveredPoint.sessionBookmarks}</span>
+        <div ref={chartCardRef} className="analytics-scroll-card">
+          <Card padding="lg">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="flex items-center gap-2 font-display text-lg font-bold">
+                <BarChart3 className="h-4 w-4 text-[#34D399]" />
+                <span>Engagement &amp; Traffic Velocity</span>
               </div>
-            )}
-          </div>
-        </Card>
+              <div className="flex flex-wrap items-center gap-4 text-xs">
+                <span className="flex items-center gap-1.5">
+                  <span className="h-2.5 w-2.5 rounded-xs bg-[#10B981]" /> Booth Traffic
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <span className="h-2.5 w-2.5 rounded-xs bg-[#6EE7B7]" /> Profile Views
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <span className="h-2.5 w-2.5 rounded-xs bg-[#2DD4BF]" /> Session Bookmarks
+                </span>
+              </div>
+            </div>
+
+            <div className="relative mt-4 overflow-x-auto">
+              <svg viewBox={`0 0 ${svgW} ${svgH}`} className="h-56 w-full min-w-[540px]">
+                {[0.25, 0.5, 0.75, 1].map((frac) => {
+                  const y = svgH - padY - frac * (svgH - padY * 2);
+                  return (
+                    <line
+                      key={frac}
+                      x1={padX}
+                      x2={svgW - padX}
+                      y1={y}
+                      y2={y}
+                      stroke="currentColor"
+                      strokeOpacity={0.1}
+                      strokeDasharray="4 4"
+                    />
+                  );
+                })}
+
+                <polyline
+                  className="analytics-polyline"
+                  fill="none"
+                  stroke="#10B981"
+                  strokeWidth="3"
+                  style={{ filter: 'drop-shadow(0 0 6px rgba(16,185,129,0.42))' }}
+                  points={buildPolyline((p) => p.boothTraffic)}
+                />
+                <polyline
+                  className="analytics-polyline"
+                  fill="none"
+                  stroke="#6EE7B7"
+                  strokeWidth="2.5"
+                  points={buildPolyline((p) => p.profileViews)}
+                />
+                <polyline
+                  className="analytics-polyline"
+                  fill="none"
+                  stroke="#2DD4BF"
+                  strokeWidth="2.5"
+                  points={buildPolyline((p) => p.sessionBookmarks)}
+                />
+
+                {filteredSeries.map((pt, i) => {
+                  const x =
+                    filteredSeries.length === 1
+                      ? svgW / 2
+                      : padX + (i / (filteredSeries.length - 1)) * (svgW - padX * 2);
+                  const y = svgH - padY - (pt.boothTraffic / maxVal) * (svgH - padY * 2);
+                  return (
+                    <g key={pt.date}>
+                      <circle
+                        cx={x}
+                        cy={y}
+                        r={hoverIdx === i ? 6 : 3.5}
+                        fill="#34D399"
+                        onMouseEnter={() => setHoverIdx(i)}
+                        onMouseLeave={() => setHoverIdx(null)}
+                        className="analytics-node cursor-pointer"
+                      />
+                    </g>
+                  );
+                })}
+              </svg>
+
+              {hoveredPoint && (
+                <div className="mt-2 flex flex-wrap items-center gap-4 rounded-lg border border-[#104E35]/18 bg-[#E4EDE7] px-3 py-2 font-mono text-xs dark:border-[#2A6F52]/36 dark:bg-[#050A07]">
+                  <span className="font-bold">{hoveredPoint.date}</span>
+                  <span className="text-[#10B981]">Traffic: {hoveredPoint.boothTraffic}</span>
+                  <span className="text-[#6EE7B7]">Profile Views: {hoveredPoint.profileViews}</span>
+                  <span className="text-[#2DD4BF]">Bookmarks: {hoveredPoint.sessionBookmarks}</span>
+                </div>
+              )}
+            </div>
+          </Card>
+        </div>
 
         {/* Breakdown Tables */}
         <div className="grid gap-6 lg:grid-cols-2">
-          <Card padding="lg">
+          <Card padding="lg" className="analytics-scroll-card analytics-booth-table">
             <h2 className="font-display text-lg font-bold">Top Booth Traffic &amp; Allocation</h2>
             <div className="mt-3 overflow-x-auto">
               <table className="w-full text-left text-xs">
@@ -328,7 +521,7 @@ export const ExpoAnalyticsDashboard: React.FC<ExpoAnalyticsDashboardProps> = ({
                       <tr
                         key={b.id}
                         onClick={() => onInspectBooth(b.id)}
-                        className="cursor-pointer hover:bg-[#E4EDE7] dark:hover:bg-[#10B981]/8"
+                        className="analytics-booth-row cursor-pointer hover:bg-[#E4EDE7] dark:hover:bg-[#10B981]/8"
                       >
                         <td className="py-2 font-mono font-bold">{b.number}</td>
                         <td className="py-2">{b.exhibitorName || b.zone}</td>
@@ -348,7 +541,7 @@ export const ExpoAnalyticsDashboard: React.FC<ExpoAnalyticsDashboardProps> = ({
             </div>
           </Card>
 
-          <Card padding="lg">
+          <Card padding="lg" className="analytics-scroll-card analytics-bars-group">
             <h2 className="font-display text-lg font-bold">Session Registration &amp; Popularity</h2>
             <div className="mt-3 space-y-3">
               {snapshot.sessions.map((s) => {
@@ -370,8 +563,11 @@ export const ExpoAnalyticsDashboard: React.FC<ExpoAnalyticsDashboardProps> = ({
                     </div>
                     <div className="h-2 w-full overflow-hidden rounded-full bg-[#E8EFEA] dark:bg-[#040705]">
                       <div
-                        className="h-full rounded-full bg-gradient-to-r from-[#059669] to-[#34D399]"
-                        style={{ width: `${fillPct}%` }}
+                        className="analytics-bar-fill h-full rounded-full bg-gradient-to-r from-[#059669] to-[#34D399]"
+                        style={{
+                          width: `${fillPct}%`,
+                          boxShadow: '0 0 12px rgba(52, 211, 153, 0.45)',
+                        }}
                       />
                     </div>
                   </div>
@@ -380,7 +576,7 @@ export const ExpoAnalyticsDashboard: React.FC<ExpoAnalyticsDashboardProps> = ({
             </div>
           </Card>
         </div>
-      </motion.div>
+      </div>
     </div>
   );
 };

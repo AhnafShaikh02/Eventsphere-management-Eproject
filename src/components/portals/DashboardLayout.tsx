@@ -1,8 +1,12 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Bell, Compass, LogOut, Menu, PanelLeftClose, PanelLeftOpen, X } from 'lucide-react';
 import type { UserAccount } from '../../types/eventsphere';
 import { getRoleLabel } from '../../services/eventSphereClient';
 import { Badge, Button } from '../ui';
+
+gsap.registerPlugin(ScrollTrigger);
 
 export interface PortalNavItem {
   id: string;
@@ -41,7 +45,242 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   const [collapsed, setCollapsed] = useState(false);
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
 
+  const shellRef = useRef<HTMLDivElement | null>(null);
+  const sidebarRef = useRef<HTMLElement | null>(null);
+  const mainRef = useRef<HTMLElement | null>(null);
+  const contentRef = useRef<HTMLDivElement | null>(null);
+  const scrollBarRef = useRef<HTMLDivElement | null>(null);
+  const auraOrbRef = useRef<HTMLDivElement | null>(null);
+
   const activeItem = navItems.find((item) => item.id === activeSection) || navItems[0];
+
+  // Portal shell mount: sidebar nav stagger + continuous ambient glow orb
+  useEffect(() => {
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduce || !shellRef.current) return;
+
+    const ctx = gsap.context(() => {
+      const navButtons = sidebarRef.current?.querySelectorAll('.portal-nav-btn');
+      if (navButtons && navButtons.length > 0) {
+        gsap.from(navButtons, {
+          x: -14,
+          opacity: 0,
+          duration: 0.42,
+          stagger: 0.03,
+          ease: 'power3.out',
+          clearProps: 'transform,opacity',
+        });
+      }
+
+      if (auraOrbRef.current) {
+        gsap.fromTo(
+          auraOrbRef.current,
+          { opacity: 0.28, scale: 0.9 },
+          {
+            opacity: 0.56,
+            scale: 1.15,
+            duration: 3.4,
+            repeat: -1,
+            yoyo: true,
+            ease: 'sine.inOut',
+          },
+        );
+      }
+    }, shellRef);
+
+    return () => ctx.revert();
+  }, [roleTitle]);
+
+  // Section switch + ScrollTrigger choreography (scroll text, cards, booths, rows, glow)
+  useEffect(() => {
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const mainEl = mainRef.current;
+    const contentEl = contentRef.current;
+    if (!mainEl || !contentEl) return;
+
+    if (reduce) {
+      if (scrollBarRef.current) scrollBarRef.current.style.transform = 'scaleX(1)';
+      return;
+    }
+
+    const ctx = gsap.context(() => {
+      // 1. Header kinetic text reveal on section switch
+      const headerEls = mainEl.querySelectorAll('.portal-header-crumb, .portal-header-title');
+      if (headerEls.length > 0) {
+        gsap.fromTo(
+          headerEls,
+          { y: 14, opacity: 0, filter: 'blur(6px)' },
+          {
+            y: 0,
+            opacity: 1,
+            filter: 'blur(0px)',
+            duration: 0.52,
+            stagger: 0.06,
+            ease: 'power3.out',
+            clearProps: 'transform,opacity,filter',
+          },
+        );
+      }
+
+      // 2. Scroll progress glow bar tied to workspace scroll
+      if (scrollBarRef.current) {
+        gsap.fromTo(
+          scrollBarRef.current,
+          { scaleX: 0.08 },
+          {
+            scaleX: 1,
+            ease: 'none',
+            scrollTrigger: {
+              trigger: contentEl,
+              start: 'top 140px',
+              end: 'bottom bottom',
+              scrub: 0.25,
+            },
+          },
+        );
+      }
+
+      // 3. KPI StatCards stagger + subtle luminous glow arrival
+      const statCards = Array.from(contentEl.querySelectorAll<HTMLElement>('[data-gsap-stat="true"]'));
+      if (statCards.length > 0) {
+        gsap.fromTo(
+          statCards,
+          { y: 20, opacity: 0, scale: 0.97 },
+          {
+            y: 0,
+            opacity: 1,
+            scale: 1,
+            duration: 0.55,
+            stagger: 0.06,
+            ease: 'power3.out',
+            clearProps: 'transform,opacity',
+          },
+        );
+      }
+
+      // 4. Cards & section panels: above-fold stagger + below-fold ScrollTrigger reveal with glow pulse
+      const cards = Array.from(contentEl.querySelectorAll<HTMLElement>('.surface-luxe:not([data-gsap-stat="true"])'));
+      const aboveFoldCards: HTMLElement[] = [];
+      const belowFoldCards: HTMLElement[] = [];
+
+      cards.forEach((card) => {
+        const rect = card.getBoundingClientRect();
+        if (rect.top < window.innerHeight * 0.92) {
+          aboveFoldCards.push(card);
+        } else {
+          belowFoldCards.push(card);
+        }
+      });
+
+      if (aboveFoldCards.length > 0) {
+        gsap.fromTo(
+          aboveFoldCards,
+          { y: 20, opacity: 0, scale: 0.985 },
+          {
+            y: 0,
+            opacity: 1,
+            scale: 1,
+            duration: 0.56,
+            delay: 0.05,
+            stagger: 0.055,
+            ease: 'power3.out',
+            clearProps: 'transform,opacity',
+          },
+        );
+      }
+
+      belowFoldCards.forEach((card) => {
+        gsap.fromTo(
+          card,
+          { y: 26, opacity: 0, scale: 0.985 },
+          {
+            y: 0,
+            opacity: 1,
+            scale: 1,
+            duration: 0.58,
+            ease: 'power3.out',
+            clearProps: 'transform,opacity',
+            scrollTrigger: {
+              trigger: card,
+              start: 'top 90%',
+              once: true,
+            },
+          },
+        );
+      });
+
+      // 5. Scroll-triggered kinetic text reveal for h2 / h3 section headings inside portals
+      const headings = Array.from(contentEl.querySelectorAll<HTMLElement>('h2, h3'));
+      headings.forEach((heading, idx) => {
+        const rect = heading.getBoundingClientRect();
+        const animateIn = () => {
+          gsap.fromTo(
+            heading,
+            { y: 14, opacity: 0, filter: 'blur(5px)' },
+            {
+              y: 0,
+              opacity: 1,
+              filter: 'blur(0px)',
+              duration: 0.5,
+              delay: rect.top < window.innerHeight * 0.92 ? Math.min(idx * 0.04, 0.24) : 0,
+              ease: 'power3.out',
+              clearProps: 'transform,opacity,filter',
+            },
+          );
+        };
+
+        if (rect.top < window.innerHeight * 0.92) {
+          animateIn();
+        } else {
+          ScrollTrigger.create({
+            trigger: heading,
+            start: 'top 92%',
+            once: true,
+            onEnter: animateIn,
+          });
+        }
+      });
+
+      // 6. Booth matrix tiles wave reveal
+      const boothTiles = Array.from(contentEl.querySelectorAll<HTMLElement>('.booth-tile-wrap'));
+      if (boothTiles.length > 0) {
+        gsap.fromTo(
+          boothTiles,
+          { y: 14, opacity: 0, scale: 0.92 },
+          {
+            y: 0,
+            opacity: 1,
+            scale: 1,
+            duration: 0.44,
+            stagger: { amount: 0.42, from: 'start' },
+            ease: 'power2.out',
+            clearProps: 'transform,opacity',
+          },
+        );
+      }
+
+      // 7. Data table row scroll stagger
+      const tableRows = Array.from(contentEl.querySelectorAll<HTMLElement>('tbody tr'));
+      if (tableRows.length > 0) {
+        gsap.fromTo(
+          tableRows.slice(0, 24),
+          { x: -10, opacity: 0 },
+          {
+            x: 0,
+            opacity: 1,
+            duration: 0.38,
+            stagger: 0.025,
+            ease: 'power2.out',
+            clearProps: 'transform,opacity',
+          },
+        );
+      }
+
+      ScrollTrigger.refresh();
+    }, mainEl);
+
+    return () => ctx.revert();
+  }, [activeSection, roleTitle]);
 
   const renderNavList = (onPick?: () => void) => (
     <nav aria-label={`${roleTitle} navigation`} className="flex-1 space-y-1 overflow-y-auto px-2.5 py-3">
@@ -56,7 +295,14 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
               onPick?.();
             }}
             title={collapsed ? item.label : undefined}
-            className={`flex w-full items-center justify-between gap-2.5 rounded-xl px-3 py-2.5 text-left text-xs font-semibold transition-all ${
+            style={
+              active
+                ? {
+                    boxShadow: `0 0 18px -6px ${roleAccent}55`,
+                  }
+                : undefined
+            }
+            className={`portal-nav-btn flex w-full items-center justify-between gap-2.5 rounded-xl px-3 py-2.5 text-left text-xs font-semibold transition-all ${
               active
                 ? 'bg-gradient-to-r from-[#059669]/18 to-[#34D399]/14 text-[#047857] shadow-xs dark:from-[#10B981]/22 dark:to-[#34D399]/10 dark:text-[#ECFDF5]'
                 : 'text-[#466153] hover:bg-[#E8EFEA] hover:text-[#09140E] dark:text-[#8EAD9E] dark:hover:bg-[#10B981]/10 dark:hover:text-[#ECFDF5]'
@@ -83,11 +329,16 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   );
 
   return (
-    <div className="relative z-20 min-h-screen bg-[#E9F0EC]/97 pt-20 text-[#091911] dark:bg-[#040705]/97 dark:text-[#DDF2E7]">
+    <div
+      ref={shellRef}
+      style={{ '--portal-accent': roleAccent } as React.CSSProperties}
+      className="relative z-20 min-h-screen bg-[#E9F0EC]/97 pt-20 text-[#091911] dark:bg-[#040705]/97 dark:text-[#DDF2E7]"
+    >
       <div className="mx-auto flex max-w-[1440px] gap-0 px-3 pb-10 sm:px-6 lg:gap-6">
         {/* Desktop Sidebar */}
         <aside
-          className={`surface-luxe sticky top-24 hidden h-[calc(100vh-7rem)] shrink-0 flex-col rounded-2xl border border-[#104E35]/18 bg-[#F0F5F2] transition-all duration-200 dark:border-[#2A6F52]/36 dark:bg-[#08110C] lg:flex ${
+          ref={sidebarRef}
+          className={`surface-luxe portal-shell-card sticky top-24 hidden h-[calc(100vh-7rem)] shrink-0 flex-col rounded-2xl border border-[#104E35]/18 bg-[#F0F5F2] transition-all duration-200 dark:border-[#2A6F52]/36 dark:bg-[#08110C] lg:flex ${
             collapsed ? 'w-[72px]' : 'w-64'
           }`}
         >
@@ -179,55 +430,70 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
         )}
 
         {/* Main Workspace Canvas */}
-        <main className="min-w-0 flex-1 space-y-5 pt-2">
-          {/* Top Portal Breadcrumb & Actions */}
-          <div className="surface-luxe flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-[#104E35]/18 bg-[#F0F5F2] px-4 py-3 dark:border-[#2A6F52]/36 dark:bg-[#08110C] sm:px-5">
-            <div className="flex items-center gap-3">
-              <Button
-                variant="icon"
-                size="sm"
-                className="lg:hidden"
-                onClick={() => setMobileDrawerOpen(true)}
-                aria-label="Open portal sidebar"
-              >
-                <Menu className="h-4 w-4" />
-              </Button>
-              <div>
-                <div className="flex items-center gap-2 text-[11px] font-mono text-[#466153] dark:text-[#8EAD9E]">
-                  <span>{roleTitle}</span>
-                  <span>/</span>
-                  <span className="font-semibold text-[#059669] dark:text-[#34D399]">
+        <main ref={mainRef} className="min-w-0 flex-1 space-y-5 pt-2">
+          {/* Top Portal Breadcrumb & Actions with Ambient Role Glow + Scroll Progress Bar */}
+          <div className="surface-luxe portal-shell-card sticky top-20 z-20 rounded-2xl border border-[#104E35]/18 bg-[#F0F5F2]/95 px-4 py-3 backdrop-blur-md dark:border-[#2A6F52]/36 dark:bg-[#08110C]/95 sm:px-5">
+            <div
+              ref={auraOrbRef}
+              aria-hidden="true"
+              className="portal-aura-orb absolute -top-10 right-16 h-28 w-44 rounded-full"
+            />
+            <div className="relative z-10 flex flex-wrap items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <Button
+                  variant="icon"
+                  size="sm"
+                  className="lg:hidden"
+                  onClick={() => setMobileDrawerOpen(true)}
+                  aria-label="Open portal sidebar"
+                >
+                  <Menu className="h-4 w-4" />
+                </Button>
+                <div>
+                  <div className="portal-header-crumb flex items-center gap-2 text-[11px] font-mono text-[#466153] dark:text-[#8EAD9E]">
+                    <span>{roleTitle}</span>
+                    <span>/</span>
+                    <span className="font-semibold text-[#059669] dark:text-[#34D399]">
+                      {activeItem?.label}
+                    </span>
+                  </div>
+                  <h1 className="portal-header-title font-display text-lg font-extrabold tracking-tight sm:text-xl">
                     {activeItem?.label}
-                  </span>
+                  </h1>
                 </div>
-                <h1 className="font-display text-lg font-extrabold tracking-tight sm:text-xl">
-                  {activeItem?.label}
-                </h1>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2">
+                <Badge tone="emerald">{getRoleLabel(currentUser.role)}</Badge>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={onOpenNotifications}
+                  leftIcon={<Bell className="h-3.5 w-3.5 text-[#F97362]" />}
+                >
+                  Alerts{unreadNotifications > 0 ? ` (${unreadNotifications})` : ''}
+                </Button>
+                <Button
+                  variant="primary"
+                  size="sm"
+                  onClick={onOpen3DFloor}
+                  leftIcon={<Compass className="h-3.5 w-3.5" />}
+                >
+                  3D Floor
+                </Button>
               </div>
             </div>
-
-            <div className="flex flex-wrap items-center gap-2">
-              <Badge tone="emerald">{getRoleLabel(currentUser.role)}</Badge>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={onOpenNotifications}
-                leftIcon={<Bell className="h-3.5 w-3.5 text-[#F97362]" />}
-              >
-                Alerts{unreadNotifications > 0 ? ` (${unreadNotifications})` : ''}
-              </Button>
-              <Button
-                variant="primary"
-                size="sm"
-                onClick={onOpen3DFloor}
-                leftIcon={<Compass className="h-3.5 w-3.5" />}
-              >
-                3D Floor
-              </Button>
-            </div>
+            <div
+              ref={scrollBarRef}
+              aria-hidden="true"
+              className="portal-scroll-progress absolute right-3 bottom-0 left-3 rounded-full"
+              style={{ transform: 'scaleX(0.08)' }}
+            />
           </div>
 
-          {children}
+          <div ref={contentRef} className="space-y-5">
+            {children}
+          </div>
         </main>
       </div>
     </div>

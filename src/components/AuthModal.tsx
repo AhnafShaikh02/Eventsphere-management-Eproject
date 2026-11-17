@@ -1,12 +1,19 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   ArrowLeft,
   ArrowRight,
   Building2,
   Calendar,
+  Check,
   CheckCircle2,
+  Clock,
+  Eye,
+  EyeOff,
   KeyRound,
+  Lock,
   LogOut,
+  Mail,
+  RefreshCw,
   Shield,
   ShieldCheck,
   Ticket,
@@ -28,7 +35,13 @@ interface AuthModalProps {
   onToast: (msg: string) => void;
 }
 
-type AuthStep = 'role-select' | 'login' | 'register' | 'reset';
+type AuthStep =
+  | 'role-select'
+  | 'login'
+  | 'register'
+  | 'forgot-password'
+  | 'verify-otp'
+  | 'new-password';
 
 const ROLE_CARDS: Array<{
   role: UserRole;
@@ -75,7 +88,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   onLogout,
   onToast,
 }) => {
-  const [step, setStep] = useState<AuthStep>(defaultTab);
+  const initialStep: AuthStep = defaultTab === 'reset' ? 'forgot-password' : defaultTab;
+  const [step, setStep] = useState<AuthStep>(initialStep);
   const [selectedRole, setSelectedRole] = useState<UserRole>(defaultRole);
   const [postSelectTarget, setPostSelectTarget] = useState<'login' | 'register'>('login');
 
@@ -93,9 +107,16 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   const [organizerInviteCode, setOrganizerInviteCode] = useState('');
   const [gdprConsent, setGdprConsent] = useState(true);
 
-  const [resetCode, setResetCode] = useState('');
+  // Dedicated 3-Step Password Reset State (OTP is never exposed or stored in clear UI hints)
+  const [otpDigits, setOtpDigits] = useState<string[]>(['', '', '', '', '', '']);
+  const otpInputRefs = useRef<Array<HTMLInputElement | null>>([]);
+  const [otpExpiresInSec, setOtpExpiresInSec] = useState(0);
+  const [resendCooldownSec, setResendCooldownSec] = useState(0);
+  const [resetSessionToken, setResetSessionToken] = useState<string | null>(null);
   const [newPassword, setNewPassword] = useState('');
-  const [issuedCodeHint, setIssuedCodeHint] = useState<string | null>(null);
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const [profileName, setProfileName] = useState(currentUser?.name || '');
   const [profileCompany, setProfileCompany] = useState(currentUser?.company || '');
@@ -104,20 +125,55 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
 
-  React.useEffect(() => {
+  useEffect(() => {
     setSelectedRole(defaultRole);
   }, [defaultRole]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (isOpen) {
-      setStep(defaultTab);
+      const targetStep: AuthStep = defaultTab === 'reset' ? 'forgot-password' : defaultTab;
+      setStep(targetStep);
       setPostSelectTarget(defaultTab === 'register' ? 'register' : 'login');
       setError(null);
+      setNotice(null);
+    } else if (typeof window !== 'undefined') {
+      const p = window.location.pathname;
+      if (p === '/forgot-password' || p === '/verify-otp' || p === '/reset-password') {
+        window.history.replaceState(null, '', '/');
+      }
     }
   }, [isOpen, defaultTab]);
 
-  React.useEffect(() => {
+  // Sync browser URL path cleanly for the dedicated password reset screens
+  useEffect(() => {
+    if (!isOpen || typeof window === 'undefined') return;
+    if (step === 'forgot-password') {
+      window.history.replaceState(null, '', '/forgot-password');
+    } else if (step === 'verify-otp') {
+      window.history.replaceState(null, '', '/verify-otp');
+    } else if (step === 'new-password') {
+      window.history.replaceState(null, '', '/reset-password');
+    } else {
+      const p = window.location.pathname;
+      if (p === '/forgot-password' || p === '/verify-otp' || p === '/reset-password') {
+        window.history.replaceState(null, '', '/');
+      }
+    }
+  }, [isOpen, step]);
+
+  // 5-minute OTP expiry & 60-second resend cooldown timers
+  useEffect(() => {
+    if (otpExpiresInSec <= 0 && resendCooldownSec <= 0) return;
+    const timer = window.setInterval(() => {
+      setOtpExpiresInSec((prev) => (prev > 0 ? prev - 1 : 0));
+      setResendCooldownSec((prev) => (prev > 0 ? prev - 1 : 0));
+    }, 1000);
+    return () => window.clearInterval(timer);
+  }, [otpExpiresInSec, resendCooldownSec]);
+
+  useEffect(() => {
     if (currentUser) {
       setProfileName(currentUser.name);
       setProfileCompany(currentUser.company || '');
@@ -125,6 +181,19 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       setProfilePhone(currentUser.phone || '');
     }
   }, [currentUser]);
+
+  const passwordChecks = useMemo(
+    () => [
+      { label: 'At least 8 characters', met: newPassword.length >= 8 },
+      { label: 'Uppercase letter (A-Z)', met: /[A-Z]/.test(newPassword) },
+      { label: 'Lowercase letter (a-z)', met: /[a-z]/.test(newPassword) },
+      { label: 'Number (0-9)', met: /\d/.test(newPassword) },
+      { label: 'Special character (!@#$%)', met: /[^A-Za-z0-9]/.test(newPassword) },
+    ],
+    [newPassword],
+  );
+  const strengthScore = passwordChecks.filter((c) => c.met).length;
+  const passwordsMatch = newPassword.length > 0 && newPassword === confirmPassword;
 
   const handleDemoSignIn = async (demoEmail: string, demoPassword: string) => {
     setBusy(true);
@@ -197,29 +266,130 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     onClose();
   };
 
-  const handleRequestReset = async () => {
+  const handleRequestOtp = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    const cleanEmail = email.trim().toLowerCase();
+    if (!cleanEmail) {
+      setError('Please enter your registered email address.');
+      return;
+    }
     setBusy(true);
     setError(null);
-    const res = await eventSphereApi.forgotPassword(email);
+    setNotice(null);
+    const res = await eventSphereApi.forgotPassword(cleanEmail);
     setBusy(false);
     if (!res.ok) {
       setError(res.error);
       return;
     }
-    setIssuedCodeHint(res.data.demoResetCode || res.data.message);
-    onToast('One-time reset code issued (valid 15m).');
+    setOtpDigits(['', '', '', '', '', '']);
+    setResetSessionToken(null);
+    setOtpExpiresInSec(res.data.expiresInSeconds ?? 300);
+    setResendCooldownSec(res.data.cooldownSeconds ?? 60);
+    setNotice(res.data.message);
+    setStep('verify-otp');
+    onToast('Verification email requested. Check your Gmail inbox.');
+    window.setTimeout(() => otpInputRefs.current[0]?.focus(), 80);
+  };
+
+  const handleOtpDigitChange = (index: number, raw: string) => {
+    const digitsOnly = raw.replace(/\D/g, '');
+    if (!digitsOnly) {
+      setOtpDigits((prev) => {
+        const next = [...prev];
+        next[index] = '';
+        return next;
+      });
+      return;
+    }
+    if (digitsOnly.length > 1) {
+      const split = digitsOnly.slice(0, 6).split('');
+      setOtpDigits((prev) => prev.map((_, idx) => split[idx] || ''));
+      const focusIdx = Math.min(5, split.length - 1);
+      otpInputRefs.current[focusIdx]?.focus();
+      return;
+    }
+    setOtpDigits((prev) => {
+      const next = [...prev];
+      next[index] = digitsOnly;
+      return next;
+    });
+    if (index < 5) {
+      otpInputRefs.current[index + 1]?.focus();
+    }
+  };
+
+  const handleOtpKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Backspace' && !otpDigits[index] && index > 0) {
+      otpInputRefs.current[index - 1]?.focus();
+    } else if (e.key === 'ArrowLeft' && index > 0) {
+      otpInputRefs.current[index - 1]?.focus();
+    } else if (e.key === 'ArrowRight' && index < 5) {
+      otpInputRefs.current[index + 1]?.focus();
+    }
+  };
+
+  const handleVerifyOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const otp = otpDigits.join('');
+    if (otp.length !== 6) {
+      setError('Please enter the complete 6-digit verification code from your email.');
+      return;
+    }
+    if (otpExpiresInSec <= 0) {
+      setError('This verification code has expired. Please request a new code.');
+      return;
+    }
+    setBusy(true);
+    setError(null);
+    setNotice(null);
+    const res = await eventSphereApi.verifyResetOtp({ email: email.trim().toLowerCase(), otp });
+    setBusy(false);
+    if (!res.ok) {
+      setError(res.error);
+      return;
+    }
+    setResetSessionToken(res.data.resetSessionToken);
+    setOtpDigits(['', '', '', '', '', '']);
+    setNewPassword('');
+    setConfirmPassword('');
+    setNotice(res.data.message);
+    setStep('new-password');
   };
 
   const handleCompleteReset = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!resetSessionToken) {
+      setError('Please verify your 6-digit email code first.');
+      setStep('forgot-password');
+      return;
+    }
+    if (strengthScore < 5) {
+      setError('Please choose a strong password meeting all security requirements.');
+      return;
+    }
+    if (!passwordsMatch) {
+      setError('New password and confirmation do not match.');
+      return;
+    }
     setBusy(true);
     setError(null);
-    const res = await eventSphereApi.resetPassword({ email, token: resetCode, newPassword });
+    const res = await eventSphereApi.resetPassword({
+      email: email.trim().toLowerCase(),
+      resetSessionToken,
+      newPassword,
+      confirmPassword,
+    });
     setBusy(false);
     if (!res.ok) {
       setError(res.error);
       return;
     }
+    setResetSessionToken(null);
+    setNewPassword('');
+    setConfirmPassword('');
+    setPassword('');
+    setNotice('Password reset successful! Sign in with your new password.');
     onToast('Password updated! You may now sign in.');
     setStep('login');
   };
@@ -245,6 +415,14 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   };
 
   const activeRoleMeta = ROLE_CARDS.find((r) => r.role === selectedRole) || ROLE_CARDS[2];
+  const isResetFlow =
+    step === 'forgot-password' || step === 'verify-otp' || step === 'new-password';
+
+  const formatCountdown = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+  };
 
   return (
     <Modal
@@ -257,12 +435,30 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           ? 'Account & Profile'
           : step === 'role-select'
             ? 'Choose Your EventSphere Portal'
-            : `${activeRoleMeta.title} Portal · ${step === 'register' ? 'Sign Up' : step === 'reset' ? 'Reset Password' : 'Sign In'}`
+            : step === 'forgot-password'
+              ? 'Forgot Password · Email Verification'
+              : step === 'verify-otp'
+                ? 'Verify 6-Digit Email Code'
+                : step === 'new-password'
+                  ? 'Create New Password'
+                  : `${activeRoleMeta.title} Portal · ${step === 'register' ? 'Sign Up' : 'Sign In'}`
       }
     >
       {error && (
-        <div className="mb-4 rounded-xl border border-[#F97362]/50 bg-[#F97362]/12 px-3.5 py-2.5 text-xs font-medium text-[#C2410C] dark:text-[#FDA4AF]">
+        <div
+          role="alert"
+          className="mb-4 rounded-xl border border-[#F97362]/50 bg-[#F97362]/12 px-3.5 py-2.5 text-xs font-medium text-[#C2410C] dark:text-[#FDA4AF]"
+        >
           {error}
+        </div>
+      )}
+      {notice && !error && (
+        <div
+          role="status"
+          className="mb-4 flex items-start gap-2 rounded-xl border border-[#10B981]/45 bg-[#10B981]/10 px-3.5 py-2.5 text-xs font-medium text-[#065F46] dark:text-[#6EE7B7]"
+        >
+          <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[#10B981]" />
+          <span>{notice}</span>
         </div>
       )}
 
@@ -431,35 +627,90 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         </div>
       ) : (
         <div className="space-y-4">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              leftIcon={<ArrowLeft className="h-3.5 w-3.5" />}
-              onClick={() => {
-                setStep('role-select');
-                setError(null);
-              }}
-            >
-              Change Role ({activeRoleMeta.title})
-            </Button>
+          {!isResetFlow ? (
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                leftIcon={<ArrowLeft className="h-3.5 w-3.5" />}
+                onClick={() => {
+                  setStep('role-select');
+                  setError(null);
+                  setNotice(null);
+                }}
+              >
+                Change Role ({activeRoleMeta.title})
+              </Button>
 
-            <div className="flex gap-1.5">
-              {(['login', 'register', 'reset'] as const).map((t) => (
+              <div className="flex gap-1.5">
+                {(['login', 'register'] as const).map((t) => (
+                  <Button
+                    key={t}
+                    size="sm"
+                    variant={step === t ? 'primary' : 'ghost'}
+                    onClick={() => {
+                      setStep(t);
+                      setError(null);
+                      setNotice(null);
+                    }}
+                  >
+                    {t === 'login' ? 'Sign In' : 'Sign Up'}
+                  </Button>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              <div className="flex items-center justify-between gap-2">
                 <Button
-                  key={t}
+                  variant="ghost"
                   size="sm"
-                  variant={step === t ? 'primary' : 'ghost'}
+                  leftIcon={<ArrowLeft className="h-3.5 w-3.5" />}
                   onClick={() => {
-                    setStep(t);
+                    setStep('login');
                     setError(null);
+                    setNotice(null);
                   }}
                 >
-                  {t === 'login' ? 'Sign In' : t === 'register' ? 'Sign Up' : 'Reset'}
+                  Back to Sign In
                 </Button>
-              ))}
+                <span className="font-mono text-[11px] font-semibold uppercase tracking-wider text-[#059669] dark:text-[#34D399]">
+                  Gmail Security Reset
+                </span>
+              </div>
+
+              {/* 3-Step Password Reset Progress Indicator */}
+              <div className="grid grid-cols-3 gap-2 rounded-xl border border-[#104E35]/18 bg-[#E4EDE7] p-2 dark:border-[#2A6F52]/36 dark:bg-[#09120D]">
+                {[
+                  { id: 'forgot-password', num: '01', label: 'Email' },
+                  { id: 'verify-otp', num: '02', label: '6-Digit OTP' },
+                  { id: 'new-password', num: '03', label: 'New Password' },
+                ].map((s, idx) => {
+                  const stepOrder = ['forgot-password', 'verify-otp', 'new-password'];
+                  const currentIdx = stepOrder.indexOf(step);
+                  const completed = idx < currentIdx;
+                  const active = s.id === step;
+                  return (
+                    <div
+                      key={s.id}
+                      className={`flex items-center justify-center gap-1.5 rounded-lg px-2 py-1.5 text-[11px] font-semibold transition-all ${
+                        active
+                          ? 'bg-[#10B981]/18 text-[#065F46] ring-1 ring-[#10B981]/50 dark:text-[#34D399]'
+                          : completed
+                            ? 'text-[#059669] dark:text-[#6EE7B7]'
+                            : 'text-[#466153]/75 dark:text-[#8EAD9E]/65'
+                      }`}
+                    >
+                      <span className="font-mono text-[10px]">
+                        {completed ? '✓' : s.num}
+                      </span>
+                      <span className="truncate">{s.label}</span>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
-          </div>
+          )}
 
           {step === 'login' && (
             <form onSubmit={handleLogin} className="space-y-3.5">
@@ -480,10 +731,19 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 placeholder="••••••••"
               />
               <div className="flex items-center justify-between text-xs">
-                <Button variant="text" onClick={() => setStep('reset')}>
+                <Button
+                  type="button"
+                  variant="text"
+                  onClick={() => {
+                    setError(null);
+                    setNotice(null);
+                    setStep('forgot-password');
+                  }}
+                >
                   Forgot password?
                 </Button>
                 <Button
+                  type="button"
                   variant="text"
                   onClick={() => {
                     if (selectedRole === 'admin') {
@@ -643,56 +903,255 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             </form>
           )}
 
-          {step === 'reset' && (
-            <form onSubmit={handleCompleteReset} className="space-y-3.5">
-              <div className="flex items-end gap-2">
-                <div className="flex-1">
-                  <Input
-                    label="Account Email"
-                    type="email"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="you@company.io"
-                  />
+          {step === 'forgot-password' && (
+            <form onSubmit={handleRequestOtp} className="space-y-4">
+              <div className="rounded-xl border border-[#104E35]/18 bg-[#E4EDE7] p-4 dark:border-[#2A6F52]/36 dark:bg-[#09120D]">
+                <div className="flex items-start gap-3">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#10B981]/15 text-[#059669] dark:text-[#34D399]">
+                    <Mail className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <h3 className="font-display text-sm font-bold text-[#091911] dark:text-[#ECFDF5]">
+                      Reset via Registered Gmail
+                    </h3>
+                    <p className="mt-1 text-xs leading-relaxed text-[#466153] dark:text-[#8EAD9E]">
+                      Enter the email address registered to your EventSphere account. We will send a 6-digit one-time verification code directly to your inbox (valid for 5 minutes).
+                    </p>
+                  </div>
                 </div>
+              </div>
+
+              <Input
+                label="Registered Email Address"
+                type="email"
+                required
+                autoFocus
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@gmail.com"
+              />
+
+              <Button
+                type="submit"
+                variant="primary"
+                fullWidth
+                loading={busy}
+                leftIcon={<KeyRound className="h-4 w-4" />}
+              >
+                Send 6-Digit Verification Code
+              </Button>
+            </form>
+          )}
+
+          {step === 'verify-otp' && (
+            <form onSubmit={handleVerifyOtp} className="space-y-4">
+              <div className="rounded-xl border border-[#104E35]/18 bg-[#E4EDE7] p-4 dark:border-[#2A6F52]/36 dark:bg-[#09120D]">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div>
+                    <div className="text-xs font-semibold text-[#466153] dark:text-[#8EAD9E]">
+                      Check your Gmail inbox
+                    </div>
+                    <div className="mt-0.5 font-mono text-xs font-bold text-[#091911] dark:text-[#ECFDF5]">
+                      {email.trim().toLowerCase()}
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setStep('forgot-password');
+                      setError(null);
+                      setNotice(null);
+                    }}
+                    className="text-xs font-semibold text-[#059669] underline-offset-4 hover:underline dark:text-[#34D399]"
+                  >
+                    Change email
+                  </button>
+                </div>
+
+                <div className="mt-3 flex items-center justify-between border-t border-[#104E35]/14 pt-2.5 text-xs dark:border-[#2A6F52]/30">
+                  <span className="flex items-center gap-1.5 text-[#466153] dark:text-[#8EAD9E]">
+                    <Clock className="h-3.5 w-3.5 text-[#10B981]" />
+                    <span>Code expiration</span>
+                  </span>
+                  <span
+                    className={`font-mono font-bold ${
+                      otpExpiresInSec > 60
+                        ? 'text-[#059669] dark:text-[#34D399]'
+                        : 'text-[#C2410C] dark:text-[#FDA4AF]'
+                    }`}
+                  >
+                    {otpExpiresInSec > 0 ? formatCountdown(otpExpiresInSec) : 'Expired'}
+                  </span>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="block text-xs font-semibold text-[#466153] dark:text-[#8EAD9E]">
+                  Enter 6-Digit Verification Code
+                </label>
+                <div className="grid grid-cols-6 gap-2 sm:gap-2.5">
+                  {otpDigits.map((digit, idx) => (
+                    <input
+                      key={idx}
+                      ref={(el) => {
+                        otpInputRefs.current[idx] = el;
+                      }}
+                      type="text"
+                      inputMode="numeric"
+                      autoComplete={idx === 0 ? 'one-time-code' : 'off'}
+                      maxLength={6}
+                      value={digit}
+                      onChange={(e) => handleOtpDigitChange(idx, e.target.value)}
+                      onKeyDown={(e) => handleOtpKeyDown(idx, e)}
+                      aria-label={`Verification code digit ${idx + 1}`}
+                      className="h-12 w-full rounded-xl border border-[#104E35]/28 bg-[#F4F8F5] text-center font-mono text-xl font-bold text-[#091911] transition-all focus:border-[#10B981] focus:outline-none focus:ring-2 focus:ring-[#10B981]/30 dark:border-[#2A6F52]/55 dark:bg-[#08100B] dark:text-[#34D399] dark:focus:border-[#34D399]"
+                    />
+                  ))}
+                </div>
+              </div>
+
+              <Button
+                type="submit"
+                variant="primary"
+                fullWidth
+                loading={busy}
+                disabled={otpDigits.join('').length !== 6 || otpExpiresInSec <= 0}
+              >
+                Verify Code &amp; Continue
+              </Button>
+
+              <div className="flex items-center justify-between border-t border-[#104E35]/16 pt-3 text-xs dark:border-[#2A6F52]/32">
+                <span className="text-[#466153] dark:text-[#8EAD9E]">
+                  Didn&apos;t receive the email?
+                </span>
                 <Button
                   type="button"
-                  variant="secondary"
-                  disabled={busy || !email}
-                  onClick={handleRequestReset}
-                  leftIcon={<KeyRound className="h-3.5 w-3.5" />}
+                  variant="ghost"
+                  size="sm"
+                  disabled={busy || resendCooldownSec > 0}
+                  onClick={() => handleRequestOtp()}
+                  leftIcon={<RefreshCw className="h-3.5 w-3.5" />}
                 >
-                  Send Code
+                  {resendCooldownSec > 0
+                    ? `Resend in ${resendCooldownSec}s`
+                    : 'Resend Code'}
                 </Button>
               </div>
+            </form>
+          )}
 
-              {issuedCodeHint && (
-                <div className="rounded-xl border border-[#34D399]/40 bg-[#34D399]/12 px-3.5 py-2.5 font-mono text-xs text-emerald-900 dark:text-[#34D399]">
-                  One-time reset code: <strong>{issuedCodeHint}</strong>
+          {step === 'new-password' && (
+            <form onSubmit={handleCompleteReset} className="space-y-4">
+              <div className="space-y-3">
+                <div className="relative">
+                  <Input
+                    label="New Password"
+                    type={showNewPassword ? 'text' : 'password'}
+                    required
+                    minLength={8}
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    placeholder="Create a strong password"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowNewPassword((v) => !v)}
+                    aria-label={showNewPassword ? 'Hide new password' : 'Show new password'}
+                    className="absolute top-[30px] right-3 text-[#466153] hover:text-[#091911] dark:text-[#8EAD9E] dark:hover:text-[#ECFDF5]"
+                  >
+                    {showNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
                 </div>
-              )}
 
-              <div className="grid gap-3 sm:grid-cols-2">
-                <Input
-                  label="Reset Code"
-                  required
-                  value={resetCode}
-                  onChange={(e) => setResetCode(e.target.value)}
-                  placeholder="8-char code"
-                  className="font-mono uppercase"
-                />
-                <Input
-                  label="New Password"
-                  type="password"
-                  required
-                  minLength={6}
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                />
+                <div className="relative">
+                  <Input
+                    label="Confirm New Password"
+                    type={showConfirmPassword ? 'text' : 'password'}
+                    required
+                    minLength={8}
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    placeholder="Re-enter your new password"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword((v) => !v)}
+                    aria-label={showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'}
+                    className="absolute top-[30px] right-3 text-[#466153] hover:text-[#091911] dark:text-[#8EAD9E] dark:hover:text-[#ECFDF5]"
+                  >
+                    {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
               </div>
-              <Button type="submit" variant="primary" fullWidth loading={busy}>
-                Confirm Password Reset
+
+              {/* Password Strength Meter & Checklist */}
+              <div className="rounded-xl border border-[#104E35]/18 bg-[#E4EDE7] p-3.5 dark:border-[#2A6F52]/36 dark:bg-[#09120D]">
+                <div className="flex items-center justify-between text-xs font-semibold">
+                  <span className="flex items-center gap-1.5 text-[#466153] dark:text-[#8EAD9E]">
+                    <Lock className="h-3.5 w-3.5 text-[#10B981]" />
+                    <span>Password Strength</span>
+                  </span>
+                  <span
+                    className={`font-mono ${
+                      strengthScore >= 5
+                        ? 'text-[#059669] dark:text-[#34D399]'
+                        : strengthScore >= 3
+                          ? 'text-amber-600 dark:text-amber-400'
+                          : 'text-[#C2410C] dark:text-[#FDA4AF]'
+                    }`}
+                  >
+                    {strengthScore === 5 ? 'Strong' : strengthScore >= 3 ? 'Fair' : 'Weak'} ({strengthScore}/5)
+                  </span>
+                </div>
+                <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-[#104E35]/15 dark:bg-[#1B3325]">
+                  <div
+                    className="h-full rounded-full transition-all duration-300"
+                    style={{
+                      width: `${(strengthScore / 5) * 100}%`,
+                      background:
+                        strengthScore === 5
+                          ? 'linear-gradient(90deg, #059669, #34D399)'
+                          : strengthScore >= 3
+                            ? '#F59E0B'
+                            : '#F97362',
+                    }}
+                  />
+                </div>
+                <div className="mt-3 grid gap-1.5 sm:grid-cols-2">
+                  {passwordChecks.map((rule) => (
+                    <div
+                      key={rule.label}
+                      className={`flex items-center gap-1.5 text-[11px] ${
+                        rule.met
+                          ? 'font-medium text-[#059669] dark:text-[#6EE7B7]'
+                          : 'text-[#466153]/80 dark:text-[#8EAD9E]/70'
+                      }`}
+                    >
+                      <Check className={`h-3 w-3 ${rule.met ? 'opacity-100' : 'opacity-30'}`} />
+                      <span>{rule.label}</span>
+                    </div>
+                  ))}
+                  <div
+                    className={`flex items-center gap-1.5 text-[11px] ${
+                      passwordsMatch
+                        ? 'font-medium text-[#059669] dark:text-[#6EE7B7]'
+                        : 'text-[#466153]/80 dark:text-[#8EAD9E]/70'
+                    }`}
+                  >
+                    <Check className={`h-3 w-3 ${passwordsMatch ? 'opacity-100' : 'opacity-30'}`} />
+                    <span>Passwords match</span>
+                  </div>
+                </div>
+              </div>
+
+              <Button
+                type="submit"
+                variant="primary"
+                fullWidth
+                loading={busy}
+                disabled={strengthScore < 5 || !passwordsMatch}
+              >
+                Save New Password
               </Button>
             </form>
           )}

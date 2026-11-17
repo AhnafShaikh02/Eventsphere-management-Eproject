@@ -24,21 +24,21 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
 
 const VARIANT_STYLES: Record<ButtonVariant, string> = {
   primary:
-    'btn-luxe bg-gradient-to-r from-[#059669] via-[#10B981] to-[#34D399] text-[#02120B] font-bold shadow-[0_8px_24px_rgba(16,185,129,0.28)] hover:shadow-[0_12px_28px_rgba(16,185,129,0.38)]',
+    'btn-luxe bg-gradient-to-r from-[#059669] via-[#10B981] to-[#34D399] text-[#02120B] font-bold shadow-[0_8px_24px_rgba(16,185,129,0.28)] hover:shadow-[0_0_26px_rgba(52,211,153,0.58),0_0_12px_rgba(45,212,191,0.42)]',
   secondary:
-    'bg-[#E2ECE6] text-[#091911] font-semibold border border-[#104E35]/20 hover:bg-[#D4E3DA] hover:border-[#059669]/40 dark:bg-[#0D1A13] dark:text-[#DDF2E7] dark:border-[#2A6F52]/40 dark:hover:bg-[#13261C]',
+    'bg-[#E2ECE6] text-[#091911] font-semibold border border-[var(--es-border)] hover:bg-[#D4E3DA] hover:border-[var(--es-border-strong)] hover:shadow-[0_0_20px_var(--es-glow)] dark:bg-[#0D1A13] dark:text-[#DDF2E7] dark:hover:bg-[#13261C]',
   outline:
-    'bg-[#EFF5F1] text-[#091911] font-semibold border border-[#104E35]/22 hover:border-[#059669]/55 hover:text-[#047857] dark:bg-[#08110C] dark:text-[#DDF2E7] dark:border-[#2A6F52]/40 dark:hover:border-[#34D399]/60 dark:hover:text-[#34D399]',
+    'bg-[#EFF5F1] text-[#091911] font-semibold border border-[var(--es-border)] hover:border-[var(--es-border-strong)] hover:text-[#047857] hover:shadow-[0_0_20px_var(--es-glow)] dark:bg-[#08110C] dark:text-[#DDF2E7] dark:hover:text-[#62B894]',
   ghost:
-    'bg-transparent text-[#355243] font-semibold hover:bg-[#E2ECE6] hover:text-[#091911] dark:text-[#8EAD9E] dark:hover:bg-[#10B981]/12 dark:hover:text-[#DDF2E7]',
+    'bg-transparent text-[#355243] font-semibold hover:bg-[#E2ECE6] hover:text-[#091911] hover:shadow-[0_0_16px_var(--es-glow)] dark:text-[#8EAD9E] dark:hover:bg-[#10B981]/12 dark:hover:text-[#DDF2E7]',
   destructive:
-    'bg-[#F97362]/14 text-[#C2410C] font-bold border border-[#F97362]/45 hover:bg-[#F97362]/24 dark:text-[#FDA4AF] dark:border-[#F97362]/40',
+    'bg-[#F97362]/14 text-[#C2410C] font-bold border border-[#F97362]/45 hover:bg-[#F97362]/24 hover:shadow-[0_0_20px_var(--es-glow-coral)] dark:text-[#FDA4AF] dark:border-[#F97362]/40',
   icon:
-    'bg-[#E6EFE9] text-[#355243] border border-[#104E35]/18 hover:border-[#059669]/55 hover:text-[#091911] dark:bg-[#08110C] dark:text-[#8EAD9E] dark:border-[#2A6F52]/38 dark:hover:border-[#34D399]/60 dark:hover:text-[#DDF2E7]',
+    'bg-[#E6EFE9] text-[#355243] border border-[var(--es-border)] hover:border-[var(--es-border-strong)] hover:text-[#091911] hover:shadow-[0_0_18px_var(--es-glow)] dark:bg-[#08110C] dark:text-[#8EAD9E] dark:hover:text-[#DDF2E7]',
   text:
-    'bg-transparent text-[#059669] font-semibold hover:underline dark:text-[#34D399] px-1 py-0.5',
+    'no-btn-glow bg-transparent text-[#059669] font-semibold hover:underline dark:text-[#34D399] px-1 py-0.5',
   fab:
-    'btn-luxe rounded-full bg-gradient-to-r from-[#059669] to-[#34D399] text-[#02120B] font-bold shadow-[0_14px_34px_rgba(16,185,129,0.38)]',
+    'btn-luxe rounded-full bg-gradient-to-r from-[#059669] to-[#34D399] text-[#02120B] font-bold shadow-[0_14px_34px_rgba(16,185,129,0.38)] hover:shadow-[0_0_30px_rgba(52,211,153,0.65),0_0_14px_rgba(45,212,191,0.45)]',
 };
 
 const SIZE_STYLES: Record<ButtonSize, string> = {

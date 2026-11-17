@@ -16,7 +16,7 @@ export const PWAInstallButton: React.FC = () => {
       <button
         type="button"
         onClick={install}
-        className="inline-flex min-h-[38px] items-center gap-2 rounded-lg border border-[#059669]/40 bg-[#059669]/10 px-3 py-1.5 text-xs font-semibold text-[#047857] transition-colors hover:bg-[#059669]/20 dark:border-[#10B981]/40 dark:bg-[#10B981]/10 dark:text-[#34D399] dark:hover:bg-[#10B981]/20 whitespace-nowrap shrink-0"
+        className="inline-flex min-h-[38px] items-center gap-2 rounded-lg border border-[var(--es-border)] bg-[#059669]/10 px-3 py-1.5 text-xs font-semibold text-[#047857] transition-colors hover:border-[var(--es-border-strong)] hover:bg-[#059669]/20 dark:bg-[#10B981]/10 dark:text-[#34D399] dark:hover:bg-[#10B981]/20 whitespace-nowrap shrink-0"
       >
         <Download className="h-3.5 w-3.5" aria-hidden="true" />
         <span>Install Offline App</span>
@@ -30,7 +30,7 @@ export const PWAInstallButton: React.FC = () => {
         <button
           type="button"
           onClick={() => setShowIOSGuide(true)}
-          className="inline-flex min-h-[38px] items-center gap-2 rounded-lg border border-[#104E35]/20 bg-[#E4EDE7] px-3 py-1.5 text-xs font-medium text-[#091911] hover:bg-[#D4E3DA] dark:border-[#2A6F52]/40 dark:bg-[#08110C] dark:text-[#DDF2E7] whitespace-nowrap shrink-0"
+          className="inline-flex min-h-[38px] items-center gap-2 rounded-lg border border-[var(--es-border)] bg-[#E4EDE7] px-3 py-1.5 text-xs font-medium text-[#091911] hover:border-[var(--es-border-strong)] hover:bg-[#D4E3DA] dark:bg-[#08110C] dark:text-[#DDF2E7] whitespace-nowrap shrink-0"
         >
           <Download className="h-3.5 w-3.5" aria-hidden="true" />
           <span>Install on iOS</span>

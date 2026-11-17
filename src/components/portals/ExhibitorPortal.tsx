@@ -32,6 +32,7 @@ import {
   StatCard,
   Textarea,
 } from '../ui';
+import { PrivacyAndComplianceCard } from '../PrivacyAndComplianceCard';
 import { DashboardLayout, type PortalNavItem } from './DashboardLayout';
 
 interface ExhibitorPortalProps {
@@ -762,15 +763,25 @@ export const ExhibitorPortal: React.FC<ExhibitorPortalProps> = ({
       )}
 
       {section === 'settings' && (
-        <Card padding="lg" className="space-y-4">
-          <h2 className="font-display text-lg font-bold">Account Settings</h2>
-          <p className="text-xs text-[#466153] dark:text-[#8EAD9E]">
-            Account: <strong>{currentUser.name}</strong> ({currentUser.email})
-          </p>
-          <Button variant="primary" onClick={onOpenProfileModal}>
-            Edit Personal Account Details
-          </Button>
-        </Card>
+        <div className="space-y-5">
+          <Card padding="lg" className="space-y-4">
+            <h2 className="font-display text-lg font-bold">Account Settings</h2>
+            <p className="text-xs text-[#466153] dark:text-[#8EAD9E]">
+              Account: <strong>{currentUser.name}</strong> ({currentUser.email})
+            </p>
+            <Button variant="primary" onClick={onOpenProfileModal}>
+              Edit Personal Account Details
+            </Button>
+          </Card>
+
+          <PrivacyAndComplianceCard
+            currentUser={currentUser}
+            authToken={authToken}
+            onRefreshState={onRefreshState}
+            onLogout={onLogout}
+            onToast={onToast}
+          />
+        </div>
       )}
 
       <ConfirmDialog

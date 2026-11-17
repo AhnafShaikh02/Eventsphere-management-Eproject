@@ -9,7 +9,34 @@ export interface UserAccount {
   title?: string;
   phone?: string;
   gdprConsent: boolean;
+  analyticsTelemetry?: boolean;
+  marketingEmails?: boolean;
+  consentUpdatedAt?: string;
   createdAt: string;
+}
+
+export interface AdminMonitoringSummary {
+  service: string;
+  encryptionAtRest: string;
+  concurrentUsers: number;
+  uptimeSeconds: number;
+  totalApiRequests: number;
+  totalApiErrors: number;
+  errorRatePct: number;
+  avgLatencyMs: number;
+  p95LatencyMs: number;
+  memoryRssMb: number;
+  heapUsedMb: number;
+  backupFiles: string[];
+  database: {
+    mode: string;
+    connected: boolean;
+    database: string | null;
+    lastSyncedAt: string | null;
+  };
+  smtp: {
+    configured: boolean;
+  };
 }
 
 export type ExpoStatus = 'upcoming' | 'live' | 'completed';

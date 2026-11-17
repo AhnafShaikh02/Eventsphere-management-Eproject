@@ -9,7 +9,9 @@
       "company": "EventSphere Management",
       "title": "Lead Expo Director",
       "gdprConsent": true,
-      "createdAt": "2026-11-16T18:54:48.872Z"
+      "createdAt": "2026-11-16T18:54:48.872Z",
+      "analyticsTelemetry": true,
+      "marketingEmails": true
     },
     {
       "id": "usr-exh-1",
@@ -20,7 +22,9 @@
       "company": "Lumina Robotics",
       "title": "VP of Field Engineering",
       "gdprConsent": true,
-      "createdAt": "2026-11-16T18:54:48.872Z"
+      "createdAt": "2026-11-16T18:54:48.872Z",
+      "analyticsTelemetry": true,
+      "marketingEmails": true
     },
     {
       "id": "usr-exh-2",
@@ -31,7 +35,9 @@
       "company": "AetherGrid CleanTech",
       "title": "Solutions Architect",
       "gdprConsent": true,
-      "createdAt": "2026-11-16T18:54:48.872Z"
+      "createdAt": "2026-11-16T18:54:48.872Z",
+      "analyticsTelemetry": true,
+      "marketingEmails": true
     },
     {
       "id": "usr-att-1",
@@ -42,7 +48,23 @@
       "company": "Horizon Ventures",
       "title": "Hardware Partner",
       "gdprConsent": true,
-      "createdAt": "2026-11-16T18:54:48.872Z"
+      "createdAt": "2026-11-16T18:54:48.872Z",
+      "analyticsTelemetry": true,
+      "marketingEmails": true
+    },
+    {
+      "id": "usr-1794877191456",
+      "name": "Ikram Shaikh",
+      "email": "ikramshaikh0333@gmail.com",
+      "passwordHash": "$2b$10$/ITF3BdboXmgjLYPPY7K9.x9tcvaMmxXIAQwvKyIBzp776PkonM9i",
+      "role": "attendee",
+      "company": "nova",
+      "phone": "enc:v1:9a2e2004ac2dca2525c136bc:b9bed53629f5fc6e35be22dea6ce2e44:7bada381b200dd32f91dd6b6",
+      "gdprConsent": true,
+      "analyticsTelemetry": true,
+      "marketingEmails": true,
+      "consentUpdatedAt": "2026-11-17T00:59:51.551Z",
+      "createdAt": "2026-11-17T00:59:51.551Z"
     }
   ],
   "resetTokens": [],
@@ -57,8 +79,12 @@
       "theme": "Autonomous Infrastructure & Live Twins",
       "bannerAccent": "#7B5CFF",
       "registeredUserIds": [
-        "usr-att-1"
-      ]
+        "usr-att-1",
+        "usr-exh-1"
+      ],
+      "category": "Robotics & AI",
+      "status": "live",
+      "capacity": 800
     },
     {
       "id": "expo-2026-bio",
@@ -69,7 +95,10 @@
       "description": "Clinical instrumentation, microfluidic diagnostics, and hospital automation showcase.",
       "theme": "Precision Diagnostics at Scale",
       "bannerAccent": "#4FE3C1",
-      "registeredUserIds": []
+      "registeredUserIds": [],
+      "category": "Biotech & MedTech",
+      "status": "upcoming",
+      "capacity": 800
     }
   ],
   "booths": [
@@ -559,6 +588,28 @@
       "submittedAt": "2026-11-15"
     }
   ],
+  "registrations": [
+    {
+      "id": "reg-1",
+      "expoId": "expo-2026-global",
+      "userId": "usr-att-1",
+      "userName": "Maya Patel",
+      "userEmail": "attendee@eventsphere.io",
+      "ticketCode": "ES-2026-8412",
+      "status": "confirmed",
+      "registeredAt": "2026-11-14"
+    },
+    {
+      "id": "reg-1794875895985-y03",
+      "expoId": "expo-2026-global",
+      "userId": "usr-exh-1",
+      "userName": "Marcus Chen",
+      "userEmail": "exhibitor@lumina-robotics.io",
+      "ticketCode": "ES-2026-6142",
+      "status": "confirmed",
+      "registeredAt": "2026-11-17"
+    }
+  ],
   "sessions": [
     {
       "id": "ses-1",
@@ -629,6 +680,44 @@
       "updatedAt": "2026-11-16T18:54:48.872Z"
     }
   ],
+  "speakers": [
+    {
+      "id": "spk-1",
+      "expoId": "expo-2026-global",
+      "name": "Elena Vance",
+      "role": "Lead Expo Director",
+      "company": "EventSphere Management",
+      "topic": "Spatial Operations",
+      "bio": "Architect of live 3D exhibition campuses and sub-2-second floor telemetry platforms."
+    },
+    {
+      "id": "spk-2",
+      "expoId": "expo-2026-global",
+      "name": "Marcus Chen",
+      "role": "VP of Field Engineering",
+      "company": "Lumina Robotics",
+      "topic": "Robotics & AI",
+      "bio": "Leads millimeter-accurate tactile cobot deployments across 40+ European fulfillment hubs."
+    },
+    {
+      "id": "spk-3",
+      "expoId": "expo-2026-global",
+      "name": "Sora Takahashi",
+      "role": "Solutions Architect",
+      "company": "AetherGrid CleanTech",
+      "topic": "Clean Energy",
+      "bio": "Designs high-density solid-state DC microgrids for zero-emission mega-venues."
+    },
+    {
+      "id": "spk-4",
+      "expoId": "expo-2026-global",
+      "name": "Aria Novak",
+      "role": "Principal Security Engineer",
+      "company": "Sentinel Mesh Security",
+      "topic": "Cloud & Security",
+      "bio": "Specializes in hardware-attested zero-trust identity fabrics for autonomous hardware."
+    }
+  ],
   "messages": [
     {
       "id": "msg-1",
@@ -678,6 +767,15 @@
       "kind": "reminder",
       "readBy": [],
       "createdAt": "2026-11-16T18:54:48.872Z"
+    },
+    {
+      "id": "not-1794875895985-cmsu",
+      "targetUserId": "usr-exh-1",
+      "title": "Ticket Confirmed",
+      "message": "Pass ES-2026-6142 is active for NextGen Industrial & Tech Expo 2026.",
+      "kind": "system",
+      "readBy": [],
+      "createdAt": "2026-11-17T00:38:15.985Z"
     }
   ],
   "feedback": [
@@ -726,6 +824,34 @@
       "action": "BOOTH_RESERVED",
       "detail": "Atomically reserved Booth A2 (6x3m Corner) in North Innovation Wing.",
       "timestamp": "2026-11-16T18:54:48.872Z"
+    },
+    {
+      "id": "log-1794875870171-zlbu",
+      "actor": "Marcus Chen",
+      "action": "USER_LOGIN",
+      "detail": "Signed in (exhibitor)",
+      "timestamp": "2026-11-17T00:37:50.171Z"
+    },
+    {
+      "id": "log-1794875895985-uz05",
+      "actor": "Marcus Chen",
+      "action": "EXPO_REGISTERED",
+      "detail": "Registered for NextGen Industrial & Tech Expo 2026 (ES-2026-6142)",
+      "timestamp": "2026-11-17T00:38:15.985Z"
+    },
+    {
+      "id": "log-1794877191551-qusa",
+      "actor": "Ikram Shaikh",
+      "action": "USER_REGISTERED",
+      "detail": "Registered as attendee",
+      "timestamp": "2026-11-17T00:59:51.551Z"
+    },
+    {
+      "id": "log-1794877258333-3luc",
+      "actor": "Ikram Shaikh",
+      "action": "USER_LOGIN",
+      "detail": "Signed in (attendee)",
+      "timestamp": "2026-11-17T01:00:58.333Z"
     }
   ],
   "analyticsSeries": [

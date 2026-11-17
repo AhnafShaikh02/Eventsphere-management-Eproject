@@ -105,8 +105,8 @@ export const TopNav: React.FC<TopNavProps> = ({
         aria-label="Primary navigation"
         className={`surface-luxe relative mx-auto flex max-w-7xl items-center justify-between gap-4 rounded-2xl border px-4 py-2.5 transition-all duration-200 sm:px-5 ${
           isScrolled
-            ? 'border-[#104E35]/20 bg-[#EEF4F0]/96 text-[#091911] shadow-lg dark:border-[#2A6F52]/40 dark:bg-[#060C08]/95 dark:text-[#DDF2E7]'
-            : 'border-[#104E35]/16 bg-[#EEF4F0]/90 text-[#091911] dark:border-[#2A6F52]/34 dark:bg-[#060C08]/90 dark:text-[#DDF2E7]'
+            ? 'border-[var(--es-border-strong)] bg-[#EEF4F0]/96 text-[#091911] shadow-lg dark:bg-[#060C08]/95 dark:text-[#DDF2E7]'
+            : 'border-[var(--es-border)] bg-[#EEF4F0]/90 text-[#091911] dark:bg-[#060C08]/90 dark:text-[#DDF2E7]'
         }`}
       >
         {/* Scroll progress hairline */}

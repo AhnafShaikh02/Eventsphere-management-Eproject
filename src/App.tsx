@@ -216,8 +216,14 @@ export default function App() {
     };
   }, [authToken, showToast]);
 
-  // Handle URL ?booth=... deep link
+  // Handle URL ?booth=... and /forgot-password deep links
   useEffect(() => {
+    const path = window.location.pathname;
+    if (path === '/forgot-password' || path === '/verify-otp' || path === '/reset-password') {
+      setAuthDefaultTab('reset');
+      setAuthOpen(true);
+      return;
+    }
     const params = new URLSearchParams(window.location.search);
     const boothId = params.get('booth');
     if (boothId && snapshot.booths.some((b) => b.id === boothId)) {

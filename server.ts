@@ -8,176 +8,46 @@ import crypto from 'node:crypto';
 import fs from 'node:fs';
 import http from 'node:http';
 import path from 'node:path';
+import zlib from 'node:zlib';
 import { Server as SocketIOServer } from 'socket.io';
 import { createServer as createViteServer } from 'vite';
-
-type UserRole = 'admin' | 'exhibitor' | 'attendee';
-type BoothStatus = 'available' | 'reserved' | 'occupied' | 'pending';
-type ExpoStatus = 'upcoming' | 'live' | 'completed';
-
-interface StoredUser {
-  id: string;
-  name: string;
-  email: string;
-  passwordHash: string;
-  role: UserRole;
-  company?: string;
-  title?: string;
-  phone?: string;
-  gdprConsent: boolean;
-  createdAt: string;
-}
-
-interface ResetTokenRecord {
-  email: string;
-  token: string;
-  expiresAt: number;
-}
-
-interface SyncRecord {
-  syncKey: string;
-  updatedAt: string;
-  deviceLabel: string;
-  checksum: string;
-  payload: Record<string, unknown>;
-}
-
-interface ServerDatabase {
-  users: StoredUser[];
-  resetTokens: ResetTokenRecord[];
-  expos: Array<{
-    id: string;
-    title: string;
-    date: string;
-    endDate: string;
-    location: string;
-    description: string;
-    theme: string;
-    category: string;
-    status: ExpoStatus;
-    capacity?: number;
-    bannerAccent: string;
-    registeredUserIds: string[];
-  }>;
-  booths: Array<{
-    id: string;
-    expoId: string;
-    number: string;
-    zone: string;
-    size: '3x3m Standard' | '6x3m Corner' | '6x6m Island';
-    priceUsd: number;
-    status: BoothStatus;
-    row: number;
-    col: number;
-    exhibitorId: string | null;
-    exhibitorName: string | null;
-    trafficCount: number;
-  }>;
-  exhibitors: Array<{
-    id: string;
-    userId: string;
-    companyName: string;
-    category: 'Robotics & AI' | 'Clean Energy' | 'Cloud & Security' | 'Spatial Computing' | 'Biotech & MedTech';
-    tagline: string;
-    description: string;
-    logoColor: string;
-    contactEmail: string;
-    phone?: string;
-    website: string;
-    products: string[];
-    staff: string[];
-    documents?: string[];
-    profileViews: number;
-  }>;
-  applications: Array<{
-    id: string;
-    expoId: string;
-    exhibitorId: string;
-    companyName: string;
-    category: 'Robotics & AI' | 'Clean Energy' | 'Cloud & Security' | 'Spatial Computing' | 'Biotech & MedTech';
-    productsSummary: string;
-    documents: string[];
-    status: 'pending' | 'approved' | 'rejected' | 'info_requested';
-    rejectionReason?: string;
-    reviewerNote?: string;
-    submittedAt: string;
-  }>;
-  registrations: Array<{
-    id: string;
-    expoId: string;
-    userId: string;
-    userName: string;
-    userEmail: string;
-    ticketCode: string;
-    status: 'confirmed' | 'cancelled';
-    registeredAt: string;
-  }>;
-  sessions: Array<{
-    id: string;
-    expoId: string;
-    title: string;
-    speaker: string;
-    speakerRole: string;
-    topic: string;
-    startTime: string;
-    endTime: string;
-    location: string;
-    capacity: number;
-    registeredUserIds: string[];
-    bookmarkedUserIds: string[];
-    updatedAt: string;
-  }>;
-  speakers: Array<{
-    id: string;
-    expoId: string;
-    name: string;
-    role: string;
-    company: string;
-    topic: string;
-    bio: string;
-  }>;
-  messages: Array<{
-    id: string;
-    senderId: string;
-    senderName: string;
-    senderRole: UserRole;
-    recipientChannel: string;
-    recipientLabel: string;
-    body: string;
-    createdAt: string;
-  }>;
-  notifications: Array<{
-    id: string;
-    targetUserId: string;
-    title: string;
-    message: string;
-    kind: 'schedule' | 'booth' | 'application' | 'reminder' | 'system';
-    readBy: string[];
-    createdAt: string;
-  }>;
-  feedback: Array<{
-    id: string;
-    userId: string;
-    userName: string;
-    category: 'Suggestion' | 'Technical Issue' | 'Booth Inquiry';
-    message: string;
-    createdAt: string;
-    status: 'open' | 'resolved';
-  }>;
-  activityLogs: Array<{
-    id: string;
-    actor: string;
-    action: string;
-    detail: string;
-    timestamp: string;
-  }>;
-  analyticsSeries: Array<{
-    date: string;
-    boothTraffic: number;
-    sessionBookmarks: number;
-    profileViews: number;
-  }>;
-}
+import {
+  getMailerStatus,
+  isSmtpConfigured,
+  sendApplicationStatusEmail,
+  sendResetCodeEmail,
+  sendTicketConfirmationEmail,
+} from './server/mailer';
+import { ServerMonitor } from './server/monitoring';
+import {
+  closeMongoStore,
+  connectMongoStore,
+  getMongoStoreStatus,
+  getSyncRecordFromMongo,
+  loadDatabaseFromMongo,
+  queueSyncDatabaseToMongo,
+  upsertSyncRecordToMongo,
+} from './server/mongoStore';
+import {
+  createRateLimiter,
+  decryptPii,
+  encryptPii,
+  generateSixDigitOtp,
+  hashOtp,
+  hashResetSessionToken,
+  securityHeadersMiddleware,
+  validatePasswordStrength,
+  verifyHashEqual,
+} from './server/security';
+import type {
+  BoothStatus,
+  ExpoStatus,
+  ResetTokenRecord,
+  ServerDatabase,
+  StoredUser,
+  SyncRecord,
+  UserRole,
+} from './server/types';
 
 const PORT = Number(process.env.PORT || 3000);
 const JWT_SECRET = process.env.JWT_SECRET || 'eventsphere-dev-jwt-secret-change-in-prod';
@@ -712,6 +582,27 @@ function migrateDatabase(db: ServerDatabase): ServerDatabase {
     status: e.status || (i === 0 ? 'live' : 'upcoming'),
     capacity: e.capacity || 800,
   }));
+  db.users = db.users.map((u) => ({
+    ...u,
+    phone: u.phone ? encryptPii(u.phone) : undefined,
+    analyticsTelemetry: u.analyticsTelemetry ?? true,
+    marketingEmails: u.marketingEmails ?? true,
+  }));
+  db.exhibitors = db.exhibitors.map((ex) => ({
+    ...ex,
+    phone: ex.phone ? encryptPii(ex.phone) : undefined,
+  }));
+  const nowMs = Date.now();
+  db.resetTokens = Array.isArray(db.resetTokens)
+    ? db.resetTokens.filter(
+        (t) =>
+          t &&
+          typeof t.email === 'string' &&
+          typeof t.userId === 'string' &&
+          !t.used &&
+          ((t.otpHash && t.expiresAt > nowMs) || (t.verified && t.resetSessionExpiresAt && t.resetSessionExpiresAt > nowMs)),
+      )
+    : [];
   return db;
 }
 
@@ -738,7 +629,7 @@ function loadDatabase(): ServerDatabase {
   }
 }
 
-function saveDatabase(db: ServerDatabase): void {
+function saveDatabase(db: ServerDatabase, skipMongoSync = false): void {
   if (!fs.existsSync(DATA_DIR)) {
     fs.mkdirSync(DATA_DIR, { recursive: true });
   }
@@ -746,6 +637,9 @@ function saveDatabase(db: ServerDatabase): void {
   fs.writeFileSync(tmp, JSON.stringify(db, null, 2), 'utf8');
   fs.renameSync(tmp, DB_FILE);
   createAutomatedBackup(db);
+  if (!skipMongoSync) {
+    void queueSyncDatabaseToMongo(db);
+  }
 }
 
 function loadVault(): Record<string, SyncRecord> {
@@ -799,8 +693,11 @@ function sanitizeUser(user: StoredUser) {
     role: user.role,
     company: user.company,
     title: user.title,
-    phone: user.phone,
+    phone: decryptPii(user.phone),
     gdprConsent: user.gdprConsent,
+    analyticsTelemetry: user.analyticsTelemetry ?? true,
+    marketingEmails: user.marketingEmails ?? true,
+    consentUpdatedAt: user.consentUpdatedAt,
     createdAt: user.createdAt,
   };
 }
@@ -818,30 +715,71 @@ function decodeOptionalAuth(req: Request): AuthUserClaims | undefined {
 
 async function startServer() {
   const app = express();
+  app.disable('x-powered-by');
+  app.set('trust proxy', 1);
+  app.use(securityHeadersMiddleware);
+
   const httpServer = http.createServer(app);
   const io = new SocketIOServer(httpServer, {
     cors: { origin: '*' },
   });
 
+  // Lightweight gzip compression for JSON/API payloads >= 1KB
+  app.use('/api', (req: Request, res: Response, next: NextFunction) => {
+    const accept = String(req.headers['accept-encoding'] || '');
+    if (!accept.includes('gzip')) {
+      next();
+      return;
+    }
+    const origJson = res.json.bind(res);
+    res.json = ((body: unknown) => {
+      const jsonStr = JSON.stringify(body);
+      if (jsonStr.length < 1024 || res.headersSent) {
+        return origJson(body);
+      }
+      try {
+        const compressed = zlib.gzipSync(jsonStr);
+        res.setHeader('Content-Encoding', 'gzip');
+        res.setHeader('Vary', 'Accept-Encoding');
+        res.setHeader('Content-Type', 'application/json; charset=utf-8');
+        return res.send(compressed);
+      } catch {
+        return origJson(body);
+      }
+    }) as Response['json'];
+    next();
+  });
+
   app.use('/api/assistant', express.json({ limit: '8mb' }));
   app.use(express.json({ limit: '512kb' }));
 
-  const serverStartedAt = Date.now();
-  let totalApiRequests = 0;
-  let totalApiLatencyMs = 0;
-  let totalApiErrors = 0;
+  const monitor = new ServerMonitor();
+  const apiRateLimiter = createRateLimiter({ windowMs: 60_000, max: 400, keyPrefix: 'api' });
+  const authRateLimiter = createRateLimiter({ windowMs: 60_000, max: 60, keyPrefix: 'auth' });
+  const otpRequestLimiter = createRateLimiter({ windowMs: 15 * 60_000, max: 12, keyPrefix: 'otp-req' });
+  const otpVerifyLimiter = createRateLimiter({ windowMs: 15 * 60_000, max: 25, keyPrefix: 'otp-verify' });
+
+  app.use('/api', apiRateLimiter);
+  app.use('/api/auth', authRateLimiter);
 
   app.use('/api', (req: Request, res: Response, next: NextFunction) => {
     const t0 = performance.now();
-    totalApiRequests += 1;
     res.on('finish', () => {
-      totalApiLatencyMs += performance.now() - t0;
-      if (res.statusCode >= 500) totalApiErrors += 1;
+      monitor.record(req.method, req.originalUrl, res.statusCode, performance.now() - t0);
     });
     next();
   });
 
-  let db = loadDatabase();
+  await connectMongoStore();
+  let db: ServerDatabase;
+  const mongoLoaded = await loadDatabaseFromMongo();
+  if (mongoLoaded && mongoLoaded.booths?.length && mongoLoaded.users?.length) {
+    db = migrateDatabase(mongoLoaded);
+    saveDatabase(db, true);
+  } else {
+    db = loadDatabase();
+    await queueSyncDatabaseToMongo(db);
+  }
   createAutomatedBackup(db);
   let concurrentUsers = 1;
 
@@ -923,10 +861,15 @@ async function startServer() {
 
     const activityLogs = role === 'admin' ? db.activityLogs : [];
 
+    const exhibitors = db.exhibitors.map((ex) => ({
+      ...ex,
+      phone: decryptPii(ex.phone),
+    }));
+
     return {
       expos: db.expos,
       booths: db.booths,
-      exhibitors: db.exhibitors,
+      exhibitors,
       applications,
       registrations,
       sessions: db.sessions,
@@ -982,20 +925,28 @@ async function startServer() {
   };
 
   app.get('/api/health', (_req: Request, res: Response) => {
-    res.json({ ok: true, service: 'eventsphere', concurrentUsers, timestamp: new Date().toISOString() });
+    res.json({
+      ok: true,
+      service: 'eventsphere',
+      concurrentUsers,
+      encryptionAtRest: 'aes-256-gcm',
+      database: getMongoStoreStatus(),
+      smtp: getMailerStatus(),
+      timestamp: new Date().toISOString(),
+    });
   });
 
   app.get('/api/metrics', (_req: Request, res: Response) => {
     const backupFiles = fs.existsSync(BACKUPS_DIR)
       ? fs.readdirSync(BACKUPS_DIR).filter((f) => f.endsWith('.json')).length
       : 0;
+    const summary = monitor.getSummary();
     res.json({
-      uptimeSeconds: Math.round((Date.now() - serverStartedAt) / 1000),
-      totalApiRequests,
-      avgLatencyMs: totalApiRequests > 0 ? Number((totalApiLatencyMs / totalApiRequests).toFixed(2)) : 0,
-      totalApiErrors,
+      ...summary,
       concurrentUsers: Math.max(1, concurrentUsers),
       backupCount: backupFiles,
+      storageMode: getMongoStoreStatus().mode,
+      smtpConfigured: getMailerStatus().configured,
     });
   });
 
@@ -1064,6 +1015,7 @@ async function startServer() {
     const assignedRole: UserRole =
       role === 'admin' ? 'admin' : role === 'exhibitor' ? 'exhibitor' : 'attendee';
 
+    const encryptedPhone = encryptPii(phone?.trim().slice(0, 32));
     const user: StoredUser = {
       id: `usr-${Date.now()}`,
       name: name.trim().slice(0, 80),
@@ -1071,8 +1023,11 @@ async function startServer() {
       passwordHash: bcrypt.hashSync(password, 10),
       role: assignedRole,
       company: company?.trim().slice(0, 80),
-      phone: phone?.trim().slice(0, 32),
+      phone: encryptedPhone,
       gdprConsent: true,
+      analyticsTelemetry: true,
+      marketingEmails: true,
+      consentUpdatedAt: new Date().toISOString(),
       createdAt: new Date().toISOString(),
     };
     db.users.push(user);
@@ -1088,7 +1043,7 @@ async function startServer() {
         description: (description || 'Exhibitor profile awaiting booth setup.').trim(),
         logoColor: validColor,
         contactEmail: user.email,
-        phone: user.phone,
+        phone: encryptedPhone,
         website: (website || '').trim(),
         products: Array.isArray(products) ? products.filter(Boolean).slice(0, 12) : [],
         staff: [user.name],
@@ -1120,53 +1075,233 @@ async function startServer() {
     res.json({ token: signToken(user), user: sanitizeUser(user) });
   });
 
-  app.post('/api/auth/forgot-password', (req: Request, res: Response) => {
+  const OTP_TTL_MS = 5 * 60 * 1000;
+  const OTP_RESEND_COOLDOWN_MS = 60 * 1000;
+  const OTP_MAX_ATTEMPTS = 5;
+  const RESET_SESSION_TTL_MS = 10 * 60 * 1000;
+  const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  app.post('/api/auth/forgot-password', otpRequestLimiter, async (req: Request, res: Response) => {
     const { email } = req.body as { email?: string };
     const cleanEmail = String(email || '').trim().toLowerCase();
-    const user = db.users.find((u) => u.email === cleanEmail);
-    if (!user) {
-      res.json({ ok: true, message: 'If that account exists, a one-time reset link was issued.' });
+
+    if (!cleanEmail || !EMAIL_REGEX.test(cleanEmail)) {
+      res.status(400).json({ error: 'Please enter a valid registered email address.' });
       return;
     }
-    const token = crypto.randomBytes(4).toString('hex').toUpperCase();
+
+    if (!isSmtpConfigured()) {
+      res.status(503).json({
+        error: 'Email delivery is not configured on the server. Set GMAIL_USER and GMAIL_APP_PASSWORD in .env.',
+      });
+      return;
+    }
+
+    const now = Date.now();
+    // Prune expired reset records
+    db.resetTokens = db.resetTokens.filter(
+      (t) => !t.used && (t.expiresAt > now || (t.verified && t.resetSessionExpiresAt && t.resetSessionExpiresAt > now)),
+    );
+
+    const user = db.users.find((u) => u.email === cleanEmail);
+    if (!user) {
+      // Generic response prevents account/email enumeration
+      res.json({
+        ok: true,
+        message:
+          'If an account with that email exists, a 6-digit verification code has been sent to your Gmail inbox.',
+        cooldownSeconds: 60,
+        expiresInSeconds: 300,
+      });
+      return;
+    }
+
+    const existing = db.resetTokens.find((t) => t.email === cleanEmail && !t.used);
+    if (existing && existing.resendAvailableAt > now) {
+      const retryAfterSec = Math.max(1, Math.ceil((existing.resendAvailableAt - now) / 1000));
+      res.setHeader('Retry-After', String(retryAfterSec));
+      res.status(429).json({
+        error: `Please wait ${retryAfterSec}s before requesting another verification code.`,
+        retryAfterSec,
+      });
+      return;
+    }
+
+    const otp = generateSixDigitOtp();
+    const record: ResetTokenRecord = {
+      id: `rst-${now}-${crypto.randomBytes(4).toString('hex')}`,
+      userId: user.id,
+      email: cleanEmail,
+      otpHash: hashOtp(cleanEmail, otp),
+      expiresAt: now + OTP_TTL_MS,
+      resendAvailableAt: now + OTP_RESEND_COOLDOWN_MS,
+      attempts: 0,
+      maxAttempts: OTP_MAX_ATTEMPTS,
+      verified: false,
+      resetSessionHash: null,
+      resetSessionExpiresAt: null,
+      used: false,
+      createdAt: now,
+    };
+
     db.resetTokens = db.resetTokens.filter((t) => t.email !== cleanEmail);
-    db.resetTokens.push({ email: cleanEmail, token, expiresAt: Date.now() + 15 * 60 * 1000 });
+    db.resetTokens.push(record);
     saveDatabase(db);
+
+    const emailSent = await sendResetCodeEmail(user.email, user.name, otp);
+    if (!emailSent) {
+      db.resetTokens = db.resetTokens.filter((t) => t.id !== record.id);
+      saveDatabase(db);
+      res.status(502).json({
+        error: 'Unable to send verification email via Gmail SMTP. Please verify server mail credentials and try again.',
+      });
+      return;
+    }
+
+    pushLog(user.name, 'PASSWORD_RESET_OTP_SENT', 'Sent 6-digit password reset OTP via Gmail SMTP');
+    saveDatabase(db);
+
     res.json({
       ok: true,
-      message: `One-time reset code issued (expires in 15m): ${token}`,
-      demoResetCode: token,
+      message:
+        'If an account with that email exists, a 6-digit verification code has been sent to your Gmail inbox.',
+      cooldownSeconds: 60,
+      expiresInSeconds: 300,
     });
   });
 
-  app.post('/api/auth/reset-password', (req: Request, res: Response) => {
-    const { email, token, newPassword } = req.body as {
-      email?: string;
-      token?: string;
-      newPassword?: string;
-    };
+  app.post('/api/auth/verify-reset-otp', otpVerifyLimiter, (req: Request, res: Response) => {
+    const { email, otp } = req.body as { email?: string; otp?: string };
     const cleanEmail = String(email || '').trim().toLowerCase();
-    if (!token || !newPassword || newPassword.length < 6) {
-      res.status(400).json({ error: 'Reset code and new password (min 6 chars) required.' });
+    const cleanOtp = String(otp || '').trim();
+
+    if (!cleanEmail || !EMAIL_REGEX.test(cleanEmail)) {
+      res.status(400).json({ error: 'Please provide a valid email address.' });
       return;
     }
-    const rec = db.resetTokens.find(
-      (t) => t.email === cleanEmail && t.token === token.trim().toUpperCase() && t.expiresAt > Date.now(),
-    );
-    if (!rec) {
-      res.status(400).json({ error: 'Reset code is invalid or expired.' });
+    if (!/^\d{6}$/.test(cleanOtp)) {
+      res.status(400).json({ error: 'Please enter the 6-digit verification code sent to your email.' });
       return;
     }
+
+    const now = Date.now();
     const user = db.users.find((u) => u.email === cleanEmail);
-    if (!user) {
-      res.status(404).json({ error: 'Account not found.' });
+    const rec = db.resetTokens.find((t) => t.email === cleanEmail);
+
+    if (
+      !user ||
+      !rec ||
+      rec.userId !== user.id ||
+      rec.used ||
+      rec.verified ||
+      !rec.otpHash ||
+      rec.expiresAt <= now
+    ) {
+      res.status(400).json({ error: 'Verification code is invalid or has expired.' });
       return;
     }
-    user.passwordHash = bcrypt.hashSync(newPassword, 10);
-    db.resetTokens = db.resetTokens.filter((t) => t.email !== cleanEmail);
-    pushLog(user.name, 'PASSWORD_RESET', 'Completed one-time password reset');
+
+    if (rec.attempts >= rec.maxAttempts) {
+      rec.used = true;
+      rec.otpHash = '';
+      saveDatabase(db);
+      res.status(429).json({
+        error: 'Maximum verification attempts exceeded. Please request a new verification code.',
+      });
+      return;
+    }
+
+    const candidateHash = hashOtp(cleanEmail, cleanOtp);
+    if (!verifyHashEqual(rec.otpHash, candidateHash)) {
+      rec.attempts += 1;
+      const remaining = Math.max(0, rec.maxAttempts - rec.attempts);
+      if (remaining === 0) {
+        rec.used = true;
+        rec.otpHash = '';
+        saveDatabase(db);
+        res.status(429).json({
+          error: 'Maximum verification attempts exceeded. Please request a new verification code.',
+        });
+        return;
+      }
+      saveDatabase(db);
+      res.status(400).json({
+        error: `Invalid verification code. ${remaining} attempt${remaining === 1 ? '' : 's'} remaining.`,
+      });
+      return;
+    }
+
+    const resetSessionToken = crypto.randomBytes(32).toString('hex');
+    rec.verified = true;
+    rec.otpHash = ''; // Invalidate OTP immediately upon verification so it can never be reused
+    rec.resetSessionHash = hashResetSessionToken(resetSessionToken);
+    rec.resetSessionExpiresAt = now + RESET_SESSION_TTL_MS;
+
+    pushLog(user.name, 'PASSWORD_RESET_OTP_VERIFIED', 'Verified 6-digit email OTP for password reset');
     saveDatabase(db);
-    res.json({ ok: true, message: 'Password updated. You may now sign in.' });
+
+    res.json({
+      ok: true,
+      resetSessionToken,
+      message: 'Verification code confirmed. You may now create your new password.',
+    });
+  });
+
+  app.post('/api/auth/reset-password', async (req: Request, res: Response) => {
+    const { email, resetSessionToken, newPassword, confirmPassword } = req.body as {
+      email?: string;
+      resetSessionToken?: string;
+      newPassword?: string;
+      confirmPassword?: string;
+    };
+
+    const cleanEmail = String(email || '').trim().toLowerCase();
+    const rawSession = String(resetSessionToken || '').trim();
+
+    if (!cleanEmail || !rawSession) {
+      res.status(400).json({ error: 'Verified reset session is required. Please verify your OTP first.' });
+      return;
+    }
+    if (confirmPassword !== undefined && newPassword !== confirmPassword) {
+      res.status(400).json({ error: 'Passwords do not match.' });
+      return;
+    }
+
+    const strength = validatePasswordStrength(String(newPassword || ''));
+    if (!strength.valid) {
+      res.status(400).json({ error: strength.error || 'Password does not meet security requirements.' });
+      return;
+    }
+
+    const now = Date.now();
+    const user = db.users.find((u) => u.email === cleanEmail);
+    const rec = db.resetTokens.find((t) => t.email === cleanEmail);
+
+    if (
+      !user ||
+      !rec ||
+      rec.userId !== user.id ||
+      rec.used ||
+      !rec.verified ||
+      !rec.resetSessionHash ||
+      !rec.resetSessionExpiresAt ||
+      rec.resetSessionExpiresAt <= now ||
+      !verifyHashEqual(rec.resetSessionHash, hashResetSessionToken(rawSession))
+    ) {
+      res.status(400).json({ error: 'Password reset session is invalid or has expired. Please restart the reset flow.' });
+      return;
+    }
+
+    user.passwordHash = await bcrypt.hash(String(newPassword), 10);
+    rec.used = true;
+    rec.otpHash = '';
+    rec.resetSessionHash = null;
+    db.resetTokens = db.resetTokens.filter((t) => t.email !== cleanEmail);
+
+    pushLog(user.name, 'PASSWORD_RESET', 'Completed email OTP verified password reset');
+    saveDatabase(db);
+
+    res.json({ ok: true, message: 'Your password has been updated. You may now sign in.' });
   });
 
   app.get('/api/auth/me', requireAuth, (req: AuthRequest, res: Response) => {
@@ -1193,9 +1328,96 @@ async function startServer() {
     if (name && name.trim()) user.name = name.trim().slice(0, 80);
     if (company !== undefined) user.company = company.trim().slice(0, 80);
     if (title !== undefined) user.title = title.trim().slice(0, 80);
-    if (phone !== undefined) user.phone = phone.trim().slice(0, 32);
+    if (phone !== undefined) user.phone = encryptPii(phone.trim().slice(0, 32));
     saveDatabase(db);
     res.json({ user: sanitizeUser(user), token: signToken(user) });
+  });
+
+  // GDPR Privacy & Consent Management
+  app.put('/api/auth/privacy/consent', requireAuth, (req: AuthRequest, res: Response) => {
+    const user = db.users.find((u) => u.id === req.authUser?.id);
+    if (!user) {
+      res.status(404).json({ error: 'User not found.' });
+      return;
+    }
+    const { gdprConsent, analyticsTelemetry, marketingEmails } = req.body as {
+      gdprConsent?: boolean;
+      analyticsTelemetry?: boolean;
+      marketingEmails?: boolean;
+    };
+    if (typeof gdprConsent === 'boolean') user.gdprConsent = gdprConsent;
+    if (typeof analyticsTelemetry === 'boolean') user.analyticsTelemetry = analyticsTelemetry;
+    if (typeof marketingEmails === 'boolean') user.marketingEmails = marketingEmails;
+    user.consentUpdatedAt = new Date().toISOString();
+    pushLog(user.name, 'PRIVACY_CONSENT_UPDATED', 'Updated GDPR consent preferences');
+    saveDatabase(db);
+    res.json({ user: sanitizeUser(user) });
+  });
+
+  app.get('/api/auth/privacy/export', requireAuth, (req: AuthRequest, res: Response) => {
+    const user = db.users.find((u) => u.id === req.authUser?.id);
+    if (!user) {
+      res.status(404).json({ error: 'User not found.' });
+      return;
+    }
+    const uid = user.id;
+    const payload = {
+      exportedAt: new Date().toISOString(),
+      regulation: 'GDPR Article 20 Data Portability Export',
+      profile: sanitizeUser(user),
+      registrations: db.registrations.filter((r) => r.userId === uid),
+      registeredExpos: db.expos
+        .filter((e) => e.registeredUserIds.includes(uid))
+        .map((e) => ({ id: e.id, title: e.title, date: e.date, location: e.location })),
+      bookmarkedSessions: db.sessions
+        .filter((s) => s.bookmarkedUserIds.includes(uid))
+        .map((s) => ({ id: s.id, title: s.title, startTime: s.startTime, location: s.location })),
+      messagesSent: db.messages.filter((m) => m.senderId === uid),
+      feedbackSubmitted: db.feedback.filter((f) => f.userId === uid),
+    };
+    pushLog(user.name, 'GDPR_DATA_EXPORTED', 'Downloaded personal data archive');
+    saveDatabase(db);
+    res.json(payload);
+  });
+
+  app.delete('/api/auth/account', requireAuth, (req: AuthRequest, res: Response) => {
+    const uid = req.authUser!.id;
+    const user = db.users.find((u) => u.id === uid);
+    if (!user) {
+      res.status(404).json({ error: 'Account not found.' });
+      return;
+    }
+    const cleanEmail = user.email;
+    db.users = db.users.filter((u) => u.id !== uid);
+    db.resetTokens = db.resetTokens.filter((t) => t.email !== cleanEmail);
+    db.expos.forEach((e) => {
+      e.registeredUserIds = e.registeredUserIds.filter((id) => id !== uid);
+    });
+    db.sessions.forEach((s) => {
+      s.registeredUserIds = s.registeredUserIds.filter((id) => id !== uid);
+      s.bookmarkedUserIds = s.bookmarkedUserIds.filter((id) => id !== uid);
+    });
+    db.registrations.forEach((r) => {
+      if (r.userId === uid) {
+        r.userName = 'Deleted User';
+        r.userEmail = 'deleted@erased.local';
+        r.status = 'cancelled';
+      }
+    });
+    db.messages.forEach((m) => {
+      if (m.senderId === uid) {
+        m.senderName = 'Former Participant';
+      }
+    });
+    db.feedback.forEach((f) => {
+      if (f.userId === uid) {
+        f.userName = 'Deleted User';
+      }
+    });
+    pushLog('Privacy Officer', 'GDPR_ACCOUNT_ERASED', `Erased PII for user ${uid}`);
+    saveDatabase(db);
+    io.emit('state:sync', getPublicSnapshot());
+    res.json({ ok: true, message: 'Account and personal data permanently erased.' });
   });
 
   // ADM-1: Create/Edit/Delete Expos
@@ -1505,18 +1727,21 @@ async function startServer() {
     if (reviewerNote !== undefined) appRec.reviewerNote = reviewerNote.trim();
     pushLog(req.authUser!.name, `APPLICATION_${status.toUpperCase()}`, `${appRec.companyName} (${status})`);
     const exhOwner = db.exhibitors.find((e) => e.id === appRec.exhibitorId);
+    const detailMsg =
+      status === 'approved'
+        ? 'Ready to select a booth on the live floor plan.'
+        : status === 'info_requested'
+          ? appRec.reviewerNote || 'Please provide updated compliance documents.'
+          : appRec.rejectionReason || 'Floor capacity constraints';
     pushNotification(
       exhOwner?.userId || 'all',
       `Application ${status === 'approved' ? 'Approved' : status === 'rejected' ? 'Rejected' : 'Info Requested'}`,
-      `${appRec.companyName}: ${
-        status === 'approved'
-          ? 'Ready to select a booth on the live floor plan.'
-          : status === 'info_requested'
-            ? appRec.reviewerNote || 'Please provide updated compliance documents.'
-            : appRec.rejectionReason
-      }`,
+      `${appRec.companyName}: ${detailMsg}`,
       'application',
     );
+    if (exhOwner?.contactEmail) {
+      void sendApplicationStatusEmail(exhOwner.contactEmail, appRec.companyName, status, detailMsg);
+    }
     saveDatabase(db);
     io.emit('application:updated', appRec);
     io.emit('state:sync', getPublicSnapshot());
@@ -1539,6 +1764,14 @@ async function startServer() {
       `${appRec.companyName}: ${appRec.reviewerNote}`,
       'application',
     );
+    if (exhOwner?.contactEmail) {
+      void sendApplicationStatusEmail(
+        exhOwner.contactEmail,
+        appRec.companyName,
+        'info_requested',
+        appRec.reviewerNote,
+      );
+    }
     pushLog(req.authUser!.name, 'APPLICATION_INFO_REQUESTED', `${appRec.companyName}: ${appRec.reviewerNote}`);
     saveDatabase(db);
     io.emit('state:sync', getPublicSnapshot());
@@ -1580,7 +1813,7 @@ async function startServer() {
     if (description !== undefined) exh.description = description.trim();
     if (website !== undefined) exh.website = website.trim();
     if (contactEmail !== undefined) exh.contactEmail = contactEmail.trim();
-    if (phone !== undefined) exh.phone = phone.trim();
+    if (phone !== undefined) exh.phone = encryptPii(phone.trim());
     if (logoColor && /^#[0-9a-fA-F]{6}$/.test(logoColor)) exh.logoColor = logoColor;
     if (Array.isArray(products)) exh.products = products.slice(0, 12);
     if (Array.isArray(staff)) exh.staff = staff.slice(0, 12);
@@ -1588,7 +1821,7 @@ async function startServer() {
     pushLog(req.authUser!.name, 'EXHIBITOR_UPDATED', `Updated profile for ${exh.companyName}`);
     saveDatabase(db);
     io.emit('state:sync', getPublicSnapshot());
-    res.json(exh);
+    res.json({ ...exh, phone: decryptPii(exh.phone) });
   });
 
   app.post('/api/exhibitors/:id/view', (req: Request, res: Response) => {
@@ -1738,7 +1971,7 @@ async function startServer() {
     res.json({ ok: true });
   });
 
-  // Admin Attendee Directory
+  // Admin Attendee Directory & Reliability/Monitoring Endpoints
   app.get('/api/admin/attendees', requireAuth, requireRole('admin'), (_req: AuthRequest, res: Response) => {
     const attendees = db.users
       .filter((u) => u.role === 'attendee')
@@ -1748,12 +1981,40 @@ async function startServer() {
         email: u.email,
         company: u.company,
         title: u.title,
-        phone: u.phone,
+        phone: decryptPii(u.phone),
         createdAt: u.createdAt,
         registeredExpoIds: db.expos.filter((e) => e.registeredUserIds.includes(u.id)).map((e) => e.id),
         bookmarkedSessionCount: db.sessions.filter((s) => s.bookmarkedUserIds.includes(u.id)).length,
       }));
     res.json({ attendees });
+  });
+
+  app.get('/api/admin/monitoring', requireAuth, requireRole('admin'), (_req: AuthRequest, res: Response) => {
+    const backups = fs.existsSync(BACKUPS_DIR)
+      ? fs.readdirSync(BACKUPS_DIR).filter((f) => f.endsWith('.json')).sort().reverse()
+      : [];
+    res.json({
+      service: 'eventsphere',
+      encryptionAtRest: 'aes-256-gcm',
+      concurrentUsers: Math.max(1, concurrentUsers),
+      database: getMongoStoreStatus(),
+      smtp: getMailerStatus(),
+      backupFiles: backups,
+      ...monitor.getSummary(),
+    });
+  });
+
+  app.post('/api/admin/backup', requireAuth, requireRole('admin'), async (req: AuthRequest, res: Response) => {
+    if (!fs.existsSync(BACKUPS_DIR)) {
+      fs.mkdirSync(BACKUPS_DIR, { recursive: true });
+    }
+    const stamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+    const filename = `eventsphere-manual-${stamp}.json`;
+    fs.writeFileSync(path.join(BACKUPS_DIR, filename), JSON.stringify(db, null, 2), 'utf8');
+    await queueSyncDatabaseToMongo(db);
+    pushLog(req.authUser!.name, 'BACKUP_CREATED', `Triggered snapshot backup ${filename}`);
+    saveDatabase(db);
+    res.status(201).json({ ok: true, filename, createdAt: new Date().toISOString() });
   });
 
   // ATT-2 & ATT-5: Expo/Session Registration, Ticket Generation & Bookmarks
@@ -1785,6 +2046,14 @@ async function startServer() {
     }
     pushLog(req.authUser!.name, 'EXPO_REGISTERED', `Registered for ${expo.title} (${reg.ticketCode})`);
     pushNotification(uid, 'Ticket Confirmed', `Pass ${reg.ticketCode} is active for ${expo.title}.`, 'system');
+    void sendTicketConfirmationEmail(
+      req.authUser!.email,
+      req.authUser!.name,
+      expo.title,
+      expo.date,
+      expo.location,
+      reg.ticketCode,
+    );
     saveDatabase(db);
     io.emit('state:sync', getPublicSnapshot());
     res.json({ expo, registration: reg });
@@ -1933,10 +2202,15 @@ async function startServer() {
   });
 
   // Cross-Device Cloud Sync Backup Vault
-  app.get('/api/sync/:syncKey', (req: Request, res: Response) => {
+  app.get('/api/sync/:syncKey', async (req: Request, res: Response) => {
     const syncKey = String(req.params.syncKey || '').toUpperCase().trim();
     if (!SYNC_KEY_REGEX.test(syncKey)) {
       res.status(400).json({ error: 'Invalid sync key format.' });
+      return;
+    }
+    const mongoRecord = await getSyncRecordFromMongo(syncKey);
+    if (mongoRecord) {
+      res.json(mongoRecord);
       return;
     }
     const vault = loadVault();
@@ -1948,7 +2222,7 @@ async function startServer() {
     res.json(record);
   });
 
-  app.put('/api/sync/:syncKey', (req: Request, res: Response) => {
+  app.put('/api/sync/:syncKey', async (req: Request, res: Response) => {
     const syncKey = String(req.params.syncKey || '').toUpperCase().trim();
     if (!SYNC_KEY_REGEX.test(syncKey)) {
       res.status(400).json({ error: 'Invalid sync key format.' });
@@ -1975,6 +2249,7 @@ async function startServer() {
     const vault = loadVault();
     vault[syncKey] = record;
     saveVault(vault);
+    await upsertSyncRecordToMongo(record);
     res.json({ ok: true, syncKey, updatedAt, checksum });
   });
 
@@ -2310,8 +2585,19 @@ Response Guidelines:
   }
 
   httpServer.listen(PORT, '0.0.0.0', () => {
-    console.log(`EventSphere Management server + Socket.io listening on http://0.0.0.0:${PORT}`);
+    const dbStatus = getMongoStoreStatus();
+    const smtpStatus = getMailerStatus();
+    console.log(
+      `EventSphere Management server + Socket.io listening on http://0.0.0.0:${PORT} | DB=${dbStatus.mode}${dbStatus.database ? ` (${dbStatus.database})` : ''} | SMTP=${smtpStatus.configured ? 'ready' : 'inactive'}`,
+    );
   });
+
+  const gracefulShutdown = async () => {
+    await closeMongoStore();
+    httpServer.close(() => process.exit(0));
+  };
+  process.once('SIGTERM', () => void gracefulShutdown());
+  process.once('SIGINT', () => void gracefulShutdown());
 }
 
 startServer().catch((err) => {
