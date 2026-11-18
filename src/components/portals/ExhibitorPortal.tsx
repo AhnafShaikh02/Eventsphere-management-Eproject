@@ -91,7 +91,7 @@ export const ExhibitorPortal: React.FC<ExhibitorPortalProps> = ({
     contactEmail: myExhibitor?.contactEmail || currentUser.email,
     phone: myExhibitor?.phone || '',
     website: myExhibitor?.website || '',
-    logoColor: myExhibitor?.logoColor || '#10B981',
+    logoColor: myExhibitor?.logoColor || '#D4AF63',
   });
 
   const [appForm, setAppForm] = useState({
@@ -220,7 +220,7 @@ export const ExhibitorPortal: React.FC<ExhibitorPortalProps> = ({
                   <EmptyState
                     icon={<Grid className="h-5 w-5" />}
                     title="No booth reserved yet"
-                    description="Once your application is approved, claim any available emerald booth on the live floor plan."
+                    description="Once your application is approved, claim any available champagne gold booth on the live floor plan."
                     action={
                       <Button variant="primary" size="sm" onClick={() => setSection('booth-selection')}>
                         Browse Floor Booths
@@ -233,13 +233,13 @@ export const ExhibitorPortal: React.FC<ExhibitorPortalProps> = ({
                   {myBooths.map((b) => (
                     <div
                       key={b.id}
-                      className="flex items-center justify-between rounded-xl border border-[#104E35]/18 bg-[#E4EDE7] p-3.5 dark:border-[#2A6F52]/34 dark:bg-[#050A07]"
+                      className="flex items-center justify-between rounded-xl border border-[#272732]/18 bg-[#E6E7EE] p-3.5 dark:border-[#2D2D3A]/34 dark:bg-[#0E0E13]"
                     >
                       <div>
                         <div className="font-display text-sm font-bold">
                           Booth {b.number} · {b.zone}
                         </div>
-                        <div className="font-mono text-xs text-[#466153] dark:text-[#8EAD9E]">
+                        <div className="font-mono text-xs text-[#525463] dark:text-[#9497A6]">
                           {b.size} · ${b.priceUsd.toLocaleString()} · {b.trafficCount} visits
                         </div>
                       </div>
@@ -330,17 +330,17 @@ export const ExhibitorPortal: React.FC<ExhibitorPortalProps> = ({
               />
             </div>
             <div>
-              <div className="mb-1.5 text-xs font-semibold text-[#466153] dark:text-[#8EAD9E]">
+              <div className="mb-1.5 text-xs font-semibold text-[#525463] dark:text-[#9497A6]">
                 Booth Brand Color Swatch
               </div>
               <div className="flex gap-2">
-                {['#10B981', '#34D399', '#F97362', '#38BDF8', '#A78BFA', '#F59E0B'].map((hex) => (
+                {['#D4AF63', '#E8C987', '#F97362', '#38BDF8', '#C58B3B', '#F59E0B'].map((hex) => (
                   <button
                     key={hex}
                     type="button"
                     onClick={() => setProfileForm((p) => ({ ...p, logoColor: hex }))}
                     className={`h-8 w-8 rounded-lg border-2 ${
-                      profileForm.logoColor === hex ? 'border-[#091911] ring-2 ring-[#10B981]/45 scale-110 shadow dark:border-[#A7F3D0]' : 'border-transparent opacity-75'
+                      profileForm.logoColor === hex ? 'border-[#0B0B0E] ring-2 ring-[#D4AF63]/45 scale-110 shadow dark:border-[#F3DCAA]' : 'border-transparent opacity-75'
                     }`}
                     style={{ backgroundColor: hex }}
                   />
@@ -360,11 +360,11 @@ export const ExhibitorPortal: React.FC<ExhibitorPortalProps> = ({
             <Card key={expo.id} padding="md">
               <div className="flex items-center justify-between">
                 <Badge tone={expo.status === 'live' ? 'emerald' : 'teal'}>{expo.status}</Badge>
-                <span className="font-mono text-xs text-[#466153] dark:text-[#8EAD9E]">{expo.date}</span>
+                <span className="font-mono text-xs text-[#525463] dark:text-[#9497A6]">{expo.date}</span>
               </div>
               <h3 className="mt-2 font-display text-base font-bold">{expo.title}</h3>
-              <p className="mt-1 text-xs text-[#466153] dark:text-[#8EAD9E]">{expo.location}</p>
-              <p className="mt-2 text-xs text-[#466153] dark:text-[#8EAD9E]">{expo.description}</p>
+              <p className="mt-1 text-xs text-[#525463] dark:text-[#9497A6]">{expo.location}</p>
+              <p className="mt-2 text-xs text-[#525463] dark:text-[#9497A6]">{expo.description}</p>
               <Button
                 variant="primary"
                 size="sm"
@@ -430,7 +430,7 @@ export const ExhibitorPortal: React.FC<ExhibitorPortalProps> = ({
                     {app.status.replace('_', ' ')}
                   </Badge>
                 </div>
-                <p className="mt-1.5 text-xs text-[#466153] dark:text-[#8EAD9E]">{app.productsSummary}</p>
+                <p className="mt-1.5 text-xs text-[#525463] dark:text-[#9497A6]">{app.productsSummary}</p>
                 {(app.reviewerNote || app.rejectionReason) && (
                   <p className="mt-2 rounded-lg border border-amber-500/30 bg-amber-500/10 px-2.5 py-1.5 text-xs text-amber-800 dark:text-amber-300">
                     Organizer Note: {app.reviewerNote || app.rejectionReason}
@@ -474,10 +474,10 @@ export const ExhibitorPortal: React.FC<ExhibitorPortalProps> = ({
                           style={{ backgroundColor: STATUS_HEX[b.status] }}
                         />
                       </div>
-                      <div className="mt-1 font-mono text-xs text-[#466153] dark:text-[#8EAD9E]">
+                      <div className="mt-1 font-mono text-xs text-[#525463] dark:text-[#9497A6]">
                         {b.zone} · {b.size}
                       </div>
-                      <div className="mt-1 font-mono text-sm font-bold text-[#059669] dark:text-[#34D399]">
+                      <div className="mt-1 font-mono text-sm font-bold text-[#8A621C] dark:text-[#E8C987]">
                         ${b.priceUsd.toLocaleString()}
                       </div>
                     </div>
@@ -528,7 +528,7 @@ export const ExhibitorPortal: React.FC<ExhibitorPortalProps> = ({
                     <h3 className="font-display text-lg font-bold">Booth {b.number}</h3>
                     <Badge tone="emerald">{b.status}</Badge>
                   </div>
-                  <p className="mt-1 font-mono text-xs text-[#466153] dark:text-[#8EAD9E]">
+                  <p className="mt-1 font-mono text-xs text-[#525463] dark:text-[#9497A6]">
                     {b.zone} · {b.size} · ${b.priceUsd.toLocaleString()} · {b.trafficCount} floor visits
                   </p>
                   <div className="mt-4 flex gap-2">
@@ -576,7 +576,7 @@ export const ExhibitorPortal: React.FC<ExhibitorPortalProps> = ({
               value={newProduct}
               onChange={(e) => setNewProduct(e.target.value)}
               placeholder="Add product or live demo module..."
-              className="flex-1 rounded-xl border border-[#104E35]/20 bg-[#EEF4F0] px-3.5 py-2 text-sm text-[#091911] placeholder:text-[#577363] focus:border-[#10B981] focus:outline-none dark:border-[#2A6F52]/38 dark:bg-[#050A07] dark:text-[#DDF2E7] dark:placeholder:text-[#6D907E]"
+              className="flex-1 rounded-xl border border-[#272732]/20 bg-[#F8F8FB] px-3.5 py-2 text-sm text-[#0B0B0E] placeholder:text-[#5E6070] focus:border-[#D4AF63] focus:outline-none dark:border-[#2D2D3A]/38 dark:bg-[#0E0E13] dark:text-[#F2F3F7] dark:placeholder:text-[#737685]"
             />
             <Button type="submit" variant="primary" leftIcon={<Plus className="h-4 w-4" />}>
               Add Product
@@ -587,7 +587,7 @@ export const ExhibitorPortal: React.FC<ExhibitorPortalProps> = ({
             {myExhibitor.products.map((prod) => (
               <div
                 key={prod}
-                className="flex items-center justify-between rounded-xl border border-[#104E35]/18 bg-[#E4EDE7] px-4 py-3 text-sm font-semibold dark:border-[#2A6F52]/34 dark:bg-[#050A07]"
+                className="flex items-center justify-between rounded-xl border border-[#272732]/18 bg-[#E6E7EE] px-4 py-3 text-sm font-semibold dark:border-[#2D2D3A]/34 dark:bg-[#0E0E13]"
               >
                 <span>{prod}</span>
                 <Button
@@ -636,7 +636,7 @@ export const ExhibitorPortal: React.FC<ExhibitorPortalProps> = ({
               value={newStaff}
               onChange={(e) => setNewStaff(e.target.value)}
               placeholder="Staff full name..."
-              className="flex-1 rounded-xl border border-[#104E35]/20 bg-[#EEF4F0] px-3.5 py-2 text-sm text-[#091911] placeholder:text-[#577363] focus:border-[#10B981] focus:outline-none dark:border-[#2A6F52]/38 dark:bg-[#050A07] dark:text-[#DDF2E7] dark:placeholder:text-[#6D907E]"
+              className="flex-1 rounded-xl border border-[#272732]/20 bg-[#F8F8FB] px-3.5 py-2 text-sm text-[#0B0B0E] placeholder:text-[#5E6070] focus:border-[#D4AF63] focus:outline-none dark:border-[#2D2D3A]/38 dark:bg-[#0E0E13] dark:text-[#F2F3F7] dark:placeholder:text-[#737685]"
             />
             <Button type="submit" variant="primary" leftIcon={<Plus className="h-4 w-4" />}>
               Add Staff
@@ -647,7 +647,7 @@ export const ExhibitorPortal: React.FC<ExhibitorPortalProps> = ({
             {myExhibitor.staff.map((member) => (
               <div
                 key={member}
-                className="flex items-center justify-between rounded-xl border border-[#104E35]/18 bg-[#E4EDE7] px-4 py-3 text-sm font-semibold dark:border-[#2A6F52]/34 dark:bg-[#050A07]"
+                className="flex items-center justify-between rounded-xl border border-[#272732]/18 bg-[#E6E7EE] px-4 py-3 text-sm font-semibold dark:border-[#2D2D3A]/34 dark:bg-[#0E0E13]"
               >
                 <span>{member}</span>
                 <Button
@@ -687,18 +687,18 @@ export const ExhibitorPortal: React.FC<ExhibitorPortalProps> = ({
               ]}
             />
           </div>
-          <div className="max-h-72 space-y-2 overflow-y-auto rounded-xl border border-[#104E35]/18 bg-[#E4EDE7] p-3 dark:border-[#2A6F52]/34 dark:bg-[#050A07]">
+          <div className="max-h-72 space-y-2 overflow-y-auto rounded-xl border border-[#272732]/18 bg-[#E6E7EE] p-3 dark:border-[#2D2D3A]/34 dark:bg-[#0E0E13]">
             {snapshot.messages
               .filter((m) => m.recipientChannel === chatChannel)
               .map((m) => (
-                <div key={m.id} className="rounded-lg border border-[#104E35]/16 bg-[#F0F5F2] p-2.5 text-xs dark:border-[#2A6F52]/30 dark:bg-[#09120D]">
+                <div key={m.id} className="rounded-lg border border-[#272732]/16 bg-[#FFFFFF] p-2.5 text-xs dark:border-[#2D2D3A]/30 dark:bg-[#131319]">
                   <div className="flex justify-between font-semibold">
                     <span>{m.senderName}</span>
-                    <span className="font-mono text-[10px] text-[#466153] dark:text-[#8EAD9E]">
+                    <span className="font-mono text-[10px] text-[#525463] dark:text-[#9497A6]">
                       {new Date(m.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </span>
                   </div>
-                  <p className="mt-1 text-[#466153] dark:text-[#C5DFD0]">{m.body}</p>
+                  <p className="mt-1 text-[#525463] dark:text-[#D4D6E0]">{m.body}</p>
                 </div>
               ))}
           </div>
@@ -725,7 +725,7 @@ export const ExhibitorPortal: React.FC<ExhibitorPortalProps> = ({
               value={chatDraft}
               onChange={(e) => setChatDraft(e.target.value)}
               placeholder="Write a message..."
-              className="flex-1 rounded-xl border border-[#104E35]/20 bg-[#EEF4F0] px-3.5 py-2 text-sm text-[#091911] placeholder:text-[#577363] focus:border-[#10B981] focus:outline-none dark:border-[#2A6F52]/38 dark:bg-[#050A07] dark:text-[#DDF2E7] dark:placeholder:text-[#6D907E]"
+              className="flex-1 rounded-xl border border-[#272732]/20 bg-[#F8F8FB] px-3.5 py-2 text-sm text-[#0B0B0E] placeholder:text-[#5E6070] focus:border-[#D4AF63] focus:outline-none dark:border-[#2D2D3A]/38 dark:bg-[#0E0E13] dark:text-[#F2F3F7] dark:placeholder:text-[#737685]"
             />
             <Button type="submit" variant="primary" leftIcon={<Send className="h-3.5 w-3.5" />}>
               Send
@@ -751,12 +751,12 @@ export const ExhibitorPortal: React.FC<ExhibitorPortalProps> = ({
             </Button>
           </div>
           {snapshot.notifications.map((n) => (
-            <div key={n.id} className="rounded-xl border border-[#104E35]/18 bg-[#E4EDE7] p-3 text-xs dark:border-[#2A6F52]/34 dark:bg-[#050A07]">
+            <div key={n.id} className="rounded-xl border border-[#272732]/18 bg-[#E6E7EE] p-3 text-xs dark:border-[#2D2D3A]/34 dark:bg-[#0E0E13]">
               <div className="flex justify-between font-bold">
                 <span>{n.title}</span>
                 <Badge tone="emerald">{n.kind}</Badge>
               </div>
-              <p className="mt-1 text-[#466153] dark:text-[#8EAD9E]">{n.message}</p>
+              <p className="mt-1 text-[#525463] dark:text-[#9497A6]">{n.message}</p>
             </div>
           ))}
         </Card>
@@ -766,7 +766,7 @@ export const ExhibitorPortal: React.FC<ExhibitorPortalProps> = ({
         <div className="space-y-5">
           <Card padding="lg" className="space-y-4">
             <h2 className="font-display text-lg font-bold">Account Settings</h2>
-            <p className="text-xs text-[#466153] dark:text-[#8EAD9E]">
+            <p className="text-xs text-[#525463] dark:text-[#9497A6]">
               Account: <strong>{currentUser.name}</strong> ({currentUser.email})
             </p>
             <Button variant="primary" onClick={onOpenProfileModal}>

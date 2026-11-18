@@ -295,8 +295,8 @@ export const ExpoAnalyticsDashboard: React.FC<ExpoAnalyticsDashboardProps> = ({
   return (
     <div
       ref={rootRef}
-      style={{ '--portal-accent': '#10B981' } as React.CSSProperties}
-      className="relative z-20 min-h-screen bg-[#E9F0EC]/96 px-4 pt-24 pb-16 text-[#091911] dark:bg-[#040705]/96 dark:text-[#DDF2E7] sm:px-6"
+      style={{ '--portal-accent': '#D4AF63' } as React.CSSProperties}
+      className="relative z-20 min-h-screen bg-[#F3F4F7]/96 px-4 pt-24 pb-16 text-[#0B0B0E] dark:bg-[#0B0B0E]/96 dark:text-[#F2F3F7] sm:px-6"
     >
       <div
         ref={progressRef}
@@ -307,10 +307,10 @@ export const ExpoAnalyticsDashboard: React.FC<ExpoAnalyticsDashboardProps> = ({
 
       <div className="mx-auto max-w-7xl space-y-6">
         {/* Header & Export Toolbar */}
-        <div className="portal-shell-card surface-luxe relative flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-[#104E35]/18 bg-[#F0F5F2]/90 px-5 py-5 dark:border-[#2A6F52]/34 dark:bg-[#08110C]/90">
+        <div className="portal-shell-card surface-luxe relative flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-[#272732]/18 bg-[#FFFFFF]/90 px-5 py-5 dark:border-[#2D2D3A]/34 dark:bg-[#121217]/90">
           <div aria-hidden="true" className="portal-aura-orb absolute -top-12 right-10 h-32 w-56 rounded-full" />
           <div className="relative z-10">
-            <p className="analytics-text-reveal font-mono text-xs font-semibold tracking-wider text-[#059669] dark:text-[#34D399]">
+            <p className="analytics-text-reveal font-mono text-xs font-semibold tracking-wider text-[#8A621C] dark:text-[#E8C987]">
               Telemetry &amp; Reporting
             </p>
             <h1 className="analytics-text-reveal mt-1 font-display text-3xl font-extrabold tracking-tight sm:text-4xl">
@@ -330,7 +330,7 @@ export const ExpoAnalyticsDashboard: React.FC<ExpoAnalyticsDashboardProps> = ({
             <Button
               variant="outline"
               size="sm"
-              leftIcon={<FileJson className="h-3.5 w-3.5 text-[#34D399]" />}
+              leftIcon={<FileJson className="h-3.5 w-3.5 text-[#8A621C] dark:text-[#E8C987]" />}
               onClick={handleExportJson}
             >
               Export JSON
@@ -349,7 +349,7 @@ export const ExpoAnalyticsDashboard: React.FC<ExpoAnalyticsDashboardProps> = ({
         {/* Date Range Filters */}
         <Card padding="sm" className="no-print analytics-text-reveal flex flex-wrap items-center justify-between gap-3">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="font-mono text-xs font-semibold text-[#466153] dark:text-[#8EAD9E]">
+            <span className="font-mono text-xs font-semibold text-[#525463] dark:text-[#9497A6]">
               Date Range:
             </span>
             {[7, 14, 30].map((d) => (
@@ -408,15 +408,15 @@ export const ExpoAnalyticsDashboard: React.FC<ExpoAnalyticsDashboardProps> = ({
           <Card padding="lg">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="flex items-center gap-2 font-display text-lg font-bold">
-                <BarChart3 className="h-4 w-4 text-[#34D399]" />
+                <BarChart3 className="h-4 w-4 text-[#8A621C] dark:text-[#E8C987]" />
                 <span>Engagement &amp; Traffic Velocity</span>
               </div>
               <div className="flex flex-wrap items-center gap-4 text-xs">
                 <span className="flex items-center gap-1.5">
-                  <span className="h-2.5 w-2.5 rounded-xs bg-[#10B981]" /> Booth Traffic
+                  <span className="h-2.5 w-2.5 rounded-xs bg-[#D4AF63]" /> Booth Traffic
                 </span>
                 <span className="flex items-center gap-1.5">
-                  <span className="h-2.5 w-2.5 rounded-xs bg-[#6EE7B7]" /> Profile Views
+                  <span className="h-2.5 w-2.5 rounded-xs bg-[#F3DCAA]" /> Profile Views
                 </span>
                 <span className="flex items-center gap-1.5">
                   <span className="h-2.5 w-2.5 rounded-xs bg-[#2DD4BF]" /> Session Bookmarks
@@ -445,15 +445,15 @@ export const ExpoAnalyticsDashboard: React.FC<ExpoAnalyticsDashboardProps> = ({
                 <polyline
                   className="analytics-polyline"
                   fill="none"
-                  stroke="#10B981"
+                  stroke="#D4AF63"
                   strokeWidth="3"
-                  style={{ filter: 'drop-shadow(0 0 6px rgba(16,185,129,0.42))' }}
+                  style={{ filter: 'drop-shadow(0 0 6px rgba(212,175,99,0.42))' }}
                   points={buildPolyline((p) => p.boothTraffic)}
                 />
                 <polyline
                   className="analytics-polyline"
                   fill="none"
-                  stroke="#6EE7B7"
+                  stroke="#F3DCAA"
                   strokeWidth="2.5"
                   points={buildPolyline((p) => p.profileViews)}
                 />
@@ -477,7 +477,7 @@ export const ExpoAnalyticsDashboard: React.FC<ExpoAnalyticsDashboardProps> = ({
                         cx={x}
                         cy={y}
                         r={hoverIdx === i ? 6 : 3.5}
-                        fill="#34D399"
+                        fill="#E8C987"
                         onMouseEnter={() => setHoverIdx(i)}
                         onMouseLeave={() => setHoverIdx(null)}
                         className="analytics-node cursor-pointer"
@@ -488,11 +488,11 @@ export const ExpoAnalyticsDashboard: React.FC<ExpoAnalyticsDashboardProps> = ({
               </svg>
 
               {hoveredPoint && (
-                <div className="mt-2 flex flex-wrap items-center gap-4 rounded-lg border border-[#104E35]/18 bg-[#E4EDE7] px-3 py-2 font-mono text-xs dark:border-[#2A6F52]/36 dark:bg-[#050A07]">
+                <div className="mt-2 flex flex-wrap items-center gap-4 rounded-lg border border-[#272732]/18 bg-[#E6E7EE] px-3 py-2 font-mono text-xs dark:border-[#2D2D3A]/36 dark:bg-[#0E0E13]">
                   <span className="font-bold">{hoveredPoint.date}</span>
-                  <span className="text-[#10B981]">Traffic: {hoveredPoint.boothTraffic}</span>
-                  <span className="text-[#6EE7B7]">Profile Views: {hoveredPoint.profileViews}</span>
-                  <span className="text-[#2DD4BF]">Bookmarks: {hoveredPoint.sessionBookmarks}</span>
+                  <span className="text-[#8A621C] dark:text-[#D4AF63]">Traffic: {hoveredPoint.boothTraffic}</span>
+                  <span className="text-[#9E7836] dark:text-[#F3DCAA]">Profile Views: {hoveredPoint.profileViews}</span>
+                  <span className="text-[#0F766E] dark:text-[#2DD4BF]">Bookmarks: {hoveredPoint.sessionBookmarks}</span>
                 </div>
               )}
             </div>
@@ -505,7 +505,7 @@ export const ExpoAnalyticsDashboard: React.FC<ExpoAnalyticsDashboardProps> = ({
             <h2 className="font-display text-lg font-bold">Top Booth Traffic &amp; Allocation</h2>
             <div className="mt-3 overflow-x-auto">
               <table className="w-full text-left text-xs">
-                <thead className="border-b border-[#104E35]/16 font-mono text-[11px] text-[#355243] dark:border-[#2A6F52]/32 dark:text-[#8EAD9E]">
+                <thead className="border-b border-[#272732]/16 font-mono text-[11px] text-[#3E404D] dark:border-[#2D2D3A]/32 dark:text-[#9497A6]">
                   <tr>
                     <th className="py-2">Booth</th>
                     <th className="py-2">Exhibitor</th>
@@ -513,7 +513,7 @@ export const ExpoAnalyticsDashboard: React.FC<ExpoAnalyticsDashboardProps> = ({
                     <th className="py-2 text-right">Visits</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#104E35]/12 dark:divide-[#2A6F52]/24">
+                <tbody className="divide-y divide-[#272732]/12 dark:divide-[#2D2D3A]/24">
                   {[...snapshot.booths]
                     .sort((a, b) => b.trafficCount - a.trafficCount)
                     .slice(0, 8)
@@ -521,7 +521,7 @@ export const ExpoAnalyticsDashboard: React.FC<ExpoAnalyticsDashboardProps> = ({
                       <tr
                         key={b.id}
                         onClick={() => onInspectBooth(b.id)}
-                        className="analytics-booth-row cursor-pointer hover:bg-[#E4EDE7] dark:hover:bg-[#10B981]/8"
+                        className="analytics-booth-row cursor-pointer hover:bg-[#E6E7EE] dark:hover:bg-[#E8C987]/8"
                       >
                         <td className="py-2 font-mono font-bold">{b.number}</td>
                         <td className="py-2">{b.exhibitorName || b.zone}</td>
@@ -557,16 +557,16 @@ export const ExpoAnalyticsDashboard: React.FC<ExpoAnalyticsDashboardProps> = ({
                   <div key={s.id} className="space-y-1">
                     <div className="flex justify-between gap-2 text-xs font-semibold">
                       <span className="truncate">{s.title}</span>
-                      <span className="shrink-0 font-mono text-[11px] text-[#466153] dark:text-[#8EAD9E]">
+                      <span className="shrink-0 font-mono text-[11px] text-[#525463] dark:text-[#9497A6]">
                         {s.registeredUserIds.length} reg · {s.bookmarkedUserIds.length} saved
                       </span>
                     </div>
-                    <div className="h-2 w-full overflow-hidden rounded-full bg-[#E8EFEA] dark:bg-[#040705]">
+                    <div className="h-2 w-full overflow-hidden rounded-full bg-[#ECEEF3] dark:bg-[#0B0B0E]">
                       <div
-                        className="analytics-bar-fill h-full rounded-full bg-gradient-to-r from-[#059669] to-[#34D399]"
+                        className="analytics-bar-fill h-full rounded-full bg-gradient-to-r from-[#B88B3D] to-[#F3DCAA]"
                         style={{
                           width: `${fillPct}%`,
-                          boxShadow: '0 0 12px rgba(52, 211, 153, 0.45)',
+                          boxShadow: '0 0 12px rgba(232, 201, 135, 0.45)',
                         }}
                       />
                     </div>

@@ -73,11 +73,20 @@ export const FloorExploreHud: React.FC<FloorExploreHudProps> = ({
       }
       if (e.key.toLowerCase() === 'h') {
         setCollapsed((v) => !v);
+      } else if (e.key === '+' || e.key === '=') {
+        e.preventDefault();
+        onZoomIn();
+      } else if (e.key === '-' || e.key === '_') {
+        e.preventDefault();
+        onZoomOut();
+      } else if (e.key === '0') {
+        e.preventDefault();
+        onResetView();
       }
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, []);
+  }, [onResetView, onZoomIn, onZoomOut]);
 
   const zoomTierLabel = zoomPercent >= 145 ? 'Detail' : zoomPercent <= 75 ? 'Overview' : 'Floor';
 
@@ -87,7 +96,7 @@ export const FloorExploreHud: React.FC<FloorExploreHudProps> = ({
         <Button
           variant="outline"
           size="sm"
-          leftIcon={<ChevronUp className="h-3.5 w-3.5 text-[#10B981]" />}
+          leftIcon={<ChevronUp className="h-3.5 w-3.5 text-[#8A621C] dark:text-[#E8C987]" />}
           onClick={() => setCollapsed(false)}
           className="surface-luxe shadow-md"
         >
@@ -105,18 +114,18 @@ export const FloorExploreHud: React.FC<FloorExploreHudProps> = ({
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-        className="surface-luxe pointer-events-auto w-full max-w-[min(64rem,94vw)] rounded-xl border border-[#104E35]/18 bg-[#EEF4F0]/90 px-3.5 py-2.5 text-[#091911] dark:border-[#2A6F52]/38 dark:bg-[#050A07]/90 dark:text-[#DDF2E7]"
+        className="surface-luxe pointer-events-auto w-full max-w-[min(64rem,94vw)] rounded-xl border border-[#272732]/18 bg-[#F8F8FB]/90 px-3.5 py-2.5 text-[#0B0B0E] dark:border-[#E8C987]/22 dark:bg-[#0B0B0E]/92 dark:text-[#F2F3F7]"
       >
         <div className="flex flex-wrap items-center justify-between gap-2.5">
           {/* Status Filter Buttons */}
           <div className="flex flex-wrap items-center gap-1.5">
             {(
               [
-                { id: 'all', label: `All (${total})`, color: '#8EAD9E' },
-                { id: 'available', label: `Available (${availableCount})`, color: '#34D399' },
+                { id: 'all', label: `All (${total})`, color: '#E8C987' },
+                { id: 'available', label: `Available (${availableCount})`, color: '#D4AF63' },
                 { id: 'reserved', label: `Reserved (${reservedCount})`, color: '#F97362' },
                 { id: 'occupied', label: `Occupied (${occupiedCount})`, color: '#38BDF8' },
-                { id: 'pending', label: `Pending (${pendingCount})`, color: '#A78BFA' },
+                { id: 'pending', label: `Pending (${pendingCount})`, color: '#C58B3B' },
               ] as const
             ).map((item) => {
               const active = statusFilter === item.id;
@@ -127,8 +136,8 @@ export const FloorExploreHud: React.FC<FloorExploreHudProps> = ({
                   onClick={() => onChangeStatusFilter(item.id)}
                   className={`inline-flex min-h-[32px] items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs font-semibold transition-colors whitespace-nowrap shrink-0 ${
                     active
-                      ? 'border-[#059669]/55 bg-[#10B981]/14 text-[#091911] dark:border-[#34D399]/50 dark:bg-[#10B981]/16 dark:text-[#DDF2E7]'
-                      : 'border-[#104E35]/16 bg-[#E4EDE7]/90 text-[#355243] hover:text-[#091911] dark:border-[#2A6F52]/32 dark:bg-[#08110C]/90 dark:text-[#8EAD9E]'
+                      ? 'border-[#8A621C]/55 bg-[#D4AF63]/14 text-[#0B0B0E] dark:border-[#E8C987]/55 dark:bg-[#E8C987]/14 dark:text-[#F2F3F7]'
+                      : 'border-[#272732]/16 bg-[#E6E7EE]/90 text-[#3E404D] hover:text-[#0B0B0E] dark:border-[#2D2D3A]/36 dark:bg-[#121217]/90 dark:text-[#9497A6]'
                   }`}
                 >
                   <span
@@ -143,17 +152,29 @@ export const FloorExploreHud: React.FC<FloorExploreHudProps> = ({
 
           {/* Camera Zoom & Focus Presets */}
           <div className="flex flex-wrap items-center gap-1.5">
-            <Button variant="icon" size="sm" onClick={onZoomIn} title="Zoom in" aria-label="Zoom in">
+            <Button
+              variant="icon"
+              size="sm"
+              onClick={onZoomIn}
+              title="Zoom in (+)"
+              aria-label="Zoom in"
+            >
               <ZoomIn className="h-3.5 w-3.5" />
             </Button>
             <span
-              title="Live 3D zoom level — floor borders adapt automatically"
-              className="inline-flex h-8 items-center gap-1 rounded-lg border border-[#104E35]/18 bg-[#E4EDE7]/90 px-2 font-mono text-[11px] font-semibold text-[#059669] dark:border-[#2A6F52]/36 dark:bg-[#08110C]/90 dark:text-[#34D399]"
+              title="Live 3D zoom level — wheel, pinch, or +/- keys"
+              className="inline-flex h-8 items-center gap-1 rounded-lg border border-[#272732]/18 bg-[#E6E7EE]/90 px-2 font-mono text-[11px] font-semibold text-[#8A621C] dark:border-[#E8C987]/25 dark:bg-[#121217]/90 dark:text-[#E8C987]"
             >
               <span>{zoomPercent}%</span>
-              <span className="hidden sm:inline text-[#355243] dark:text-[#8EAD9E]">· {zoomTierLabel}</span>
+              <span className="hidden sm:inline text-[#3E404D] dark:text-[#9497A6]">· {zoomTierLabel}</span>
             </span>
-            <Button variant="icon" size="sm" onClick={onZoomOut} title="Zoom out" aria-label="Zoom out">
+            <Button
+              variant="icon"
+              size="sm"
+              onClick={onZoomOut}
+              title="Zoom out (-)"
+              aria-label="Zoom out"
+            >
               <ZoomOut className="h-3.5 w-3.5" />
             </Button>
             <Button
@@ -161,7 +182,7 @@ export const FloorExploreHud: React.FC<FloorExploreHudProps> = ({
               size="sm"
               leftIcon={<RotateCcw className="h-3 w-3" />}
               onClick={onResetView}
-              title="Reset hall overview"
+              title="Reset hall overview (0)"
             >
               Overview
             </Button>
@@ -205,13 +226,13 @@ export const FloorExploreHud: React.FC<FloorExploreHudProps> = ({
               title="Toggle Obsidian / Alabaster hall"
               aria-label="Toggle color mode"
             >
-              {nightMode ? <Sun className="h-3.5 w-3.5 text-[#34D399]" /> : <Moon className="h-3.5 w-3.5 text-[#059669]" />}
+              {nightMode ? <Sun className="h-3.5 w-3.5 text-[#E8C987]" /> : <Moon className="h-3.5 w-3.5 text-[#8A621C]" />}
             </Button>
 
             <Button
               variant="outline"
               size="sm"
-              leftIcon={<Compass className="h-3.5 w-3.5 text-[#10B981]" />}
+              leftIcon={<Compass className="h-3.5 w-3.5 text-[#8A621C] dark:text-[#E8C987]" />}
               onClick={onReturnVoyage}
             >
               Scroll Tour

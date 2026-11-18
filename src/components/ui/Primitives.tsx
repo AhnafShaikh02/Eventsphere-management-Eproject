@@ -25,7 +25,7 @@ export const Card: React.FC<CardProps> = ({
   return (
     <div
       className={[
-        'surface-luxe portal-card-glow rounded-2xl border border-[var(--es-border)] bg-[#F0F5F2] text-[#091911] dark:bg-[#08110C] dark:text-[#DDF2E7]',
+        'surface-luxe portal-card-glow rounded-2xl border border-[var(--es-border)] bg-[#FFFFFF] text-[#0B0B0E] dark:bg-[#121217] dark:text-[#F2F3F7]',
         interactive ? 'transition-all duration-200 hover:-translate-y-0.5 hover:border-[var(--es-border-strong)]' : '',
         padMap[padding],
         className,
@@ -43,17 +43,17 @@ export type BadgeTone = 'emerald' | 'coral' | 'teal' | 'violet' | 'amber' | 'neu
 
 const BADGE_TONES: Record<BadgeTone, string> = {
   emerald:
-    'border-[#10B981]/35 bg-[#10B981]/12 text-[#047857] dark:border-[#34D399]/35 dark:bg-[#10B981]/16 dark:text-[#34D399]',
+    'border-[#D4AF63]/40 bg-[#D4AF63]/14 text-[#8A621C] dark:border-[#E8C987]/35 dark:bg-[#E8C987]/14 dark:text-[#E8C987]',
   coral:
     'border-[#F97362]/40 bg-[#F97362]/14 text-[#C2410C] dark:border-[#F97362]/40 dark:bg-[#F97362]/14 dark:text-[#FDA4AF]',
   teal:
     'border-[#2DD4BF]/35 bg-[#2DD4BF]/12 text-[#0F766E] dark:border-[#2DD4BF]/35 dark:bg-[#2DD4BF]/14 dark:text-[#5EEAD4]',
   violet:
-    'border-[#A78BFA]/35 bg-[#A78BFA]/12 text-[#5B21B6] dark:border-[#A78BFA]/35 dark:bg-[#A78BFA]/15 dark:text-[#C4B5FD]',
+    'border-[#C58B3B]/40 bg-[#C58B3B]/14 text-[#8A5A19] dark:border-[#C58B3B]/40 dark:bg-[#C58B3B]/15 dark:text-[#F0C98D]',
   amber:
     'border-amber-500/35 bg-amber-500/12 text-amber-800 dark:border-amber-400/35 dark:bg-amber-400/14 dark:text-amber-300',
   neutral:
-    'border-[#104E35]/20 bg-[#E4EDE7] text-[#355243] dark:border-[#2A6F52]/38 dark:bg-[#050A07] dark:text-[#8EAD9E]',
+    'border-[#272732]/20 bg-[#EAEBF1] text-[#3E404D] dark:border-[#2D2D3A]/40 dark:bg-[#0E0E13] dark:text-[#9497A6]',
 };
 
 export const Badge: React.FC<{
@@ -111,16 +111,16 @@ export const StatCard: React.FC<{
   tone?: 'emerald' | 'coral' | 'teal' | 'violet';
 }> = ({ label, value, sublabel, icon, tone = 'emerald' }) => {
   const accentMap = {
-    emerald: '#10B981',
+    emerald: '#D4AF63',
     coral: '#F97362',
     teal: '#2DD4BF',
-    violet: '#A78BFA',
+    violet: '#C58B3B',
   };
   const glowMap = {
-    emerald: 'rgba(16, 185, 129, 0.36)',
+    emerald: 'rgba(212, 175, 99, 0.36)',
     coral: 'rgba(249, 115, 98, 0.34)',
     teal: 'rgba(45, 212, 191, 0.36)',
-    violet: 'rgba(167, 139, 250, 0.36)',
+    violet: 'rgba(197, 139, 59, 0.36)',
   };
 
   const cardRef = useRef<HTMLDivElement | null>(null);
@@ -216,7 +216,7 @@ export const StatCard: React.FC<{
       ref={cardRef}
       data-gsap-stat="true"
       style={{ '--stat-glow': glowMap[tone] } as React.CSSProperties}
-      className="surface-luxe portal-stat-card relative overflow-hidden rounded-2xl border border-[var(--es-border)] bg-[#F0F5F2] p-5 text-[#091911] dark:bg-[#08110C] dark:text-[#DDF2E7]"
+      className="surface-luxe portal-stat-card relative overflow-hidden rounded-2xl border border-[var(--es-border)] bg-[#FFFFFF] p-5 text-[#0B0B0E] dark:bg-[#121217] dark:text-[#F2F3F7]"
     >
       <div
         ref={glowRef}
@@ -226,7 +226,7 @@ export const StatCard: React.FC<{
       />
       <div className="relative z-10 flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <div className="text-xs font-semibold text-[#466153] dark:text-[#8EAD9E]">{label}</div>
+          <div className="text-xs font-semibold text-[#525463] dark:text-[#9497A6]">{label}</div>
           <div
             ref={valRef}
             className="mt-1.5 font-display text-2xl font-extrabold tracking-tight tabular-nums sm:text-3xl"
@@ -234,14 +234,14 @@ export const StatCard: React.FC<{
             {displayValue}
           </div>
           {sublabel && (
-            <div className="mt-1 font-mono text-[11px] text-[#466153] dark:text-[#8EAD9E]">
+            <div className="mt-1 font-mono text-[11px] text-[#525463] dark:text-[#9497A6]">
               {sublabel}
             </div>
           )}
         </div>
         {icon && (
           <div
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[#104E35]/18 bg-[#E4EDE7] shadow-inner dark:border-[#2A6F52]/38 dark:bg-[#050A07]"
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[#272732]/18 bg-[#EAEBF1] shadow-inner dark:border-[#2D2D3A]/38 dark:bg-[#0B0B0E]"
             style={{
               color: accentMap[tone],
               boxShadow: `0 0 18px -6px ${glowMap[tone]}`,
@@ -270,7 +270,7 @@ export const Tabs: React.FC<{
 }> = ({ items, activeId, onChange, className = '' }) => (
   <div
     role="tablist"
-    className={`inline-flex flex-wrap gap-1.5 rounded-xl border border-[#104E35]/18 bg-[#E4EDE7] p-1 dark:border-[#2A6F52]/38 dark:bg-[#050A07] ${className}`}
+    className={`inline-flex flex-wrap gap-1.5 rounded-xl border border-[#272732]/18 bg-[#EAEBF1] p-1 dark:border-[#2D2D3A]/38 dark:bg-[#0B0B0E] ${className}`}
   >
     {items.map((item) => {
       const active = item.id === activeId;
@@ -283,8 +283,8 @@ export const Tabs: React.FC<{
           onClick={() => onChange(item.id)}
           className={`inline-flex min-h-[34px] items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all whitespace-nowrap shrink-0 ${
             active
-              ? 'bg-gradient-to-r from-[#059669] to-[#34D399] text-[#02120B] shadow-sm'
-              : 'text-[#466153] hover:text-[#09140E] dark:text-[#8EAD9E] dark:hover:text-[#ECFDF5]'
+              ? 'bg-gradient-to-r from-[#B88B3D] to-[#F3DCAA] text-[#0B0B0E] shadow-sm'
+              : 'text-[#525463] hover:text-[#0B0B0E] dark:text-[#9497A6] dark:hover:text-[#F8F9FC]'
           }`}
         >
           {item.icon}
@@ -308,7 +308,7 @@ export const Tooltip: React.FC<{
     {children}
     <span
       role="tooltip"
-      className="pointer-events-none absolute bottom-full left-1/2 z-50 mb-2 -translate-x-1/2 rounded-lg border border-[#10B981]/25 bg-[#040705] px-2.5 py-1 text-[11px] font-medium text-[#ECFDF5] opacity-0 shadow-xl transition-opacity duration-150 group-hover:opacity-100 whitespace-nowrap"
+      className="pointer-events-none absolute bottom-full left-1/2 z-50 mb-2 -translate-x-1/2 rounded-lg border border-[#E8C987]/28 bg-[#0B0B0E] px-2.5 py-1 text-[11px] font-medium text-[#F8F9FC] opacity-0 shadow-xl transition-opacity duration-150 group-hover:opacity-100 whitespace-nowrap"
     >
       {content}
     </span>
@@ -321,12 +321,12 @@ export const EmptyState: React.FC<{
   description: string;
   action?: React.ReactNode;
 }> = ({ icon, title, description, action }) => (
-  <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-[#104E35]/24 bg-[#E4EDE7]/65 px-6 py-10 text-center dark:border-[#2A6F52]/40 dark:bg-[#050A07]/70">
-    <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-[#104E35]/22 bg-[#F0F5F2] text-[#059669] dark:border-[#2A6F52]/40 dark:bg-[#08110C] dark:text-[#34D399]">
+  <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-[#272732]/24 bg-[#EAEBF1]/65 px-6 py-10 text-center dark:border-[#2D2D3A]/40 dark:bg-[#0B0B0E]/70">
+    <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-[#272732]/22 bg-[#FFFFFF] text-[#8A621C] dark:border-[#2D2D3A]/40 dark:bg-[#121217] dark:text-[#E8C987]">
       {icon}
     </div>
     <h3 className="mt-3 font-display text-base font-bold">{title}</h3>
-    <p className="mt-1 max-w-md text-xs leading-relaxed text-[#355243] dark:text-[#8EAD9E]">
+    <p className="mt-1 max-w-md text-xs leading-relaxed text-[#525463] dark:text-[#9497A6]">
       {description}
     </p>
     {action && <div className="mt-4">{action}</div>}
@@ -335,7 +335,7 @@ export const EmptyState: React.FC<{
 
 export const Skeleton: React.FC<{ className?: string }> = ({ className = 'h-4 w-full' }) => (
   <div
-    className={`rounded-lg bg-[#D3E2D8] dark:bg-[#10B981]/12 ${className}`}
+    className={`rounded-lg bg-[#DFE1EA] dark:bg-[#E8C987]/12 ${className}`}
     aria-hidden="true"
   />
 );
@@ -364,7 +364,7 @@ export const DropdownMenu: React.FC<{
       {open && (
         <div
           onClick={() => setOpen(false)}
-          className={`surface-luxe absolute top-full z-50 mt-2 min-w-[220px] rounded-2xl border border-[#104E35]/20 bg-[#F0F5F2] p-1.5 text-[#091911] shadow-2xl dark:border-[#2A6F52]/40 dark:bg-[#08110C] dark:text-[#DDF2E7] ${
+          className={`surface-luxe absolute top-full z-50 mt-2 min-w-[220px] rounded-2xl border border-[#272732]/20 bg-[#FFFFFF] p-1.5 text-[#0B0B0E] shadow-2xl dark:border-[#2D2D3A]/40 dark:bg-[#121217] dark:text-[#F2F3F7] ${
             align === 'right' ? 'right-0' : 'left-0'
           }`}
         >

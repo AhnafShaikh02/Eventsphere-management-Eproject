@@ -441,7 +441,7 @@ export default function App() {
   const pendingCount = snapshot.booths.filter((b) => b.status === 'pending').length;
 
   return (
-    <div className="min-h-screen bg-[#E9F0EC] text-[#091911] dark:bg-[#040705] dark:text-[#DDF2E7]">
+    <div className="min-h-screen bg-[#F3F4F7] text-[#0B0B0E] dark:bg-[#0B0B0E] dark:text-[#F2F3F7]">
       {/* Persistent 3D Expo Hall Canvas */}
       <ExpoHallCanvas
         ref={canvasRef}
@@ -603,21 +603,21 @@ export default function App() {
       {activeView === 'portals' && (
         <>
           {!currentUser || !authToken ? (
-            <div className="relative z-20 flex min-h-screen items-center justify-center bg-[#E9F0EC]/96 px-4 pt-24 pb-16 dark:bg-[#040705]/96">
+            <div className="relative z-20 flex min-h-screen items-center justify-center bg-[#F3F4F7]/96 px-4 pt-24 pb-16 dark:bg-[#0B0B0E]/96">
               <Card padding="lg" className="w-full max-w-xl text-center">
-                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-[#10B981]/15 text-[#059669] dark:text-[#34D399]">
+                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-[#D4AF63]/16 text-[#8A621C] dark:text-[#E8C987]">
                   <Lock className="h-6 w-6" />
                 </div>
                 <h1 className="mt-4 font-display text-2xl font-extrabold tracking-tight">
                   Sign in to access your Role Portal
                 </h1>
-                <p className="mt-2 text-sm text-[#466153] dark:text-[#8EAD9E]">
+                <p className="mt-2 text-sm text-[#525463] dark:text-[#9497A6]">
                   EventSphere enforces role-based permissions. Choose your role to sign in or register an account.
                 </p>
                 <div className="mt-6 grid gap-3 sm:grid-cols-3">
                   <Button
                     variant="outline"
-                    leftIcon={<Shield className="h-4 w-4 text-[#10B981]" />}
+                    leftIcon={<Shield className="h-4 w-4 text-[#8A621C] dark:text-[#D4AF63]" />}
                     onClick={() => openAuthModal('admin', 'login', true)}
                   >
                     Organizer
@@ -880,9 +880,9 @@ export default function App() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 10, scale: 0.96 }}
             transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
-            className="no-print fixed bottom-16 left-1/2 z-50 flex -translate-x-1/2 items-center gap-2.5 rounded-xl border border-[#059669]/45 bg-[#040705] px-4 py-2.5 text-xs font-semibold text-[#ECFDF5] shadow-[0_14px_34px_rgba(0,0,0,0.55)] dark:border-[#34D399]/50 dark:bg-gradient-to-r dark:from-[#059669] dark:to-[#34D399] dark:text-[#02120B]"
+            className="no-print fixed bottom-16 left-1/2 z-50 flex -translate-x-1/2 items-center gap-2.5 rounded-xl border border-[#8A621C]/45 bg-[#0B0B0E] px-4 py-2.5 text-xs font-semibold text-[#F8F9FC] shadow-[0_14px_34px_rgba(0,0,0,0.55)] dark:border-[#E8C987]/50 dark:bg-gradient-to-r dark:from-[#B88B3D] dark:to-[#F3DCAA] dark:text-[#0B0B0E]"
           >
-            <span className="h-1.5 w-1.5 rounded-full bg-[#34D399] dark:bg-[#02120B]" aria-hidden="true" />
+            <span className="h-1.5 w-1.5 rounded-full bg-[#E8C987] dark:bg-[#0B0B0E]" aria-hidden="true" />
             <span>{toastMessage}</span>
           </motion.div>
         )}

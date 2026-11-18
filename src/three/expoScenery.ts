@@ -41,12 +41,12 @@ export function createGrassTerrainTexture(nightMode: boolean, maxAniso: number):
   canvas.height = 512;
   const ctx = canvas.getContext('2d')!;
 
-  ctx.fillStyle = nightMode ? '#06110B' : '#94B8A3';
+  ctx.fillStyle = nightMode ? '#0B0B0E' : '#B7BBC7';
   ctx.fillRect(0, 0, 512, 512);
 
   // Subtle organic turf speckles & mowing bands
   for (let y = 0; y < 512; y += 64) {
-    ctx.fillStyle = nightMode ? 'rgba(16, 185, 129, 0.035)' : 'rgba(255, 255, 255, 0.07)';
+    ctx.fillStyle = nightMode ? 'rgba(255, 255, 255, 0.02)' : 'rgba(255, 255, 255, 0.07)';
     ctx.fillRect(0, y, 512, 32);
   }
   for (let i = 0; i < 1800; i++) {
@@ -56,11 +56,11 @@ export function createGrassTerrainTexture(nightMode: boolean, maxAniso: number):
     ctx.fillStyle =
       i % 2 === 0
         ? nightMode
-          ? 'rgba(52, 211, 153, 0.06)'
-          : 'rgba(21, 128, 61, 0.14)'
+          ? 'rgba(148, 152, 174, 0.045)'
+          : 'rgba(21, 128, 61, 0.12)'
         : nightMode
-          ? 'rgba(2, 6, 4, 0.25)'
-          : 'rgba(6, 78, 59, 0.08)';
+          ? 'rgba(5, 5, 8, 0.32)'
+          : 'rgba(11, 11, 14, 0.06)';
     ctx.fillRect(x, y, r, r);
   }
 
@@ -79,10 +79,10 @@ export function createPlazaStoneTexture(nightMode: boolean, maxAniso: number): T
   canvas.height = 512;
   const ctx = canvas.getContext('2d')!;
 
-  ctx.fillStyle = nightMode ? '#0B1610' : '#D4DFD8';
+  ctx.fillStyle = nightMode ? '#111116' : '#DCE0E8';
   ctx.fillRect(0, 0, 512, 512);
 
-  ctx.strokeStyle = nightMode ? 'rgba(52, 211, 153, 0.12)' : 'rgba(15, 23, 42, 0.10)';
+  ctx.strokeStyle = nightMode ? 'rgba(148, 152, 174, 0.12)' : 'rgba(11, 11, 14, 0.10)';
   ctx.lineWidth = 2;
   for (let i = 0; i <= 512; i += 64) {
     ctx.beginPath();
@@ -98,7 +98,7 @@ export function createPlazaStoneTexture(nightMode: boolean, maxAniso: number): T
   for (let i = 0; i < 600; i++) {
     const x = (i * 137) % 512;
     const y = (i * 223) % 512;
-    ctx.fillStyle = nightMode ? 'rgba(167, 243, 208, 0.05)' : 'rgba(255, 255, 255, 0.18)';
+    ctx.fillStyle = nightMode ? 'rgba(242, 243, 247, 0.04)' : 'rgba(255, 255, 255, 0.18)';
     ctx.fillRect(x, y, 2, 2);
   }
 
@@ -117,23 +117,23 @@ export function createAsphaltRoadTexture(maxAniso: number): THREE.CanvasTexture 
   canvas.height = 512;
   const ctx = canvas.getContext('2d')!;
 
-  ctx.fillStyle = '#151B18';
+  ctx.fillStyle = '#15151B';
   ctx.fillRect(0, 0, 512, 512);
 
   for (let i = 0; i < 2400; i++) {
     const x = (i * 151) % 512;
     const y = (i * 271) % 512;
-    ctx.fillStyle = i % 3 === 0 ? 'rgba(255,255,255,0.045)' : 'rgba(0,0,0,0.18)';
+    ctx.fillStyle = i % 3 === 0 ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.22)';
     ctx.fillRect(x, y, 2, 2);
   }
 
   // Crisp shoulder lines
-  ctx.fillStyle = 'rgba(236, 253, 245, 0.65)';
+  ctx.fillStyle = 'rgba(242, 243, 247, 0.60)';
   ctx.fillRect(14, 0, 6, 512);
   ctx.fillRect(492, 0, 6, 512);
 
   // Dashed center divider
-  ctx.fillStyle = '#34D399';
+  ctx.fillStyle = '#E8C987';
   for (let y = 16; y < 512; y += 64) {
     ctx.fillRect(252, y, 8, 34);
   }
@@ -153,19 +153,19 @@ function createEntranceSignTexture(maxAniso: number): THREE.CanvasTexture {
   canvas.height = 192;
   const ctx = canvas.getContext('2d')!;
 
-  ctx.fillStyle = '#040906';
+  ctx.fillStyle = '#0B0B0E';
   ctx.fillRect(0, 0, 1024, 192);
 
-  ctx.strokeStyle = '#10B981';
+  ctx.strokeStyle = '#E8C987';
   ctx.lineWidth = 6;
   ctx.strokeRect(8, 8, 1008, 176);
 
-  ctx.fillStyle = '#34D399';
+  ctx.fillStyle = '#E8C987';
   ctx.font = '700 26px "JetBrains Mono", monospace';
   ctx.textAlign = 'center';
   ctx.fillText('SOUTH GRAND CONCOURSE · HALL 4', 512, 62);
 
-  ctx.fillStyle = '#ECFDF5';
+  ctx.fillStyle = '#F8F9FC';
   ctx.font = '800 58px "Bricolage Grotesque", system-ui, sans-serif';
   ctx.fillText('EVENTSPHERE EXPO ARENA', 512, 134);
 
@@ -216,12 +216,12 @@ export function createVehicleGroup(
     clearcoatRoughness: 0.08,
   });
   const trimMat = new THREE.MeshStandardMaterial({
-    color: 0x0f1714,
+    color: 0x14141b,
     roughness: 0.68,
     metalness: 0.2,
   });
   const glassMat = new THREE.MeshPhysicalMaterial({
-    color: 0x081310,
+    color: 0x0e0e14,
     metalness: 0.1,
     roughness: 0.06,
     clearcoat: 1.0,
@@ -229,18 +229,18 @@ export function createVehicleGroup(
     transparent: true,
   });
   const tireMat = new THREE.MeshStandardMaterial({
-    color: 0x111413,
+    color: 0x121216,
     roughness: 0.88,
     metalness: 0.05,
   });
   const rimMat = new THREE.MeshStandardMaterial({
-    color: 0xd1fae5,
+    color: 0xe2e4ec,
     roughness: 0.2,
     metalness: 0.9,
   });
   const headlightMat = new THREE.MeshStandardMaterial({
-    color: 0xecfdf5,
-    emissive: 0x6ee7b7,
+    color: 0xfffbeb,
+    emissive: 0xe8c987,
     emissiveIntensity: 1.4,
     roughness: 0.2,
   });
@@ -405,13 +405,13 @@ function createPlanterTreeGroup(
   grp.position.set(x, 0, z);
 
   const planterMat = new THREE.MeshStandardMaterial({
-    color: 0x0f1f17,
+    color: 0x15151c,
     roughness: 0.45,
     metalness: 0.32,
   });
   const rimLedMat = new THREE.MeshStandardMaterial({
-    color: 0x10b981,
-    emissive: 0x10b981,
+    color: 0xe8c987,
+    emissive: 0xd4af63,
     emissiveIntensity: 0.55,
     roughness: 0.3,
   });
@@ -424,12 +424,12 @@ function createPlanterTreeGroup(
     roughness: 0.9,
   });
   const leafMatA = new THREE.MeshStandardMaterial({
-    color: 0x15803d,
+    color: 0x696432,
     roughness: 0.78,
     metalness: 0.05,
   });
   const leafMatB = new THREE.MeshStandardMaterial({
-    color: 0x34d399,
+    color: 0xb99a5b,
     roughness: 0.72,
     metalness: 0.06,
   });
@@ -564,11 +564,11 @@ function buildOutdoorParkForestInstanced(
 
   const dummy = new THREE.Object3D();
   const palette = [
-    new THREE.Color('#0F5132'),
-    new THREE.Color('#15803D'),
-    new THREE.Color('#1E6B47'),
-    new THREE.Color('#2D7A56'),
-    new THREE.Color('#134E3A'),
+    new THREE.Color('#B99A5B'),
+    new THREE.Color('#8E7B42'),
+    new THREE.Color('#696432'),
+    new THREE.Color('#4F4B28'),
+    new THREE.Color('#CCA96A'),
   ];
   const tint = new THREE.Color();
 
@@ -657,7 +657,7 @@ export function createExpoCampusScenery(
     metalness: 0.08,
   });
   const plainAsphaltMat = new THREE.MeshStandardMaterial({
-    color: 0x161c19,
+    color: 0x16161c,
     roughness: 0.82,
     metalness: 0.06,
   });
@@ -702,14 +702,14 @@ export function createExpoCampusScenery(
 
   // Painted parking stall lines + concrete wheel stops + EV Charging Totems
   const lineMat = new THREE.MeshStandardMaterial({
-    color: 0x34d399,
-    emissive: 0x10b981,
+    color: 0xe8c987,
+    emissive: 0xd4af63,
     emissiveIntensity: 0.25,
     roughness: 0.5,
   });
   const concreteMat = new THREE.MeshStandardMaterial({ color: 0x64748b, roughness: 0.85 });
   const chargerMat = new THREE.MeshStandardMaterial({
-    color: 0x091711,
+    color: 0x13131a,
     roughness: 0.35,
     metalness: 0.55,
   });
@@ -735,8 +735,8 @@ export function createExpoCampusScenery(
     const totemGlow = new THREE.Mesh(
       new THREE.BoxGeometry(0.58, 0.14, 0.38),
       new THREE.MeshStandardMaterial({
-        color: 0x34d399,
-        emissive: 0x34d399,
+        color: 0xe8c987,
+        emissive: 0xe8c987,
         emissiveIntensity: 1.1,
       }),
     );
@@ -744,22 +744,22 @@ export function createExpoCampusScenery(
     sceneryGroup.add(totemGlow);
   }
 
-  // 4. Grand Glass Canopy Entrance & Perimeter Architectural Portal Frames
+  // 4. Grand Glass Canopy Entrance & Perimeter Architectural Curtain-Wall Atrium
   const steelMat = new THREE.MeshStandardMaterial({
     color: 0x64748b,
     roughness: 0.26,
     metalness: 0.85,
   });
   const archGlassMat = new THREE.MeshPhysicalMaterial({
-    color: 0xa7f3d0,
+    color: 0xe6decb,
     roughness: 0.1,
-    metalness: 0.1,
+    metalness: 0.12,
     transparent: true,
-    opacity: 0.26,
+    opacity: 0.18,
     depthWrite: false,
   });
   const darkTrimMat = new THREE.MeshStandardMaterial({
-    color: 0x09130e,
+    color: 0x121218,
     roughness: 0.38,
     metalness: 0.65,
   });
@@ -805,8 +805,8 @@ export function createExpoCampusScenery(
 
   // Low-iron curtain-wall glass facade wings flanking the South entrance
   for (const sx of [-11.5, 11.5]) {
-    const facadeWall = new THREE.Mesh(new THREE.BoxGeometry(11.2, 4.4, 0.14), archGlassMat);
-    facadeWall.position.set(sx, 2.2, 16.4);
+    const facadeWall = new THREE.Mesh(new THREE.BoxGeometry(11.2, 5.2, 0.14), archGlassMat);
+    facadeWall.position.set(sx, 2.6, 16.4);
     sceneryGroup.add(facadeWall);
 
     const mullionBase = new THREE.Mesh(new THREE.BoxGeometry(11.4, 0.35, 0.32), darkTrimMat);
@@ -814,18 +814,18 @@ export function createExpoCampusScenery(
     sceneryGroup.add(mullionBase);
 
     const mullionCap = new THREE.Mesh(new THREE.BoxGeometry(11.4, 0.24, 0.32), steelMat);
-    mullionCap.position.set(sx, 4.45, 16.4);
+    mullionCap.position.set(sx, 5.25, 16.4);
     sceneryGroup.add(mullionCap);
   }
 
   // Side glass curtain fins along East/West perimeter
   for (const sx of [-17.4, 17.4]) {
-    const sideGlass = new THREE.Mesh(new THREE.BoxGeometry(0.14, 4.4, 31), archGlassMat);
-    sideGlass.position.set(sx, 2.2, -1);
+    const sideGlass = new THREE.Mesh(new THREE.BoxGeometry(0.14, 5.2, 33.4), archGlassMat);
+    sideGlass.position.set(sx, 2.6, -0.3);
     sceneryGroup.add(sideGlass);
   }
 
-  // 5. Twin Reflecting Pools with Emerald Water & Sculptures (x = ±10.6, z = 19.0)
+  // 5. Twin Reflecting Pools with Warm Champagne-Bronze Water & Sculptures (x = ±10.6, z = 19.0)
   const waterMats: THREE.MeshPhysicalMaterial[] = [];
   for (const sx of [-10.6, 10.6]) {
     const coping = new THREE.Mesh(new THREE.BoxGeometry(6.6, 0.28, 3.0), darkTrimMat);
@@ -835,13 +835,13 @@ export function createExpoCampusScenery(
     sceneryGroup.add(coping);
 
     const waterMat = new THREE.MeshPhysicalMaterial({
-      color: 0x059669,
+      color: 0x3b2f1c,
       roughness: 0.08,
       metalness: 0.65,
       clearcoat: 1.0,
       clearcoatRoughness: 0.05,
-      emissive: 0x064e3b,
-      emissiveIntensity: 0.4,
+      emissive: 0x6b532e,
+      emissiveIntensity: 0.48,
     });
     waterMats.push(waterMat);
 
@@ -860,9 +860,9 @@ export function createExpoCampusScenery(
   // 6. Hero Concept EV Display Turntables inside South Promenade (no booth collisions!)
   const turntableCars: THREE.Group[] = [];
   const heroCars: Array<{ x: number; z: number; style: VehicleStyle; color: number }> = [
-    { x: -8.6, z: 14.3, style: 'sedan', color: 0x10b981 },
-    { x: 8.6, z: 14.3, style: 'suv', color: 0x34d399 },
-    { x: -12.6, z: -13.6, style: 'shuttle', color: 0x2dd4bf },
+    { x: -8.6, z: 14.3, style: 'sedan', color: 0xd4af63 },
+    { x: 8.6, z: 14.3, style: 'suv', color: 0xe8c987 },
+    { x: -12.6, z: -13.6, style: 'shuttle', color: 0xc99e4e },
   ];
 
   for (const hc of heroCars) {
@@ -881,8 +881,8 @@ export function createExpoCampusScenery(
     const glowRim = new THREE.Mesh(
       new THREE.TorusGeometry(2.6, 0.04, 8, 48),
       new THREE.MeshStandardMaterial({
-        color: 0x34d399,
-        emissive: 0x34d399,
+        color: 0xe8c987,
+        emissive: 0xe8c987,
         emissiveIntensity: 0.9,
       }),
     );
@@ -902,7 +902,7 @@ export function createExpoCampusScenery(
   }
 
   // 7. Parked Cars in Visitor Parking Lots (12 realistic cars)
-  const carPalette = [0x0f766e, 0x1e293b, 0x334155, 0x059669, 0x475569, 0x0d9488, 0x64748b];
+  const carPalette = [0xa67c3d, 0x1e293b, 0x334155, 0xc99e4e, 0x475569, 0x7c6236, 0x64748b];
   let carIdx = 0;
   for (const side of [-1, 1]) {
     for (const s of [-3, -2, -1, 1, 2, 3]) {
@@ -920,10 +920,10 @@ export function createExpoCampusScenery(
   // 8. Animated Cruising Vehicles on the Campus Loop Road (4 vehicles)
   const movingVehicles: AnimatedVehicle[] = [];
   const fleetSpecs: Array<{ style: VehicleStyle; color: number; offset: number; speed: number }> = [
-    { style: 'shuttle', color: 0x34d399, offset: 0.05, speed: 0.032 },
-    { style: 'sedan', color: 0x10b981, offset: 0.31, speed: 0.038 },
-    { style: 'suv', color: 0x2dd4bf, offset: 0.58, speed: 0.034 },
-    { style: 'shuttle', color: 0x6ee7b7, offset: 0.82, speed: 0.03 },
+    { style: 'shuttle', color: 0xe8c987, offset: 0.05, speed: 0.032 },
+    { style: 'sedan', color: 0xc99e4e, offset: 0.31, speed: 0.038 },
+    { style: 'suv', color: 0xd4af63, offset: 0.58, speed: 0.034 },
+    { style: 'shuttle', color: 0xf3dcaa, offset: 0.82, speed: 0.03 },
   ];
   for (let i = 0; i < fleetSpecs.length; i++) {
     const spec = fleetSpecs[i];
@@ -1020,8 +1020,8 @@ export function createExpoCampusScenery(
   const bollardCaps = new THREE.InstancedMesh(
     bollardCapGeo,
     new THREE.MeshStandardMaterial({
-      color: 0x34d399,
-      emissive: 0x34d399,
+      color: 0xe8c987,
+      emissive: 0xe8c987,
       emissiveIntensity: 1.25,
       roughness: 0.2,
     }),
@@ -1047,8 +1047,8 @@ export function createExpoCampusScenery(
   const armGeo = new THREE.BoxGeometry(1.1, 0.08, 0.12);
   const lampGeo = new THREE.BoxGeometry(0.48, 0.08, 0.24);
   const lampGlowMat = new THREE.MeshStandardMaterial({
-    color: 0xd1fae5,
-    emissive: 0x6ee7b7,
+    color: 0xfff3d6,
+    emissive: 0xe8c987,
     emissiveIntensity: 1.4,
   });
   const lightPositions: Array<[number, number, number]> = [
@@ -1110,8 +1110,8 @@ export function createExpoCampusScenery(
     const camEye = new THREE.Mesh(
       new THREE.SphereGeometry(0.09, 10, 10),
       new THREE.MeshStandardMaterial({
-        color: 0x34d399,
-        emissive: 0x34d399,
+        color: 0xe8c987,
+        emissive: 0xe8c987,
         emissiveIntensity: 1.5,
       }),
     );
@@ -1130,7 +1130,7 @@ export function createExpoCampusScenery(
 
       const blade = new THREE.Mesh(
         new THREE.BoxGeometry(0.3, 0.015, 0.045),
-        new THREE.MeshStandardMaterial({ color: 0xa7f3d0, roughness: 0.3, metalness: 0.7 }),
+        new THREE.MeshStandardMaterial({ color: 0xf3dcaa, roughness: 0.3, metalness: 0.7 }),
       );
       blade.position.set(rx, 0.08, rz);
       dGroup.add(blade);

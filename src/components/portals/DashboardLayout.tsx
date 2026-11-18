@@ -304,8 +304,8 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
             }
             className={`portal-nav-btn flex w-full items-center justify-between gap-2.5 rounded-xl px-3 py-2.5 text-left text-xs font-semibold transition-all ${
               active
-                ? 'bg-gradient-to-r from-[#059669]/18 to-[#34D399]/14 text-[#047857] shadow-xs dark:from-[#10B981]/22 dark:to-[#34D399]/10 dark:text-[#ECFDF5]'
-                : 'text-[#466153] hover:bg-[#E8EFEA] hover:text-[#09140E] dark:text-[#8EAD9E] dark:hover:bg-[#10B981]/10 dark:hover:text-[#ECFDF5]'
+                ? 'bg-gradient-to-r from-[#B88B3D]/18 to-[#E8C987]/14 text-[#8A621C] shadow-xs dark:from-[#E8C987]/20 dark:to-[#D4AF63]/10 dark:text-[#F8F9FC]'
+                : 'text-[#525463] hover:bg-[#ECEEF3] hover:text-[#0B0B0E] dark:text-[#9497A6] dark:hover:bg-[#E8C987]/10 dark:hover:text-[#F8F9FC]'
             }`}
           >
             <span className="flex items-center gap-2.5 min-w-0">
@@ -318,7 +318,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
               {!collapsed && <span className="truncate">{item.label}</span>}
             </span>
             {!collapsed && item.badgeCount !== undefined && item.badgeCount > 0 && (
-              <span className="rounded-md bg-[#10B981]/18 px-1.5 py-0.5 font-mono text-[10px] font-bold text-[#047857] dark:text-[#34D399]">
+              <span className="rounded-md bg-[#D4AF63]/18 px-1.5 py-0.5 font-mono text-[10px] font-bold text-[#8A621C] dark:text-[#E8C987]">
                 {item.badgeCount}
               </span>
             )}
@@ -332,20 +332,20 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
     <div
       ref={shellRef}
       style={{ '--portal-accent': roleAccent } as React.CSSProperties}
-      className="relative z-20 min-h-screen bg-[#E9F0EC]/97 pt-20 text-[#091911] dark:bg-[#040705]/97 dark:text-[#DDF2E7]"
+      className="relative z-20 min-h-screen bg-[#F3F4F7]/97 pt-20 text-[#0B0B0E] dark:bg-[#0B0B0E]/97 dark:text-[#F2F3F7]"
     >
       <div className="mx-auto flex max-w-[1440px] gap-0 px-3 pb-10 sm:px-6 lg:gap-6">
         {/* Desktop Sidebar */}
         <aside
           ref={sidebarRef}
-          className={`surface-luxe portal-shell-card sticky top-24 hidden h-[calc(100vh-7rem)] shrink-0 flex-col rounded-2xl border border-[#104E35]/18 bg-[#F0F5F2] transition-all duration-200 dark:border-[#2A6F52]/36 dark:bg-[#08110C] lg:flex ${
+          className={`surface-luxe portal-shell-card sticky top-24 hidden h-[calc(100vh-7rem)] shrink-0 flex-col rounded-2xl border border-[#272732]/18 bg-[#FFFFFF] transition-all duration-200 dark:border-[#2D2D3A]/36 dark:bg-[#121217] lg:flex ${
             collapsed ? 'w-[72px]' : 'w-64'
           }`}
         >
-          <div className="flex items-center justify-between gap-2 border-b border-[#104E35]/16 px-3.5 py-3.5 dark:border-[#2A6F52]/30">
+          <div className="flex items-center justify-between gap-2 border-b border-[#272732]/16 px-3.5 py-3.5 dark:border-[#2D2D3A]/30">
             {!collapsed && (
               <div className="min-w-0">
-                <div className="font-mono text-[10px] font-bold uppercase tracking-wider text-[#059669] dark:text-[#34D399]">
+                <div className="font-mono text-[10px] font-bold uppercase tracking-wider text-[#8A621C] dark:text-[#E8C987]">
                   {getRoleLabel(currentUser.role)} Portal
                 </div>
                 <div className="truncate font-display text-sm font-bold">{roleTitle}</div>
@@ -367,11 +367,11 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
 
           {renderNavList()}
 
-          <div className="border-t border-[#104E35]/16 p-3 dark:border-[#2A6F52]/30">
+          <div className="border-t border-[#272732]/16 p-3 dark:border-[#2D2D3A]/30">
             {!collapsed && (
               <div className="mb-2.5 truncate px-1 text-xs">
                 <div className="font-semibold truncate">{currentUser.name}</div>
-                <div className="font-mono text-[10px] text-[#466153] dark:text-[#8EAD9E] truncate">
+                <div className="font-mono text-[10px] text-[#525463] dark:text-[#9497A6] truncate">
                   {currentUser.email}
                 </div>
               </div>
@@ -396,10 +396,10 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
               if (e.target === e.currentTarget) setMobileDrawerOpen(false);
             }}
           >
-            <div className="flex h-full w-72 flex-col border-r border-[#104E35]/20 bg-[#F0F5F2] text-[#091911] dark:border-[#2A6F52]/38 dark:bg-[#040705] dark:text-[#DDF2E7]">
-              <div className="flex items-center justify-between border-b border-[#104E35]/16 px-4 py-4 dark:border-[#2A6F52]/30">
+            <div className="flex h-full w-72 flex-col border-r border-[#272732]/20 bg-[#FFFFFF] text-[#0B0B0E] dark:border-[#2D2D3A]/38 dark:bg-[#0B0B0E] dark:text-[#F2F3F7]">
+              <div className="flex items-center justify-between border-b border-[#272732]/16 px-4 py-4 dark:border-[#2D2D3A]/30">
                 <div>
-                  <div className="font-mono text-[10px] font-bold uppercase text-[#059669] dark:text-[#34D399]">
+                  <div className="font-mono text-[10px] font-bold uppercase text-[#8A621C] dark:text-[#E8C987]">
                     {getRoleLabel(currentUser.role)} Portal
                   </div>
                   <div className="font-display text-base font-bold">{roleTitle}</div>
@@ -414,7 +414,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                 </Button>
               </div>
               {renderNavList(() => setMobileDrawerOpen(false))}
-              <div className="border-t border-[#104E35]/16 p-4 dark:border-[#2A6F52]/30">
+              <div className="border-t border-[#272732]/16 p-4 dark:border-[#2D2D3A]/30">
                 <Button
                   variant="destructive"
                   size="sm"
@@ -432,7 +432,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
         {/* Main Workspace Canvas */}
         <main ref={mainRef} className="min-w-0 flex-1 space-y-5 pt-2">
           {/* Top Portal Breadcrumb & Actions with Ambient Role Glow + Scroll Progress Bar */}
-          <div className="surface-luxe portal-shell-card sticky top-20 z-20 rounded-2xl border border-[#104E35]/18 bg-[#F0F5F2]/95 px-4 py-3 backdrop-blur-md dark:border-[#2A6F52]/36 dark:bg-[#08110C]/95 sm:px-5">
+          <div className="surface-luxe portal-shell-card sticky top-20 z-20 rounded-2xl border border-[#272732]/18 bg-[#FFFFFF]/95 px-4 py-3 backdrop-blur-md dark:border-[#2D2D3A]/36 dark:bg-[#121217]/95 sm:px-5">
             <div
               ref={auraOrbRef}
               aria-hidden="true"
@@ -450,10 +450,10 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                   <Menu className="h-4 w-4" />
                 </Button>
                 <div>
-                  <div className="portal-header-crumb flex items-center gap-2 text-[11px] font-mono text-[#466153] dark:text-[#8EAD9E]">
+                  <div className="portal-header-crumb flex items-center gap-2 text-[11px] font-mono text-[#525463] dark:text-[#9497A6]">
                     <span>{roleTitle}</span>
                     <span>/</span>
-                    <span className="font-semibold text-[#059669] dark:text-[#34D399]">
+                    <span className="font-semibold text-[#8A621C] dark:text-[#E8C987]">
                       {activeItem?.label}
                     </span>
                   </div>

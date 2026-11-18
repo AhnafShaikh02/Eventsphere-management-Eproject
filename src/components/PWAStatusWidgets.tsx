@@ -16,7 +16,7 @@ export const PWAInstallButton: React.FC = () => {
       <button
         type="button"
         onClick={install}
-        className="inline-flex min-h-[38px] items-center gap-2 rounded-lg border border-[var(--es-border)] bg-[#059669]/10 px-3 py-1.5 text-xs font-semibold text-[#047857] transition-colors hover:border-[var(--es-border-strong)] hover:bg-[#059669]/20 dark:bg-[#10B981]/10 dark:text-[#34D399] dark:hover:bg-[#10B981]/20 whitespace-nowrap shrink-0"
+        className="inline-flex min-h-[38px] items-center gap-2 rounded-lg border border-[var(--es-border)] bg-[#D4AF63]/12 px-3 py-1.5 text-xs font-semibold text-[#8A621C] transition-colors hover:border-[var(--es-border-strong)] hover:bg-[#D4AF63]/22 dark:bg-[#E8C987]/12 dark:text-[#E8C987] dark:hover:bg-[#E8C987]/22 whitespace-nowrap shrink-0"
       >
         <Download className="h-3.5 w-3.5" aria-hidden="true" />
         <span>Install Offline App</span>
@@ -30,7 +30,7 @@ export const PWAInstallButton: React.FC = () => {
         <button
           type="button"
           onClick={() => setShowIOSGuide(true)}
-          className="inline-flex min-h-[38px] items-center gap-2 rounded-lg border border-[var(--es-border)] bg-[#E4EDE7] px-3 py-1.5 text-xs font-medium text-[#091911] hover:border-[var(--es-border-strong)] hover:bg-[#D4E3DA] dark:bg-[#08110C] dark:text-[#DDF2E7] whitespace-nowrap shrink-0"
+          className="inline-flex min-h-[38px] items-center gap-2 rounded-lg border border-[var(--es-border)] bg-[#E6E7EE] px-3 py-1.5 text-xs font-medium text-[#0B0B0E] hover:border-[var(--es-border-strong)] hover:bg-[#D8DBE6] dark:bg-[#121217] dark:text-[#F2F3F7] whitespace-nowrap shrink-0"
         >
           <Download className="h-3.5 w-3.5" aria-hidden="true" />
           <span>Install on iOS</span>
@@ -38,16 +38,16 @@ export const PWAInstallButton: React.FC = () => {
 
         {showIOSGuide && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
-            <div className="surface-luxe w-full max-w-sm rounded-2xl border border-[#104E35]/22 bg-[#F0F5F2] p-6 text-[#091911] shadow-2xl dark:border-[#2A6F52]/40 dark:bg-[#08110C] dark:text-[#DDF2E7]">
+            <div className="surface-luxe w-full max-w-sm rounded-2xl border border-[#272732]/22 bg-[#FFFFFF] p-6 text-[#0B0B0E] shadow-2xl dark:border-[#2D2D3A]/40 dark:bg-[#121217] dark:text-[#F2F3F7]">
               <h3 className="font-display text-lg font-bold">Install EventSphere</h3>
-              <p className="mt-2 text-sm text-[#466153] dark:text-[#8EAD9E]">
+              <p className="mt-2 text-sm text-[#525463] dark:text-[#9497A6]">
                 1. Tap the <strong>Share</strong> icon in Safari.<br />
                 2. Choose <strong>Add to Home Screen</strong> for offline floor plan &amp; schedule access.
               </p>
               <button
                 type="button"
                 onClick={() => setShowIOSGuide(false)}
-                className="btn-luxe mt-4 w-full rounded-lg bg-[#09140E] py-2.5 text-sm font-semibold text-[#ECFDF5] dark:bg-gradient-to-r dark:from-[#10B981] dark:to-[#34D399] dark:text-[#02120B]"
+                className="btn-luxe mt-4 w-full rounded-lg bg-[#0B0B0E] py-2.5 text-sm font-semibold text-[#F8F9FC] dark:bg-gradient-to-r dark:from-[#B88B3D] dark:to-[#F3DCAA] dark:text-[#0B0B0E]"
               >
                 Close
               </button>

@@ -75,7 +75,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({
     >
       <div className="space-y-4">
         {snapshotDataUrl && (
-          <div className="overflow-hidden rounded-xl border border-[#104E35]/18 dark:border-[#2A6F52]/38">
+          <div className="overflow-hidden rounded-xl border border-[#272732]/18 dark:border-[#2D2D3A]/38">
             <img
               src={snapshotDataUrl}
               alt={`3D expo floor snapshot highlighting Booth ${booth.number}`}
@@ -85,7 +85,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({
           </div>
         )}
 
-        <p className="rounded-xl border border-[#104E35]/16 bg-[#E6EFE9] p-3 text-xs leading-relaxed text-[#355243] dark:border-[#2A6F52]/34 dark:bg-[#08110C] dark:text-[#C4DFD1]">
+        <p className="rounded-xl border border-[#272732]/16 bg-[#EAEBF1] p-3 text-xs leading-relaxed text-[#3E404D] dark:border-[#2D2D3A]/34 dark:bg-[#121217] dark:text-[#D4D6E0]">
           {shareText}
         </p>
 
@@ -94,7 +94,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({
             variant="outline"
             size="md"
             leftIcon={
-              copied ? <Check className="h-3.5 w-3.5 text-[#34D399]" /> : <Copy className="h-3.5 w-3.5" />
+              copied ? <Check className="h-3.5 w-3.5 text-[#8A621C] dark:text-[#E8C987]" /> : <Copy className="h-3.5 w-3.5" />
             }
             onClick={handleCopy}
           >
@@ -105,7 +105,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({
             variant="outline"
             size="md"
             disabled={!snapshotDataUrl}
-            leftIcon={<Download className="h-3.5 w-3.5 text-[#34D399]" />}
+            leftIcon={<Download className="h-3.5 w-3.5 text-[#8A621C] dark:text-[#E8C987]" />}
             onClick={handleDownloadSnapshot}
           >
             Save 3D PNG

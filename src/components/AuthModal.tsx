@@ -56,7 +56,7 @@ const ROLE_CARDS: Array<{
     code: '01',
     title: 'Organizer',
     description: 'Create expos, approve exhibitors, manage floor booths, schedules, and analytics.',
-    accent: '#10B981',
+    accent: '#D4AF63',
     icon: <Shield className="h-5 w-5" />,
   },
   {
@@ -101,7 +101,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   const [category, setCategory] = useState<ExhibitorProfile['category']>('Robotics & AI');
   const [description, setDescription] = useState('');
   const [website, setWebsite] = useState('');
-  const [logoColor, setLogoColor] = useState('#10B981');
+  const [logoColor, setLogoColor] = useState('#D4AF63');
   const [productsRaw, setProductsRaw] = useState('');
   const [documentsRaw, setDocumentsRaw] = useState('');
   const [organizerInviteCode, setOrganizerInviteCode] = useState('');
@@ -455,23 +455,23 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       {notice && !error && (
         <div
           role="status"
-          className="mb-4 flex items-start gap-2 rounded-xl border border-[#10B981]/45 bg-[#10B981]/10 px-3.5 py-2.5 text-xs font-medium text-[#065F46] dark:text-[#6EE7B7]"
+          className="mb-4 flex items-start gap-2 rounded-xl border border-[#D4AF63]/45 bg-[#D4AF63]/12 px-3.5 py-2.5 text-xs font-medium text-[#8A621C] dark:text-[#F3DCAA]"
         >
-          <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[#10B981]" />
+          <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[#D4AF63]" />
           <span>{notice}</span>
         </div>
       )}
 
       {currentUser ? (
         <div className="space-y-5">
-          <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[#104E35]/18 bg-[#E4EDE7] p-4 dark:border-[#2A6F52]/36 dark:bg-[#09120D]">
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[#272732]/18 bg-[#E6E7EE] p-4 dark:border-[#2D2D3A]/36 dark:bg-[#131319]">
             <div className="flex items-center gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-[#059669] to-[#34D399] text-[#02120B]">
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-[#B88B3D] to-[#F3DCAA] text-[#0B0B0E]">
                 <User className="h-5 w-5" />
               </div>
               <div>
                 <div className="font-display text-sm font-bold">{currentUser.name}</div>
-                <div className="font-mono text-xs text-[#466153] dark:text-[#8EAD9E]">
+                <div className="font-mono text-xs text-[#525463] dark:text-[#9497A6]">
                   {currentUser.email} · {currentUser.role === 'admin' ? 'ORGANIZER' : currentUser.role.toUpperCase()}
                 </div>
               </div>
@@ -491,7 +491,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           </div>
 
           <form onSubmit={handleSaveProfile} className="space-y-3.5">
-            <div className="font-mono text-xs font-semibold uppercase tracking-wider text-[#466153] dark:text-[#8EAD9E]">
+            <div className="font-mono text-xs font-semibold uppercase tracking-wider text-[#525463] dark:text-[#9497A6]">
               Profile Details
             </div>
             <div className="grid gap-3 sm:grid-cols-2">
@@ -528,7 +528,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         </div>
       ) : step === 'role-select' ? (
         <div className="space-y-6">
-          <p className="text-sm text-[#466153] dark:text-[#8EAD9E]">
+          <p className="text-sm text-[#525463] dark:text-[#9497A6]">
             Select your role to enter a tailored workspace, or launch a verified demo account immediately.
           </p>
 
@@ -542,28 +542,28 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   onClick={() => setSelectedRole(card.role)}
                   className={`group flex flex-col justify-between rounded-2xl border p-4 text-left transition-all ${
                     active
-                      ? 'border-[#10B981] bg-[#10B981]/10 shadow-[0_12px_30px_rgba(16,185,129,0.16)] dark:border-[#34D399] dark:bg-[#10B981]/12'
-                      : 'border-[#104E35]/18 bg-[#E4EDE7] hover:border-[#10B981]/50 dark:border-[#2A6F52]/36 dark:bg-[#09120D]'
+                      ? 'border-[#D4AF63] bg-[#D4AF63]/12 shadow-[0_12px_30px_rgba(212,175,99,0.18)] dark:border-[#E8C987] dark:bg-[#E8C987]/12'
+                      : 'border-[#272732]/18 bg-[#E6E7EE] hover:border-[#D4AF63]/50 dark:border-[#2D2D3A]/36 dark:bg-[#131319]'
                   }`}
                 >
                   <div>
                     <div className="flex items-center justify-between">
                       <span
-                        className="flex h-10 w-10 items-center justify-center rounded-xl text-[#02120B]"
+                        className="flex h-10 w-10 items-center justify-center rounded-xl text-[#0B0B0E]"
                         style={{ backgroundColor: card.accent }}
                       >
                         {card.icon}
                       </span>
-                      <span className="font-mono text-xs font-bold text-[#466153] dark:text-[#8EAD9E]">
+                      <span className="font-mono text-xs font-bold text-[#525463] dark:text-[#9497A6]">
                         {card.code}
                       </span>
                     </div>
                     <h3 className="mt-3.5 font-display text-base font-bold">{card.title}</h3>
-                    <p className="mt-1.5 text-xs leading-relaxed text-[#466153] dark:text-[#8EAD9E]">
+                    <p className="mt-1.5 text-xs leading-relaxed text-[#525463] dark:text-[#9497A6]">
                       {card.description}
                     </p>
                   </div>
-                  <div className="mt-4 flex items-center gap-1.5 text-xs font-semibold text-[#059669] dark:text-[#34D399]">
+                  <div className="mt-4 flex items-center gap-1.5 text-xs font-semibold text-[#8A621C] dark:text-[#E8C987]">
                     {active && <CheckCircle2 className="h-3.5 w-3.5" />}
                     <span>{active ? 'Selected' : 'Select role'}</span>
                   </div>
@@ -572,7 +572,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             })}
           </div>
 
-          <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[#104E35]/16 pt-4 dark:border-[#2A6F52]/32">
+          <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[#272732]/16 pt-4 dark:border-[#2D2D3A]/32">
             <div className="flex flex-wrap items-center gap-2">
               <Button
                 variant="primary"
@@ -592,10 +592,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             </div>
           </div>
 
-          <div className="rounded-xl border border-[#104E35]/18 bg-[#E4EDE7] p-3.5 dark:border-[#2A6F52]/36 dark:bg-[#09120D]">
-            <div className="flex items-center justify-between text-[11px] font-semibold text-[#466153] dark:text-[#8EAD9E]">
+          <div className="rounded-xl border border-[#272732]/18 bg-[#E6E7EE] p-3.5 dark:border-[#2D2D3A]/36 dark:bg-[#131319]">
+            <div className="flex items-center justify-between text-[11px] font-semibold text-[#525463] dark:text-[#9497A6]">
               <span>Instant Verification Accounts (JWT + bcrypt)</span>
-              <Calendar className="h-3.5 w-3.5 text-[#10B981]" />
+              <Calendar className="h-3.5 w-3.5 text-[#8A621C] dark:text-[#D4AF63]" />
             </div>
             <div className="mt-2.5 grid gap-2 sm:grid-cols-3">
               <Button
@@ -674,13 +674,13 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 >
                   Back to Sign In
                 </Button>
-                <span className="font-mono text-[11px] font-semibold uppercase tracking-wider text-[#059669] dark:text-[#34D399]">
+                <span className="font-mono text-[11px] font-semibold uppercase tracking-wider text-[#8A621C] dark:text-[#E8C987]">
                   Gmail Security Reset
                 </span>
               </div>
 
               {/* 3-Step Password Reset Progress Indicator */}
-              <div className="grid grid-cols-3 gap-2 rounded-xl border border-[#104E35]/18 bg-[#E4EDE7] p-2 dark:border-[#2A6F52]/36 dark:bg-[#09120D]">
+              <div className="grid grid-cols-3 gap-2 rounded-xl border border-[#272732]/18 bg-[#E6E7EE] p-2 dark:border-[#2D2D3A]/36 dark:bg-[#131319]">
                 {[
                   { id: 'forgot-password', num: '01', label: 'Email' },
                   { id: 'verify-otp', num: '02', label: '6-Digit OTP' },
@@ -695,10 +695,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                       key={s.id}
                       className={`flex items-center justify-center gap-1.5 rounded-lg px-2 py-1.5 text-[11px] font-semibold transition-all ${
                         active
-                          ? 'bg-[#10B981]/18 text-[#065F46] ring-1 ring-[#10B981]/50 dark:text-[#34D399]'
+                          ? 'bg-[#D4AF63]/20 text-[#8A621C] ring-1 ring-[#D4AF63]/55 dark:text-[#E8C987]'
                           : completed
-                            ? 'text-[#059669] dark:text-[#6EE7B7]'
-                            : 'text-[#466153]/75 dark:text-[#8EAD9E]/65'
+                            ? 'text-[#8A621C] dark:text-[#F3DCAA]'
+                            : 'text-[#525463]/75 dark:text-[#9497A6]/65'
                       }`}
                     >
                       <span className="font-mono text-[10px]">
@@ -802,8 +802,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               </div>
 
               {selectedRole === 'exhibitor' && (
-                <div className="space-y-3 rounded-xl border border-[#104E35]/18 bg-[#E4EDE7] p-3.5 dark:border-[#2A6F52]/36 dark:bg-[#09120D]">
-                  <div className="font-mono text-[11px] font-semibold text-[#059669] dark:text-[#34D399]">
+                <div className="space-y-3 rounded-xl border border-[#272732]/18 bg-[#E6E7EE] p-3.5 dark:border-[#2D2D3A]/36 dark:bg-[#131319]">
+                  <div className="font-mono text-[11px] font-semibold text-[#8A621C] dark:text-[#E8C987]">
                     Exhibitor Showcase Details
                   </div>
                   <div className="grid gap-3 sm:grid-cols-2">
@@ -842,17 +842,17 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                       placeholder="Arm M4, FleetOS"
                     />
                     <div className="space-y-1.5">
-                      <label className="block text-xs font-semibold text-[#466153] dark:text-[#8EAD9E]">
+                      <label className="block text-xs font-semibold text-[#525463] dark:text-[#9497A6]">
                         Brand Accent Color
                       </label>
                       <div className="flex items-center gap-2">
-                        {['#10B981', '#34D399', '#F97362', '#38BDF8', '#A78BFA'].map((hex) => (
+                        {['#D4AF63', '#E8C987', '#F97362', '#38BDF8', '#C58B3B'].map((hex) => (
                           <button
                             key={hex}
                             type="button"
                             onClick={() => setLogoColor(hex)}
                             className={`h-7 w-7 rounded-lg border-2 ${
-                              logoColor === hex ? 'border-[#091911] ring-2 ring-[#10B981]/45 scale-110 shadow dark:border-[#A7F3D0]' : 'border-transparent opacity-75'
+                              logoColor === hex ? 'border-[#0B0B0E] ring-2 ring-[#D4AF63]/45 scale-110 shadow dark:border-[#F3DCAA]' : 'border-transparent opacity-75'
                             }`}
                             style={{ backgroundColor: hex }}
                             aria-label={`Brand color ${hex}`}
@@ -905,16 +905,16 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
           {step === 'forgot-password' && (
             <form onSubmit={handleRequestOtp} className="space-y-4">
-              <div className="rounded-xl border border-[#104E35]/18 bg-[#E4EDE7] p-4 dark:border-[#2A6F52]/36 dark:bg-[#09120D]">
+              <div className="rounded-xl border border-[#272732]/18 bg-[#E6E7EE] p-4 dark:border-[#2D2D3A]/36 dark:bg-[#131319]">
                 <div className="flex items-start gap-3">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#10B981]/15 text-[#059669] dark:text-[#34D399]">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#D4AF63]/16 text-[#8A621C] dark:text-[#E8C987]">
                     <Mail className="h-5 w-5" />
                   </div>
                   <div>
-                    <h3 className="font-display text-sm font-bold text-[#091911] dark:text-[#ECFDF5]">
+                    <h3 className="font-display text-sm font-bold text-[#0B0B0E] dark:text-[#F8F9FC]">
                       Reset via Registered Gmail
                     </h3>
-                    <p className="mt-1 text-xs leading-relaxed text-[#466153] dark:text-[#8EAD9E]">
+                    <p className="mt-1 text-xs leading-relaxed text-[#525463] dark:text-[#9497A6]">
                       Enter the email address registered to your EventSphere account. We will send a 6-digit one-time verification code directly to your inbox (valid for 5 minutes).
                     </p>
                   </div>
@@ -945,13 +945,13 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
           {step === 'verify-otp' && (
             <form onSubmit={handleVerifyOtp} className="space-y-4">
-              <div className="rounded-xl border border-[#104E35]/18 bg-[#E4EDE7] p-4 dark:border-[#2A6F52]/36 dark:bg-[#09120D]">
+              <div className="rounded-xl border border-[#272732]/18 bg-[#E6E7EE] p-4 dark:border-[#2D2D3A]/36 dark:bg-[#131319]">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div>
-                    <div className="text-xs font-semibold text-[#466153] dark:text-[#8EAD9E]">
+                    <div className="text-xs font-semibold text-[#525463] dark:text-[#9497A6]">
                       Check your Gmail inbox
                     </div>
-                    <div className="mt-0.5 font-mono text-xs font-bold text-[#091911] dark:text-[#ECFDF5]">
+                    <div className="mt-0.5 font-mono text-xs font-bold text-[#0B0B0E] dark:text-[#F8F9FC]">
                       {email.trim().toLowerCase()}
                     </div>
                   </div>
@@ -962,21 +962,21 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                       setError(null);
                       setNotice(null);
                     }}
-                    className="text-xs font-semibold text-[#059669] underline-offset-4 hover:underline dark:text-[#34D399]"
+                    className="text-xs font-semibold text-[#8A621C] underline-offset-4 hover:underline dark:text-[#E8C987]"
                   >
                     Change email
                   </button>
                 </div>
 
-                <div className="mt-3 flex items-center justify-between border-t border-[#104E35]/14 pt-2.5 text-xs dark:border-[#2A6F52]/30">
-                  <span className="flex items-center gap-1.5 text-[#466153] dark:text-[#8EAD9E]">
-                    <Clock className="h-3.5 w-3.5 text-[#10B981]" />
+                <div className="mt-3 flex items-center justify-between border-t border-[#272732]/14 pt-2.5 text-xs dark:border-[#2D2D3A]/30">
+                  <span className="flex items-center gap-1.5 text-[#525463] dark:text-[#9497A6]">
+                    <Clock className="h-3.5 w-3.5 text-[#8A621C] dark:text-[#D4AF63]" />
                     <span>Code expiration</span>
                   </span>
                   <span
                     className={`font-mono font-bold ${
                       otpExpiresInSec > 60
-                        ? 'text-[#059669] dark:text-[#34D399]'
+                        ? 'text-[#8A621C] dark:text-[#E8C987]'
                         : 'text-[#C2410C] dark:text-[#FDA4AF]'
                     }`}
                   >
@@ -986,7 +986,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               </div>
 
               <div className="space-y-2">
-                <label className="block text-xs font-semibold text-[#466153] dark:text-[#8EAD9E]">
+                <label className="block text-xs font-semibold text-[#525463] dark:text-[#9497A6]">
                   Enter 6-Digit Verification Code
                 </label>
                 <div className="grid grid-cols-6 gap-2 sm:gap-2.5">
@@ -1004,7 +1004,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                       onChange={(e) => handleOtpDigitChange(idx, e.target.value)}
                       onKeyDown={(e) => handleOtpKeyDown(idx, e)}
                       aria-label={`Verification code digit ${idx + 1}`}
-                      className="h-12 w-full rounded-xl border border-[#104E35]/28 bg-[#F4F8F5] text-center font-mono text-xl font-bold text-[#091911] transition-all focus:border-[#10B981] focus:outline-none focus:ring-2 focus:ring-[#10B981]/30 dark:border-[#2A6F52]/55 dark:bg-[#08100B] dark:text-[#34D399] dark:focus:border-[#34D399]"
+                      className="h-12 w-full rounded-xl border border-[#272732]/28 bg-[#F5F6F9] text-center font-mono text-xl font-bold text-[#0B0B0E] transition-all focus:border-[#D4AF63] focus:outline-none focus:ring-2 focus:ring-[#D4AF63]/30 dark:border-[#2D2D3A]/55 dark:bg-[#101015] dark:text-[#E8C987] dark:focus:border-[#E8C987]"
                     />
                   ))}
                 </div>
@@ -1020,8 +1020,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 Verify Code &amp; Continue
               </Button>
 
-              <div className="flex items-center justify-between border-t border-[#104E35]/16 pt-3 text-xs dark:border-[#2A6F52]/32">
-                <span className="text-[#466153] dark:text-[#8EAD9E]">
+              <div className="flex items-center justify-between border-t border-[#272732]/16 pt-3 text-xs dark:border-[#2D2D3A]/32">
+                <span className="text-[#525463] dark:text-[#9497A6]">
                   Didn&apos;t receive the email?
                 </span>
                 <Button
@@ -1057,7 +1057,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     type="button"
                     onClick={() => setShowNewPassword((v) => !v)}
                     aria-label={showNewPassword ? 'Hide new password' : 'Show new password'}
-                    className="absolute top-[30px] right-3 text-[#466153] hover:text-[#091911] dark:text-[#8EAD9E] dark:hover:text-[#ECFDF5]"
+                    className="absolute top-[30px] right-3 text-[#525463] hover:text-[#0B0B0E] dark:text-[#9497A6] dark:hover:text-[#F8F9FC]"
                   >
                     {showNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
@@ -1077,7 +1077,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     type="button"
                     onClick={() => setShowConfirmPassword((v) => !v)}
                     aria-label={showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'}
-                    className="absolute top-[30px] right-3 text-[#466153] hover:text-[#091911] dark:text-[#8EAD9E] dark:hover:text-[#ECFDF5]"
+                    className="absolute top-[30px] right-3 text-[#525463] hover:text-[#0B0B0E] dark:text-[#9497A6] dark:hover:text-[#F8F9FC]"
                   >
                     {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
@@ -1085,16 +1085,16 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               </div>
 
               {/* Password Strength Meter & Checklist */}
-              <div className="rounded-xl border border-[#104E35]/18 bg-[#E4EDE7] p-3.5 dark:border-[#2A6F52]/36 dark:bg-[#09120D]">
+              <div className="rounded-xl border border-[#272732]/18 bg-[#E6E7EE] p-3.5 dark:border-[#2D2D3A]/36 dark:bg-[#131319]">
                 <div className="flex items-center justify-between text-xs font-semibold">
-                  <span className="flex items-center gap-1.5 text-[#466153] dark:text-[#8EAD9E]">
-                    <Lock className="h-3.5 w-3.5 text-[#10B981]" />
+                  <span className="flex items-center gap-1.5 text-[#525463] dark:text-[#9497A6]">
+                    <Lock className="h-3.5 w-3.5 text-[#8A621C] dark:text-[#D4AF63]" />
                     <span>Password Strength</span>
                   </span>
                   <span
                     className={`font-mono ${
                       strengthScore >= 5
-                        ? 'text-[#059669] dark:text-[#34D399]'
+                        ? 'text-[#8A621C] dark:text-[#E8C987]'
                         : strengthScore >= 3
                           ? 'text-amber-600 dark:text-amber-400'
                           : 'text-[#C2410C] dark:text-[#FDA4AF]'
@@ -1103,14 +1103,14 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     {strengthScore === 5 ? 'Strong' : strengthScore >= 3 ? 'Fair' : 'Weak'} ({strengthScore}/5)
                   </span>
                 </div>
-                <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-[#104E35]/15 dark:bg-[#1B3325]">
+                <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-[#272732]/15 dark:bg-[#242430]">
                   <div
                     className="h-full rounded-full transition-all duration-300"
                     style={{
                       width: `${(strengthScore / 5) * 100}%`,
                       background:
                         strengthScore === 5
-                          ? 'linear-gradient(90deg, #059669, #34D399)'
+                          ? 'linear-gradient(90deg, #B88B3D, #E8C987)'
                           : strengthScore >= 3
                             ? '#F59E0B'
                             : '#F97362',
@@ -1123,8 +1123,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                       key={rule.label}
                       className={`flex items-center gap-1.5 text-[11px] ${
                         rule.met
-                          ? 'font-medium text-[#059669] dark:text-[#6EE7B7]'
-                          : 'text-[#466153]/80 dark:text-[#8EAD9E]/70'
+                          ? 'font-medium text-[#8A621C] dark:text-[#F3DCAA]'
+                          : 'text-[#525463]/80 dark:text-[#9497A6]/70'
                       }`}
                     >
                       <Check className={`h-3 w-3 ${rule.met ? 'opacity-100' : 'opacity-30'}`} />
@@ -1134,8 +1134,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   <div
                     className={`flex items-center gap-1.5 text-[11px] ${
                       passwordsMatch
-                        ? 'font-medium text-[#059669] dark:text-[#6EE7B7]'
-                        : 'text-[#466153]/80 dark:text-[#8EAD9E]/70'
+                        ? 'font-medium text-[#8A621C] dark:text-[#F3DCAA]'
+                        : 'text-[#525463]/80 dark:text-[#9497A6]/70'
                     }`}
                   >
                     <Check className={`h-3 w-3 ${passwordsMatch ? 'opacity-100' : 'opacity-30'}`} />

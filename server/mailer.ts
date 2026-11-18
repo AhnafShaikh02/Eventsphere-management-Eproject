@@ -154,24 +154,24 @@ export async function sendResetCodeEmail(to: string, name: string, otp: string):
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Password Reset Verification</title>
   </head>
-  <body style="margin:0;padding:0;background-color:#040705;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#ECFDF5;">
-    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#040705;padding:32px 16px;">
+  <body style="margin:0;padding:0;background-color:#0B0B0E;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#F2F3F7;">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#0B0B0E;padding:32px 16px;">
       <tr>
         <td align="center">
-          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width:560px;background-color:#08100B;border:1px solid #1E3A2B;border-radius:16px;overflow:hidden;">
+          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width:560px;background-color:#121217;border:1px solid #2D2D3A;border-radius:16px;overflow:hidden;">
             <tr>
-              <td style="height:4px;background:linear-gradient(90deg,#059669 0%,#10B981 50%,#34D399 100%);font-size:0;line-height:0;">&nbsp;</td>
+              <td style="height:4px;background:linear-gradient(90deg,#B88B3D 0%,#D4AF63 50%,#F3DCAA 100%);font-size:0;line-height:0;">&nbsp;</td>
             </tr>
             <tr>
-              <td style="padding:28px 32px 20px 32px;border-bottom:1px solid #162B1F;background:linear-gradient(180deg,#0B1610 0%,#08100B 100%);">
+              <td style="padding:28px 32px 20px 32px;border-bottom:1px solid #242430;background:linear-gradient(180deg,#16161D 0%,#121217 100%);">
                 <table role="presentation" cellspacing="0" cellpadding="0" border="0">
                   <tr>
                     <td style="vertical-align:middle;padding-right:12px;">
-                      <div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#059669 0%,#34D399 100%);color:#02120B;font-weight:800;font-size:15px;line-height:36px;text-align:center;letter-spacing:0.5px;">ES</div>
+                      <div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#B88B3D 0%,#F3DCAA 100%);color:#0B0B0E;font-weight:800;font-size:15px;line-height:36px;text-align:center;letter-spacing:0.5px;">ES</div>
                     </td>
                     <td style="vertical-align:middle;">
-                      <div style="font-size:18px;font-weight:800;letter-spacing:-0.02em;color:#ECFDF5;line-height:1.2;">EventSphere</div>
-                      <div style="font-size:10px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:#34D399;margin-top:2px;">Expo Portal Security</div>
+                      <div style="font-size:18px;font-weight:800;letter-spacing:-0.02em;color:#F8F9FC;line-height:1.2;">EventSphere</div>
+                      <div style="font-size:10px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:#E8C987;margin-top:2px;">Expo Portal Security</div>
                     </td>
                   </tr>
                 </table>
@@ -179,38 +179,38 @@ export async function sendResetCodeEmail(to: string, name: string, otp: string):
             </tr>
             <tr>
               <td style="padding:30px 32px;">
-                <h1 style="margin:0 0 12px 0;font-size:22px;font-weight:800;letter-spacing:-0.02em;color:#ECFDF5;">
+                <h1 style="margin:0 0 12px 0;font-size:22px;font-weight:800;letter-spacing:-0.02em;color:#F8F9FC;">
                   Password Reset Verification
                 </h1>
-                <p style="margin:0 0 16px 0;font-size:14px;line-height:1.65;color:#B4CFC0;">
-                  Hi ${safeName}, we received a request to reset the password for your EventSphere account (<span style="color:#ECFDF5;font-weight:600;">${safeEmail}</span>).
+                <p style="margin:0 0 16px 0;font-size:14px;line-height:1.65;color:#B8BAC8;">
+                  Hi ${safeName}, we received a request to reset the password for your EventSphere account (<span style="color:#F8F9FC;font-weight:600;">${safeEmail}</span>).
                 </p>
-                <p style="margin:0 0 18px 0;font-size:14px;line-height:1.65;color:#B4CFC0;">
+                <p style="margin:0 0 18px 0;font-size:14px;line-height:1.65;color:#B8BAC8;">
                   Enter the 6-digit verification code below on the EventSphere verification screen to continue:
                 </p>
 
                 <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin:0 0 20px 0;">
                   <tr>
-                    <td align="center" style="padding:20px 16px;background:linear-gradient(180deg,#0D1A12 0%,#07100B 100%);border:1px solid #10B981;border-radius:12px;">
-                      <div style="font-size:11px;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:#6EE7B7;margin-bottom:8px;">
+                    <td align="center" style="padding:20px 16px;background:linear-gradient(180deg,#181612 0%,#111116 100%);border:1px solid #D4AF63;border-radius:12px;">
+                      <div style="font-size:11px;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:#F3DCAA;margin-bottom:8px;">
                         One-Time Verification Code
                       </div>
-                      <div style="font-family:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace;font-size:34px;font-weight:800;letter-spacing:10px;color:#34D399;line-height:1.1;padding-left:10px;">
+                      <div style="font-family:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace;font-size:34px;font-weight:800;letter-spacing:10px;color:#E8C987;line-height:1.1;padding-left:10px;">
                         ${safeOtp}
                       </div>
                     </td>
                   </tr>
                 </table>
 
-                <p style="margin:0 0 20px 0;font-size:13px;line-height:1.6;color:#A7C0B1;text-align:center;">
-                  <strong style="color:#ECFDF5;">This code expires in 5 minutes</strong> and can only be used once.
+                <p style="margin:0 0 20px 0;font-size:13px;line-height:1.6;color:#9497A6;text-align:center;">
+                  <strong style="color:#F8F9FC;">This code expires in 5 minutes</strong> and can only be used once.
                 </p>
 
                 <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
                   <tr>
-                    <td style="padding:14px 16px;background-color:#0C1610;border-left:3px solid #10B981;border-radius:8px;">
-                      <div style="font-size:12px;font-weight:700;color:#34D399;margin-bottom:4px;">Security Notice</div>
-                      <div style="font-size:12px;line-height:1.55;color:#93B0A0;">
+                    <td style="padding:14px 16px;background-color:#15141A;border-left:3px solid #D4AF63;border-radius:8px;">
+                      <div style="font-size:12px;font-weight:700;color:#E8C987;margin-bottom:4px;">Security Notice</div>
+                      <div style="font-size:12px;line-height:1.55;color:#9497A6;">
                         Never share this verification code with anyone. EventSphere staff will never ask for your password or OTP. If you did not request a password reset, you can safely ignore this email.
                       </div>
                     </td>
@@ -219,7 +219,7 @@ export async function sendResetCodeEmail(to: string, name: string, otp: string):
               </td>
             </tr>
             <tr>
-              <td style="padding:18px 32px;background-color:#050A07;border-top:1px solid #162B1F;font-size:11px;color:#6E8879;text-align:center;">
+              <td style="padding:18px 32px;background-color:#0D0D11;border-top:1px solid #242430;font-size:11px;color:#737685;text-align:center;">
                 &copy; ${year} EventSphere Management Platform &middot; Automated Security Notification
               </td>
             </tr>
@@ -261,15 +261,15 @@ export async function sendTicketConfirmationEmail(
   return sendMailSafe(
     to,
     `Your EventSphere Pass: ${expoTitle} (${ticketCode})`,
-    `<div style="font-family:sans-serif;max-width:520px;margin:0 auto;padding:24px;background:#070B08;color:#ECFDF5;border-radius:12px;border:1px solid #1C3124">
-      <h2 style="margin:0 0 12px;color:#34D399">Pass Confirmed</h2>
-      <p style="margin:0 0 12px;color:#A7C0B1">Hi ${safeName}, your registration for <strong>${safeTitle}</strong> is confirmed.</p>
-      <div style="padding:14px 18px;background:#0D1510;border:1px solid #2A4736;border-radius:8px;margin-bottom:14px">
-        <div style="font-size:12px;color:#6E8879">TICKET CODE</div>
-        <div style="font-family:monospace;font-size:20px;font-weight:700;color:#34D399;margin-top:4px">${safeTicket}</div>
-        <div style="font-size:13px;color:#A7C0B1;margin-top:8px">${safeDate} · ${safeLocation}</div>
+    `<div style="font-family:sans-serif;max-width:520px;margin:0 auto;padding:24px;background:#0B0B0E;color:#F2F3F7;border-radius:12px;border:1px solid #2D2D3A">
+      <h2 style="margin:0 0 12px;color:#E8C987">Pass Confirmed</h2>
+      <p style="margin:0 0 12px;color:#B8BAC8">Hi ${safeName}, your registration for <strong>${safeTitle}</strong> is confirmed.</p>
+      <div style="padding:14px 18px;background:#121217;border:1px solid #D4AF63;border-radius:8px;margin-bottom:14px">
+        <div style="font-size:12px;color:#9497A6">TICKET CODE</div>
+        <div style="font-family:monospace;font-size:20px;font-weight:700;color:#E8C987;margin-top:4px">${safeTicket}</div>
+        <div style="font-size:13px;color:#B8BAC8;margin-top:8px">${safeDate} · ${safeLocation}</div>
       </div>
-      <p style="margin:0;font-size:12px;color:#6E8879">Present this pass code in your Attendee Portal upon arrival.</p>
+      <p style="margin:0;font-size:12px;color:#9497A6">Present this pass code in your Attendee Portal upon arrival.</p>
     </div>`,
     `Hi ${name}, your pass ${ticketCode} for ${expoTitle} (${expoDate} at ${expoLocation}) is confirmed.`,
   );
@@ -288,10 +288,10 @@ export async function sendApplicationStatusEmail(
   return sendMailSafe(
     to,
     `EventSphere Exhibitor Application ${statusLabel}: ${companyName}`,
-    `<div style="font-family:sans-serif;max-width:520px;margin:0 auto;padding:24px;background:#070B08;color:#ECFDF5;border-radius:12px;border:1px solid #1C3124">
-      <h2 style="margin:0 0 12px;color:#34D399">Exhibitor Application ${statusLabel}</h2>
-      <p style="margin:0 0 12px;color:#A7C0B1">Application for <strong>${safeCompany}</strong> has been reviewed by the EventSphere organizer team:</p>
-      <div style="padding:14px 18px;background:#0D1510;border:1px solid #2A4736;border-radius:8px;color:#ECFDF5">${safeDetail}</div>
+    `<div style="font-family:sans-serif;max-width:520px;margin:0 auto;padding:24px;background:#0B0B0E;color:#F2F3F7;border-radius:12px;border:1px solid #2D2D3A">
+      <h2 style="margin:0 0 12px;color:#E8C987">Exhibitor Application ${statusLabel}</h2>
+      <p style="margin:0 0 12px;color:#B8BAC8">Application for <strong>${safeCompany}</strong> has been reviewed by the EventSphere organizer team:</p>
+      <div style="padding:14px 18px;background:#121217;border:1px solid #D4AF63;border-radius:8px;color:#F8F9FC">${safeDetail}</div>
     </div>`,
     `Exhibitor Application ${statusLabel} for ${companyName}: ${detail}`,
   );

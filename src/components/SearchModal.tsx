@@ -76,8 +76,8 @@ export const SearchModal: React.FC<SearchModalProps> = ({
         />
 
         <div>
-          <div className="mb-2 flex items-center gap-1.5 font-mono text-[11px] font-bold text-[#466153] dark:text-[#8EAD9E]">
-            <MapPin className="h-3.5 w-3.5 text-[#34D399]" />
+          <div className="mb-2 flex items-center gap-1.5 font-mono text-[11px] font-bold text-[#525463] dark:text-[#9497A6]">
+            <MapPin className="h-3.5 w-3.5 text-[#8A621C] dark:text-[#E8C987]" />
             <span>3D Floor Booths ({results.booths.length})</span>
           </div>
           <div className="grid gap-2 sm:grid-cols-2">
@@ -89,7 +89,7 @@ export const SearchModal: React.FC<SearchModalProps> = ({
                   onSelectBooth(b.id);
                   onClose();
                 }}
-                className="flex items-center justify-between rounded-xl border border-[#10B981]/18 bg-[#E8EFEA]/80 px-3 py-2.5 text-left transition-colors hover:border-[#10B981] dark:border-[#10B981]/20 dark:bg-[#09120D]"
+                className="flex items-center justify-between rounded-xl border border-[#272732]/18 bg-[#ECEEF3]/80 px-3 py-2.5 text-left transition-colors hover:border-[#8A621C] dark:border-[#E8C987]/20 dark:bg-[#131319] dark:hover:border-[#E8C987]"
               >
                 <div>
                   <div className="flex items-center gap-2 text-xs font-bold">
@@ -99,11 +99,11 @@ export const SearchModal: React.FC<SearchModalProps> = ({
                     />
                     <span>Booth {b.number}</span>
                   </div>
-                  <div className="mt-0.5 text-[11px] text-[#466153] dark:text-[#8EAD9E]">
+                  <div className="mt-0.5 text-[11px] text-[#525463] dark:text-[#9497A6]">
                     {b.exhibitorName || b.zone}
                   </div>
                 </div>
-                <span className="font-mono text-[11px] font-semibold text-[#059669] dark:text-[#34D399]">
+                <span className="font-mono text-[11px] font-semibold text-[#8A621C] dark:text-[#E8C987]">
                   ${b.priceUsd.toLocaleString()}
                 </span>
               </button>
@@ -112,7 +112,7 @@ export const SearchModal: React.FC<SearchModalProps> = ({
         </div>
 
         <div>
-          <div className="mb-2 flex items-center gap-1.5 font-mono text-[11px] font-bold text-[#466153] dark:text-[#8EAD9E]">
+          <div className="mb-2 flex items-center gap-1.5 font-mono text-[11px] font-bold text-[#525463] dark:text-[#9497A6]">
             <Building2 className="h-3.5 w-3.5 text-[#F97362]" />
             <span>Exhibitors ({results.exhibitors.length})</span>
           </div>
@@ -131,18 +131,18 @@ export const SearchModal: React.FC<SearchModalProps> = ({
                     }
                     onClose();
                   }}
-                  className="flex w-full items-center justify-between rounded-xl border border-[#10B981]/18 bg-[#E8EFEA]/80 px-3 py-2.5 text-left hover:border-[#F97362] dark:border-[#10B981]/20 dark:bg-[#09120D]"
+                  className="flex w-full items-center justify-between rounded-xl border border-[#272732]/18 bg-[#ECEEF3]/80 px-3 py-2.5 text-left hover:border-[#F97362] dark:border-[#E8C987]/20 dark:bg-[#131319]"
                 >
                   <div>
                     <div className="text-xs font-bold">
                       {ex.companyName}{' '}
-                      <span className="font-normal text-[#466153] dark:text-[#8EAD9E]">
+                      <span className="font-normal text-[#525463] dark:text-[#9497A6]">
                         · {ex.category}
                       </span>
                     </div>
-                    <div className="text-[11px] text-[#466153] dark:text-[#8EAD9E]">{ex.tagline}</div>
+                    <div className="text-[11px] text-[#525463] dark:text-[#9497A6]">{ex.tagline}</div>
                   </div>
-                  <span className="font-mono text-[11px] font-bold text-[#059669] dark:text-[#34D399]">
+                  <span className="font-mono text-[11px] font-bold text-[#8A621C] dark:text-[#E8C987]">
                     {assignedBooth ? `Booth ${assignedBooth.number}` : 'Unassigned'}
                   </span>
                 </button>
@@ -152,7 +152,7 @@ export const SearchModal: React.FC<SearchModalProps> = ({
         </div>
 
         <div>
-          <div className="mb-2 flex items-center gap-1.5 font-mono text-[11px] font-bold text-[#466153] dark:text-[#8EAD9E]">
+          <div className="mb-2 flex items-center gap-1.5 font-mono text-[11px] font-bold text-[#525463] dark:text-[#9497A6]">
             <CalendarClock className="h-3.5 w-3.5 text-[#2DD4BF]" />
             <span>Schedule Sessions ({results.sessions.length})</span>
           </div>
@@ -165,15 +165,15 @@ export const SearchModal: React.FC<SearchModalProps> = ({
                   onJumpToSession();
                   onClose();
                 }}
-                className="flex w-full items-center justify-between rounded-xl border border-[#10B981]/18 bg-[#E8EFEA]/80 px-3 py-2 text-left hover:border-[#10B981] dark:border-[#10B981]/20 dark:bg-[#09120D]"
+                className="flex w-full items-center justify-between rounded-xl border border-[#272732]/18 bg-[#ECEEF3]/80 px-3 py-2 text-left hover:border-[#8A621C] dark:border-[#E8C987]/20 dark:bg-[#131319] dark:hover:border-[#E8C987]"
               >
                 <div>
                   <div className="text-xs font-bold">{s.title}</div>
-                  <div className="text-[11px] text-[#466153] dark:text-[#8EAD9E]">
+                  <div className="text-[11px] text-[#525463] dark:text-[#9497A6]">
                     {s.speaker} · {s.location}
                   </div>
                 </div>
-                <span className="font-mono text-xs font-semibold text-[#059669] dark:text-[#34D399]">
+                <span className="font-mono text-xs font-semibold text-[#8A621C] dark:text-[#E8C987]">
                   {s.startTime}
                 </span>
               </button>

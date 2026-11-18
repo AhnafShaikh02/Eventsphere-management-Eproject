@@ -3,6 +3,10 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
 import { RectAreaLightUniformsLib } from 'three/examples/jsm/lights/RectAreaLightUniformsLib.js';
+import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
+import { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass.js';
+import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
 import type { BoothStatus, ExpoBooth } from '../types/eventsphere';
 import {
   STATUS_HEX,
@@ -111,14 +115,15 @@ export const ExpoHallCanvas = React.forwardRef<ExpoHallCanvasHandle, ExpoHallCan
     const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
     const controlsRef = useRef<OrbitControls | null>(null);
     const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
+    const composerRef = useRef<EffectComposer | null>(null);
     const focusTargetRef = useRef<{
       active: boolean;
       pos: THREE.Vector3;
       lookAt: THREE.Vector3;
     }>({
       active: false,
-      pos: new THREE.Vector3(0, 18, 22),
-      lookAt: new THREE.Vector3(0, 1, -2),
+      pos: new THREE.Vector3(0, 21.5, 32),
+      lookAt: new THREE.Vector3(0, 1.8, 1.5),
     });
 
     useImperativeHandle(ref, () => ({
@@ -126,33 +131,37 @@ export const ExpoHallCanvas = React.forwardRef<ExpoHallCanvasHandle, ExpoHallCan
         const cam = cameraRef.current;
         const ctrl = controlsRef.current;
         if (!cam || !ctrl) return;
-        const dir = new THREE.Vector3().subVectors(cam.position, ctrl.target);
-        const nextLen = Math.max(5.5, dir.length() * 0.76);
+        const activeTarget = focusTargetRef.current.active ? focusTargetRef.current.lookAt : ctrl.target;
+        const activePos = focusTargetRef.current.active ? focusTargetRef.current.pos : cam.position;
+        const dir = new THREE.Vector3().subVectors(activePos, activeTarget);
+        const nextLen = Math.max(2.6, dir.length() * 0.72);
         dir.setLength(nextLen);
         focusTargetRef.current = {
           active: true,
-          pos: ctrl.target.clone().add(dir),
-          lookAt: ctrl.target.clone(),
+          pos: activeTarget.clone().add(dir),
+          lookAt: activeTarget.clone(),
         };
       },
       zoomOut: () => {
         const cam = cameraRef.current;
         const ctrl = controlsRef.current;
         if (!cam || !ctrl) return;
-        const dir = new THREE.Vector3().subVectors(cam.position, ctrl.target);
-        const nextLen = Math.min(82, dir.length() * 1.28);
+        const activeTarget = focusTargetRef.current.active ? focusTargetRef.current.lookAt : ctrl.target;
+        const activePos = focusTargetRef.current.active ? focusTargetRef.current.pos : cam.position;
+        const dir = new THREE.Vector3().subVectors(activePos, activeTarget);
+        const nextLen = Math.min(96, dir.length() * 1.38);
         dir.setLength(nextLen);
         focusTargetRef.current = {
           active: true,
-          pos: ctrl.target.clone().add(dir),
-          lookAt: ctrl.target.clone(),
+          pos: activeTarget.clone().add(dir),
+          lookAt: activeTarget.clone(),
         };
       },
       resetView: () => {
         focusTargetRef.current = {
           active: true,
-          pos: new THREE.Vector3(0, 22, 29),
-          lookAt: new THREE.Vector3(0, 1.2, 1),
+          pos: new THREE.Vector3(0, 21.5, 32),
+          lookAt: new THREE.Vector3(0, 1.8, 1.5),
         };
       },
       focusBooth: (boothId: string) => {
@@ -161,21 +170,21 @@ export const ExpoHallCanvas = React.forwardRef<ExpoHallCanvasHandle, ExpoHallCan
         const target = getBoothWorldPosition(booth);
         focusTargetRef.current = {
           active: true,
-          pos: new THREE.Vector3(target.x + 4.4, 5.2, target.z + 6.4),
+          pos: new THREE.Vector3(target.x + 3.8, 4.4, target.z + 5.4),
           lookAt: new THREE.Vector3(target.x, 1.1, target.z),
         };
       },
       focusStage: () => {
         focusTargetRef.current = {
           active: true,
-          pos: new THREE.Vector3(0, 6.2, -3.5),
+          pos: new THREE.Vector3(0, 6.0, -3.2),
           lookAt: new THREE.Vector3(0, 2.4, -14.5),
         };
       },
       focusPlaza: () => {
         focusTargetRef.current = {
           active: true,
-          pos: new THREE.Vector3(-12, 10.5, 36),
+          pos: new THREE.Vector3(-11.5, 10.2, 35.5),
           lookAt: new THREE.Vector3(0, 1.6, 20),
         };
       },
@@ -183,7 +192,11 @@ export const ExpoHallCanvas = React.forwardRef<ExpoHallCanvasHandle, ExpoHallCan
         const renderer = rendererRef.current;
         if (!renderer) return null;
         try {
-          renderer.render(sceneCaptureRef.current.scene!, sceneCaptureRef.current.camera!);
+          if (composerRef.current) {
+            composerRef.current.render();
+          } else {
+            renderer.render(sceneCaptureRef.current.scene!, sceneCaptureRef.current.camera!);
+          }
           return renderer.domElement.toDataURL('image/png');
         } catch {
           return null;
@@ -227,10 +240,10 @@ export const ExpoHallCanvas = React.forwardRef<ExpoHallCanvasHandle, ExpoHallCan
       rendererRef.current = renderer;
 
       const scene = new THREE.Scene();
-      const nightBg = new THREE.Color(0x040705);
-      const dayBg = new THREE.Color(0xdbe7df);
+      const nightBg = new THREE.Color(0x0b0b0e);
+      const dayBg = new THREE.Color(0xe4e6ee);
       scene.background = stateRef.current.nightMode ? nightBg.clone() : dayBg.clone();
-      const fog = new THREE.FogExp2(stateRef.current.nightMode ? 0x040705 : 0xdbe7df, 0.0085);
+      const fog = new THREE.FogExp2(stateRef.current.nightMode ? 0x0b0b0e : 0xe4e6ee, 0.0085);
       scene.fog = fog;
 
       // Environment reflections
@@ -241,26 +254,73 @@ export const ExpoHallCanvas = React.forwardRef<ExpoHallCanvasHandle, ExpoHallCan
       scene.environmentIntensity = 0.62;
       envScene.dispose();
 
-      const camera = new THREE.PerspectiveCamera(52, 1, 0.2, 240);
-      camera.position.set(0, 26, 30);
+      const camera = new THREE.PerspectiveCamera(50, 1, 0.2, 260);
+      camera.position.set(0, 21.5, 32);
       cameraRef.current = camera;
       sceneCaptureRef.current = { scene, camera };
 
+      // Subtle luxury bloom pipeline (skipped on software WebGL for responsive frame pacing)
+      let composer: EffectComposer | null = null;
+      let bloomPass: UnrealBloomPass | null = null;
+      let outputPass: OutputPass | null = null;
+      let composerRT: THREE.WebGLRenderTarget | null = null;
+      if (!isSoftGl) {
+        const initW = Math.max(1, container.clientWidth || window.innerWidth);
+        const initH = Math.max(1, container.clientHeight || window.innerHeight);
+        const pr = renderer.getPixelRatio();
+        composerRT = new THREE.WebGLRenderTarget(
+          Math.max(1, Math.floor(initW * pr)),
+          Math.max(1, Math.floor(initH * pr)),
+          {
+            type: THREE.HalfFloatType,
+            samples: renderer.capabilities.isWebGL2 ? 4 : 0,
+          },
+        );
+        composer = new EffectComposer(renderer, composerRT);
+        composer.setPixelRatio(pr);
+        composer.setSize(initW, initH);
+        composer.addPass(new RenderPass(scene, camera));
+
+        const initialNight = stateRef.current.nightMode;
+        bloomPass = new UnrealBloomPass(
+          new THREE.Vector2(initW, initH),
+          initialNight ? 0.28 : 0.14,
+          initialNight ? 0.45 : 0.30,
+          initialNight ? 0.72 : 0.96,
+        );
+        composer.addPass(bloomPass);
+
+        outputPass = new OutputPass();
+        composer.addPass(outputPass);
+        composerRef.current = composer;
+      }
+
       const controls = new OrbitControls(camera, canvas);
       controls.enableDamping = !isSoftGl;
-      controls.dampingFactor = 0.07;
-      controls.maxPolarAngle = Math.PI * 0.475;
-      controls.minDistance = 5.5;
-      controls.maxDistance = 82;
-      controls.target.set(0, 1.2, 0);
+      controls.dampingFactor = 0.08;
+      controls.enableZoom = true;
+      controls.zoomToCursor = true;
+      controls.zoomSpeed = 1.25;
+      controls.panSpeed = 0.92;
+      controls.rotateSpeed = 0.85;
+      controls.screenSpacePanning = false;
+      controls.maxPolarAngle = Math.PI * 0.478;
+      controls.minPolarAngle = 0.14;
+      controls.minDistance = 2.6;
+      controls.maxDistance = 96;
+      controls.target.set(0, 1.8, 1.5);
       controls.enabled = stateRef.current.cameraMode === 'explore';
+      const handleControlStart = () => {
+        focusTargetRef.current.active = false;
+      };
+      controls.addEventListener('start', handleControlStart);
       controlsRef.current = controls;
 
-      // Lighting: crisp emerald/mint architectural key + warm neutral fill + studio softboxes
-      const hemi = new THREE.HemisphereLight(0xd1fae5, 0x07120c, stateRef.current.nightMode ? 0.85 : 1.22);
+      // Lighting: warm champagne-gold studio key + obsidian ambient fill
+      const hemi = new THREE.HemisphereLight(0xf6ead4, 0x0b0b0e, stateRef.current.nightMode ? 0.92 : 1.24);
       scene.add(hemi);
 
-      const dirKey = new THREE.DirectionalLight(0xfff7ed, 1.48);
+      const dirKey = new THREE.DirectionalLight(0xfff5e4, 1.55);
       dirKey.position.set(22, 34, 26);
       if (!isSoftGl) {
         dirKey.castShadow = true;
@@ -278,27 +338,27 @@ export const ExpoHallCanvas = React.forwardRef<ExpoHallCanvasHandle, ExpoHallCan
 
       if (!isSoftGl) {
         RectAreaLightUniformsLib.init();
-        const rectKeynote = new THREE.RectAreaLight(0x34d399, 3.2, 12, 3.5);
+        const rectKeynote = new THREE.RectAreaLight(0xe8c987, 3.4, 12, 3.5);
         rectKeynote.position.set(0, 6.2, -11);
         rectKeynote.lookAt(0, 0.5, -14.5);
         scene.add(rectKeynote);
       }
 
-      const pEmerald = new THREE.PointLight(0x10b981, 36, 62, 1.45);
-      pEmerald.position.set(-12, 9, 4);
-      scene.add(pEmerald);
+      const pGoldWest = new THREE.PointLight(0xe8c987, 34, 62, 1.45);
+      pGoldWest.position.set(-12, 9, 4);
+      scene.add(pGoldWest);
 
-      const pCoral = new THREE.PointLight(0xf97362, 18, 46, 1.5);
+      const pCoral = new THREE.PointLight(0xf97362, 16, 46, 1.5);
       pCoral.position.set(13, 8, -8);
       scene.add(pCoral);
 
-      const pJade = new THREE.PointLight(0x34d399, 32, 62, 1.45);
-      pJade.position.set(14, 12, 16);
-      scene.add(pJade);
+      const pGoldEast = new THREE.PointLight(0xf3dcaa, 32, 62, 1.45);
+      pGoldEast.position.set(14, 12, 16);
+      scene.add(pGoldEast);
 
-      const pTeal = new THREE.PointLight(0x2dd4bf, 28, 56, 1.45);
-      pTeal.position.set(0, 8, 19);
-      scene.add(pTeal);
+      const pAmberFront = new THREE.PointLight(0xd4af63, 28, 56, 1.45);
+      pAmberFront.position.set(0, 8, 19);
+      scene.add(pAmberFront);
 
       // Shared contact shadow texture
       const shadowTex = createContactShadowTexture();
@@ -322,7 +382,7 @@ export const ExpoHallCanvas = React.forwardRef<ExpoHallCanvasHandle, ExpoHallCan
       floorMesh.receiveShadow = true;
       scene.add(floorMesh);
 
-      const gridHelper = new THREE.GridHelper(34, 17, 0x10b981, 0x0c1f16);
+      const gridHelper = new THREE.GridHelper(34, 17, 0xe8c987, 0x1d1d27);
       gridHelper.position.set(0, 0.028, -0.75);
       const gridMats = Array.isArray(gridHelper.material) ? gridHelper.material : [gridHelper.material];
       gridMats.forEach((m) => {
@@ -331,10 +391,10 @@ export const ExpoHallCanvas = React.forwardRef<ExpoHallCanvasHandle, ExpoHallCan
       });
       scene.add(gridHelper);
 
-      // Center aisle runner carpet (obsidian pine-black with subtle perimeter)
+      // Center aisle runner carpet (obsidian carbon with subtle perimeter)
       const runnerGeo = new THREE.PlaneGeometry(2.8, 35.2);
       const runnerMat = new THREE.MeshStandardMaterial({
-        color: 0x09140e,
+        color: 0x101016,
         roughness: 0.85,
       });
       const runner = new THREE.Mesh(runnerGeo, runnerMat);
@@ -373,21 +433,21 @@ export const ExpoHallCanvas = React.forwardRef<ExpoHallCanvasHandle, ExpoHallCan
         }
       }
 
-      // Ambient floating light particles (expo energy field)
-      const ptCount = 260;
+      // Ambient floating champagne stardust particles (expo energy field)
+      const ptCount = 320;
       const ptPositions = new Float32Array(ptCount * 3);
       for (let i = 0; i < ptCount; i++) {
         ptPositions[i * 3] = (Math.random() - 0.5) * 52;
-        ptPositions[i * 3 + 1] = 1.2 + Math.random() * 14;
+        ptPositions[i * 3 + 1] = 1.2 + Math.random() * 16;
         ptPositions[i * 3 + 2] = (Math.random() - 0.5) * 44;
       }
       const ptGeo = new THREE.BufferGeometry();
       ptGeo.setAttribute('position', new THREE.BufferAttribute(ptPositions, 3));
       const ptMat = new THREE.PointsMaterial({
-        size: 0.14,
-        color: 0xf3f1ff,
+        size: 0.15,
+        color: 0xf3dcaa,
         transparent: true,
-        opacity: 0.52,
+        opacity: 0.62,
       });
       const points = new THREE.Points(ptGeo, ptMat);
       scene.add(points);
@@ -448,11 +508,14 @@ export const ExpoHallCanvas = React.forwardRef<ExpoHallCanvasHandle, ExpoHallCan
 
       const handleResize = () => {
         if (!container) return;
-        const w = container.clientWidth || window.innerWidth;
-        const h = container.clientHeight || window.innerHeight;
+        const w = Math.max(1, container.clientWidth || window.innerWidth);
+        const h = Math.max(1, container.clientHeight || window.innerHeight);
         renderer.setSize(w, h, false);
+        if (composer) {
+          composer.setSize(w, h);
+        }
         camera.aspect = w / h;
-        camera.fov = camera.aspect < 1 ? 66 : 52;
+        camera.fov = camera.aspect < 1 ? 64 : 50;
         camera.updateProjectionMatrix();
       };
       handleResize();
@@ -539,6 +602,7 @@ export const ExpoHallCanvas = React.forwardRef<ExpoHallCanvasHandle, ExpoHallCan
       let disposed = false;
       let prevTime = performance.now();
       let prevNight = stateRef.current.nightMode;
+      let prevCameraMode = stateRef.current.cameraMode;
       let lastReportedZoom = -1;
 
       const afterDraw = (cb: () => void) => {
@@ -573,6 +637,18 @@ export const ExpoHallCanvas = React.forwardRef<ExpoHallCanvasHandle, ExpoHallCan
 
         const cur = stateRef.current;
 
+        // Smooth handoff when entering Explore mode from Scroll Voyage
+        if (cur.cameraMode !== prevCameraMode) {
+          prevCameraMode = cur.cameraMode;
+          if (cur.cameraMode === 'explore' && !focusTargetRef.current.active && !cur.selectedBoothId) {
+            focusTargetRef.current = {
+              active: true,
+              pos: new THREE.Vector3(0, 21.5, 32),
+              lookAt: new THREE.Vector3(0, 1.8, 1.5),
+            };
+          }
+        }
+
         // Theme switch (Night vs Daylight)
         if (cur.nightMode !== prevNight) {
           prevNight = cur.nightMode;
@@ -588,9 +664,14 @@ export const ExpoHallCanvas = React.forwardRef<ExpoHallCanvasHandle, ExpoHallCan
             ? sceneryBundle.plazaTexNight
             : sceneryBundle.plazaTexDay;
           sceneryBundle.plazaMat.needsUpdate = true;
-          ptMat.color.setHex(cur.nightMode ? 0x34d399 : 0x059669);
-          ptMat.opacity = cur.nightMode ? 0.56 : 0.34;
-          hemi.intensity = cur.nightMode ? 0.85 : 1.22;
+          ptMat.color.setHex(cur.nightMode ? 0xf3dcaa : 0x8a621c);
+          ptMat.opacity = cur.nightMode ? 0.62 : 0.36;
+          hemi.intensity = cur.nightMode ? 0.92 : 1.24;
+          if (bloomPass) {
+            bloomPass.strength = cur.nightMode ? 0.28 : 0.14;
+            bloomPass.radius = cur.nightMode ? 0.45 : 0.30;
+            bloomPass.threshold = cur.nightMode ? 0.72 : 0.96;
+          }
         }
 
         gridHelper.visible = cur.showFloorGrid;
@@ -634,7 +715,7 @@ export const ExpoHallCanvas = React.forwardRef<ExpoHallCanvasHandle, ExpoHallCan
 
           const dimmed = cur.statusFilter !== 'all' && b.status !== cur.statusFilter;
           const isSelected = cur.selectedBoothId === b.id || hoveredBoothId === b.id;
-          updateBoothGroupAppearance(grp, b, dimmed, isSelected, maxAniso);
+          updateBoothGroupAppearance(grp, b, dimmed, isSelected, maxAniso, t, i * 0.85);
 
           const targetScaleY = isSelected ? 1.08 : 1.0;
           grp.scale.y = THREE.MathUtils.damp(grp.scale.y, targetScaleY, 7, dt);
@@ -693,52 +774,62 @@ export const ExpoHallCanvas = React.forwardRef<ExpoHallCanvasHandle, ExpoHallCan
         } else {
           controls.enabled = true;
           if (focusTargetRef.current.active) {
-            camera.position.lerp(focusTargetRef.current.pos, 1 - Math.exp(-5.5 * dt));
-            controls.target.lerp(focusTargetRef.current.lookAt, 1 - Math.exp(-5.5 * dt));
-            if (camera.position.distanceTo(focusTargetRef.current.pos) < 0.08) {
+            const alpha = 1 - Math.exp(-6.5 * dt);
+            camera.position.lerp(focusTargetRef.current.pos, alpha);
+            controls.target.lerp(focusTargetRef.current.lookAt, alpha);
+            if (
+              camera.position.distanceTo(focusTargetRef.current.pos) < 0.06 &&
+              controls.target.distanceTo(focusTargetRef.current.lookAt) < 0.06
+            ) {
               focusTargetRef.current.active = false;
             }
           }
           controls.update();
+          controls.target.y = Math.max(0.4, Math.min(10, controls.target.y));
+          camera.position.y = Math.max(1.1, camera.position.y);
         }
 
         // Zoom-responsive 3D borders & floor section criteria:
         // Adapt grid, zone outlines, and dome wireframe smoothly to camera distance
         const refTarget = cur.cameraMode === 'explore' ? controls.target : scratchLook;
         const camDist = camera.position.distanceTo(refTarget);
-        const zoomRatio = THREE.MathUtils.clamp((camDist - 6) / 62, 0, 1); // 0 = zoomed in close, 1 = far overview
-        const zoomPercent = Math.round(THREE.MathUtils.lerp(220, 45, zoomRatio));
+        const zoomRatio = THREE.MathUtils.clamp((camDist - 2.6) / 93.4, 0, 1); // 0 = zoomed in close, 1 = far aerial
+        const zoomPercent = THREE.MathUtils.clamp(Math.round((26.5 / Math.max(2.6, camDist)) * 100), 25, 350);
 
         // Close-up: fine grid stays crisp, dome wireframe & wide zone outlines recede so they don't obstruct booths.
-        // Far overview: dense inner grid fades down to prevent visual clutter, while outer hall/section borders stay legible.
+        // Overview (~73%): champagne-gold geodesic dome & meridian arcs frame the glass hall clearly.
         const gridOpacity = cur.showFloorGrid
-          ? THREE.MathUtils.lerp(0.18, 0.04, THREE.MathUtils.smoothstep(zoomRatio, 0.35, 0.95))
+          ? THREE.MathUtils.lerp(0.22, 0.05, THREE.MathUtils.smoothstep(zoomRatio, 0.35, 0.95))
           : 0;
         gridMats.forEach((m) => {
           m.opacity = gridOpacity;
         });
 
         const dayScale = cur.nightMode ? 1.0 : 0.72;
-        zoneBundle.zoneGroup.visible = cur.showFloorGrid || zoomRatio > 0.14;
+        zoneBundle.zoneGroup.visible = cur.showFloorGrid || zoomRatio > 0.12;
         zoneBundle.zoneBorderMat.opacity =
-          THREE.MathUtils.lerp(0.08, 0.26, THREE.MathUtils.smoothstep(zoomRatio, 0.08, 0.6)) * dayScale;
+          THREE.MathUtils.lerp(0.10, 0.30, THREE.MathUtils.smoothstep(zoomRatio, 0.08, 0.5)) * dayScale;
         zoneBundle.hallBorderMat.opacity =
-          THREE.MathUtils.lerp(0.12, 0.32, THREE.MathUtils.smoothstep(zoomRatio, 0.05, 0.55)) * dayScale;
+          THREE.MathUtils.lerp(0.14, 0.36, THREE.MathUtils.smoothstep(zoomRatio, 0.05, 0.45)) * dayScale;
 
-        const domeVisibilityFactor = THREE.MathUtils.smoothstep(zoomRatio, 0.16, 0.65);
-        domeBundle.wireMat.opacity = 0.11 * domeVisibilityFactor * dayScale;
-        domeBundle.arcMatA.opacity = 0.18 * domeVisibilityFactor * dayScale;
-        domeBundle.arcMatB.opacity = 0.14 * domeVisibilityFactor * dayScale;
-        domeBundle.floorRingMat.opacity = THREE.MathUtils.lerp(0.08, 0.22, zoomRatio) * dayScale;
-        domeBundle.laneMatA.opacity = THREE.MathUtils.lerp(0.24, 0.44, zoomRatio) * dayScale;
-        domeBundle.laneMatB.opacity = THREE.MathUtils.lerp(0.22, 0.40, zoomRatio) * dayScale;
+        const domeVisibilityFactor = THREE.MathUtils.smoothstep(zoomRatio, 0.10, 0.34);
+        domeBundle.wireMat.opacity = 0.38 * domeVisibilityFactor * dayScale;
+        domeBundle.arcMatA.opacity = 0.52 * domeVisibilityFactor * dayScale;
+        domeBundle.arcMatB.opacity = 0.38 * domeVisibilityFactor * dayScale;
+        domeBundle.floorRingMat.opacity = THREE.MathUtils.lerp(0.10, 0.32, zoomRatio) * dayScale;
+        domeBundle.laneMatA.opacity = THREE.MathUtils.lerp(0.28, 0.52, zoomRatio) * dayScale;
+        domeBundle.laneMatB.opacity = THREE.MathUtils.lerp(0.25, 0.48, zoomRatio) * dayScale;
 
-        if (onZoomChangeRef.current && Math.abs(zoomPercent - lastReportedZoom) >= 2) {
+        if (onZoomChangeRef.current && Math.abs(zoomPercent - lastReportedZoom) >= 1) {
           lastReportedZoom = zoomPercent;
           onZoomChangeRef.current({ distance: camDist, zoomPercent, zoomRatio });
         }
 
-        renderer.render(scene, camera);
+        if (composer) {
+          composer.render(dt);
+        } else {
+          renderer.render(scene, camera);
+        }
 
         if (isSoftGl) {
           afterDraw(() => {
@@ -756,6 +847,7 @@ export const ExpoHallCanvas = React.forwardRef<ExpoHallCanvasHandle, ExpoHallCan
         cancelAnimationFrame(rafId);
         window.clearTimeout(timerId);
         ro.disconnect();
+        controls.removeEventListener('start', handleControlStart);
         canvas.removeEventListener('pointermove', handlePointerMove);
         canvas.removeEventListener('pointerdown', handlePointerDown);
         canvas.removeEventListener('pointerup', handlePointerUp);
@@ -763,6 +855,11 @@ export const ExpoHallCanvas = React.forwardRef<ExpoHallCanvasHandle, ExpoHallCan
         canvas.removeEventListener('webglcontextlost', handleContextLost);
         canvas.removeEventListener('webglcontextrestored', handleContextRestored);
         controls.dispose();
+        composerRef.current = null;
+        bloomPass?.dispose();
+        outputPass?.dispose();
+        composer?.dispose();
+        composerRT?.dispose();
         pmrem.dispose();
         envRT.dispose();
         floorTexNight.dispose();
@@ -794,7 +891,7 @@ export const ExpoHallCanvas = React.forwardRef<ExpoHallCanvasHandle, ExpoHallCan
         {hoveredTooltip && (
           <div
             role="status"
-            className="pointer-events-none fixed z-30 rounded-xl border border-[#10B981]/30 bg-[#040705]/95 px-3.5 py-2.5 text-xs text-[#ECFDF5] shadow-2xl"
+            className="pointer-events-none fixed z-30 rounded-xl border border-[#2D2D3A] bg-[#0B0B0E]/95 px-3.5 py-2.5 text-xs text-[#F2F3F7] shadow-2xl"
             style={{
               left: Math.min(hoveredTooltip.x + 16, window.innerWidth - 240),
               top: Math.min(hoveredTooltip.y + 16, window.innerHeight - 95),
@@ -806,11 +903,11 @@ export const ExpoHallCanvas = React.forwardRef<ExpoHallCanvasHandle, ExpoHallCan
                 style={{ backgroundColor: STATUS_HEX[hoveredTooltip.booth.status] }}
               />
               <span>Booth {hoveredTooltip.booth.number}</span>
-              <span className="font-mono text-[11px] text-[#34D399]">
+              <span className="font-mono text-[11px] text-[#E8C987]">
                 ${hoveredTooltip.booth.priceUsd.toLocaleString()}
               </span>
             </div>
-            <div className="mt-0.5 text-[11px] text-[#8EAD9E]">
+            <div className="mt-0.5 text-[11px] text-[#9497A6]">
               {hoveredTooltip.booth.exhibitorName
                 ? `${hoveredTooltip.booth.exhibitorName} · Click to inspect`
                 : hoveredTooltip.booth.status === 'available'
@@ -821,10 +918,10 @@ export const ExpoHallCanvas = React.forwardRef<ExpoHallCanvasHandle, ExpoHallCan
         )}
 
         {contextLost && (
-          <div className="fixed inset-0 z-20 flex items-center justify-center bg-[#040705]/94 p-6 text-center text-[#ECFDF5]">
-            <div className="max-w-md rounded-2xl border border-[#10B981]/25 bg-[#09120D] p-6">
+          <div className="fixed inset-0 z-20 flex items-center justify-center bg-[#0B0B0E]/94 p-6 text-center text-[#F2F3F7]">
+            <div className="max-w-md rounded-2xl border border-[#2D2D3A] bg-[#121217] p-6">
               <p className="font-display text-lg font-bold">3D Floor Canvas Paused</p>
-              <p className="mt-2 text-sm text-[#8EAD9E]">
+              <p className="mt-2 text-sm text-[#9497A6]">
                 Your browser paused WebGL rendering. All Portals, Schedules, and Analytics remain interactive.
               </p>
             </div>

@@ -955,6 +955,256 @@ async function startServer() {
     res.json(getPublicSnapshot(viewer));
   });
 
+  // Real-Time Venue Weather Telemetry (Open-Meteo Geocoding + Live Forecast)
+  type WeatherConditionCategory =
+    | 'clear'
+    | 'partly_cloudy'
+    | 'cloudy'
+    | 'fog'
+    | 'drizzle'
+    | 'rain'
+    | 'snow'
+    | 'storm';
+
+  interface CachedWeatherEntry {
+    expiresAt: number;
+    payload: {
+      locationQuery: string;
+      resolvedCity: string;
+      country?: string;
+      latitude: number;
+      longitude: number;
+      timezone: string;
+      utcOffsetSeconds: number;
+      temperatureC: number;
+      apparentTemperatureC: number;
+      humidityPct: number;
+      windSpeedKmh: number;
+      precipitationMm: number;
+      weatherCode: number;
+      conditionLabel: string;
+      conditionCategory: WeatherConditionCategory;
+      isDay: boolean;
+      highC: number | null;
+      lowC: number | null;
+      observedAt: string;
+      fetchedAt: string;
+      source: string;
+    };
+  }
+
+  const weatherCache = new Map<string, CachedWeatherEntry>();
+  const WEATHER_CACHE_TTL_MS = 5 * 60 * 1000;
+
+  const KNOWN_EXPO_VENUES: Array<{
+    match: RegExp;
+    city: string;
+    country: string;
+    latitude: number;
+    longitude: number;
+  }> = [
+    { match: /\bexcel\b|\blondon\b/i, city: 'London', country: 'United Kingdom', latitude: 51.5085, longitude: 0.0298 },
+    { match: /\bmoscone\b|\bsan francisco\b/i, city: 'San Francisco', country: 'United States', latitude: 37.784, longitude: -122.4014 },
+    { match: /\bmesse berlin\b|\bberlin\b/i, city: 'Berlin', country: 'Germany', latitude: 52.5038, longitude: 13.2719 },
+    { match: /\bmccormick\b|\bchicago\b/i, city: 'Chicago', country: 'United States', latitude: 41.851, longitude: -87.617 },
+    { match: /\blas vegas\b|\blvcc\b/i, city: 'Las Vegas', country: 'United States', latitude: 36.1319, longitude: -115.1516 },
+    { match: /\btokyo\b|\bbig sight\b/i, city: 'Tokyo', country: 'Japan', latitude: 35.6298, longitude: 139.7942 },
+    { match: /\bsingapore\b|\bmarina bay\b/i, city: 'Singapore', country: 'Singapore', latitude: 1.2834, longitude: 103.8607 },
+    { match: /\bdubai\b|\bdwtc\b/i, city: 'Dubai', country: 'United Arab Emirates', latitude: 25.2238, longitude: 55.2869 },
+    { match: /\bparis\b|\bporte de versailles\b/i, city: 'Paris', country: 'France', latitude: 48.8323, longitude: 2.2873 },
+  ];
+
+  const describeWmoWeather = (
+    code: number,
+  ): { label: string; category: WeatherConditionCategory } => {
+    if (code === 0) return { label: 'Clear Sky', category: 'clear' };
+    if (code === 1) return { label: 'Mostly Clear', category: 'clear' };
+    if (code === 2) return { label: 'Partly Cloudy', category: 'partly_cloudy' };
+    if (code === 3) return { label: 'Overcast', category: 'cloudy' };
+    if (code === 45 || code === 48) return { label: 'Fog & Mist', category: 'fog' };
+    if (code >= 51 && code <= 57) return { label: 'Light Drizzle', category: 'drizzle' };
+    if (code >= 61 && code <= 65) return { label: code === 65 ? 'Heavy Rain' : 'Rain', category: 'rain' };
+    if (code === 66 || code === 67) return { label: 'Freezing Rain', category: 'rain' };
+    if (code >= 71 && code <= 77) return { label: 'Snowfall', category: 'snow' };
+    if (code >= 80 && code <= 82) return { label: 'Rain Showers', category: 'rain' };
+    if (code === 85 || code === 86) return { label: 'Snow Showers', category: 'snow' };
+    if (code >= 95) return { label: 'Thunderstorm', category: 'storm' };
+    return { label: 'Variable Clouds', category: 'partly_cloudy' };
+  };
+
+  const buildGeoCandidates = (rawLocation: string): string[] => {
+    const segments = rawLocation
+      .split(/[·,|/]+/)
+      .map((s) => s.trim())
+      .filter(Boolean);
+
+    const candidates: string[] = [];
+    // Prefer city/trailing segments first (e.g. "ExCeL Hall 4 · London" -> "London")
+    for (let i = segments.length - 1; i >= 0; i--) {
+      const seg = segments[i];
+      if (!/^(?:hall|pavilion|wing|stage|room|level|floor)\s*[a-z0-9]*$/i.test(seg)) {
+        candidates.push(seg);
+      }
+      const stripped = seg
+        .replace(/\b(?:hall|pavilion|wing|stage|room|center|centre|arena|west|east|north|south|messe)\b/gi, ' ')
+        .replace(/\b\d+\b/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+      if (stripped && stripped.length >= 2) {
+        candidates.push(stripped);
+      }
+    }
+    candidates.push(rawLocation.trim());
+    return Array.from(new Set(candidates.filter((c) => c.length >= 2)));
+  };
+
+  const resolveVenueCoordinates = async (
+    rawLocation: string,
+  ): Promise<{ city: string; country?: string; latitude: number; longitude: number } | null> => {
+    const candidates = buildGeoCandidates(rawLocation);
+    for (const candidate of candidates) {
+      try {
+        const geoUrl = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(candidate)}&count=1&language=en&format=json`;
+        const geoRes = await fetch(geoUrl, { signal: AbortSignal.timeout(5000) });
+        if (geoRes.ok) {
+          const geoJson = (await geoRes.json()) as {
+            results?: Array<{ name?: string; country?: string; latitude?: number; longitude?: number }>;
+          };
+          const hit = geoJson.results?.[0];
+          if (hit && typeof hit.latitude === 'number' && typeof hit.longitude === 'number') {
+            return {
+              city: hit.name || candidate,
+              country: hit.country,
+              latitude: hit.latitude,
+              longitude: hit.longitude,
+            };
+          }
+        }
+      } catch {
+        // Try next candidate or known venue coordinates
+      }
+    }
+
+    const known = KNOWN_EXPO_VENUES.find((v) => v.match.test(rawLocation));
+    if (known) {
+      return {
+        city: known.city,
+        country: known.country,
+        latitude: known.latitude,
+        longitude: known.longitude,
+      };
+    }
+
+    return null;
+  };
+
+  app.get('/api/weather', async (req: Request, res: Response) => {
+    const rawLocation = String(req.query.location || db.expos[0]?.location || 'London').trim();
+    const forceRefresh = req.query.refresh === '1' || req.query.refresh === 'true';
+    const cacheKey = rawLocation.toLowerCase();
+
+    if (!forceRefresh) {
+      const cached = weatherCache.get(cacheKey);
+      if (cached && cached.expiresAt > Date.now()) {
+        res.json(cached.payload);
+        return;
+      }
+    }
+
+    const coords = await resolveVenueCoordinates(rawLocation);
+    if (!coords) {
+      res.status(404).json({
+        error: `Unable to locate coordinates for venue "${rawLocation}".`,
+      });
+      return;
+    }
+
+    try {
+      const forecastUrl =
+        `https://api.open-meteo.com/v1/forecast` +
+        `?latitude=${coords.latitude.toFixed(4)}` +
+        `&longitude=${coords.longitude.toFixed(4)}` +
+        `&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,weather_code,wind_speed_10m` +
+        `&daily=temperature_2m_max,temperature_2m_min` +
+        `&timezone=auto&forecast_days=1`;
+
+      const weatherRes = await fetch(forecastUrl, { signal: AbortSignal.timeout(6500) });
+      if (!weatherRes.ok) {
+        res.status(502).json({ error: `Weather provider returned status ${weatherRes.status}.` });
+        return;
+      }
+
+      const data = (await weatherRes.json()) as {
+        timezone?: string;
+        utc_offset_seconds?: number;
+        current?: {
+          time?: string;
+          temperature_2m?: number;
+          relative_humidity_2m?: number;
+          apparent_temperature?: number;
+          is_day?: number;
+          precipitation?: number;
+          weather_code?: number;
+          wind_speed_10m?: number;
+        };
+        daily?: {
+          temperature_2m_max?: number[];
+          temperature_2m_min?: number[];
+        };
+      };
+
+      if (!data.current || typeof data.current.temperature_2m !== 'number') {
+        res.status(502).json({ error: 'Weather provider returned an incomplete forecast payload.' });
+        return;
+      }
+
+      const code = Number(data.current.weather_code ?? 0);
+      const condition = describeWmoWeather(code);
+      const payload = {
+        locationQuery: rawLocation,
+        resolvedCity: coords.city,
+        country: coords.country,
+        latitude: coords.latitude,
+        longitude: coords.longitude,
+        timezone: data.timezone || 'UTC',
+        utcOffsetSeconds: Number(data.utc_offset_seconds ?? 0),
+        temperatureC: Number(data.current.temperature_2m.toFixed(1)),
+        apparentTemperatureC: Number(
+          (data.current.apparent_temperature ?? data.current.temperature_2m).toFixed(1),
+        ),
+        humidityPct: Math.round(data.current.relative_humidity_2m ?? 0),
+        windSpeedKmh: Math.round(data.current.wind_speed_10m ?? 0),
+        precipitationMm: Number((data.current.precipitation ?? 0).toFixed(1)),
+        weatherCode: code,
+        conditionLabel: condition.label,
+        conditionCategory: condition.category,
+        isDay: data.current.is_day !== 0,
+        highC:
+          typeof data.daily?.temperature_2m_max?.[0] === 'number'
+            ? Number(data.daily.temperature_2m_max[0].toFixed(1))
+            : null,
+        lowC:
+          typeof data.daily?.temperature_2m_min?.[0] === 'number'
+            ? Number(data.daily.temperature_2m_min[0].toFixed(1))
+            : null,
+        observedAt: data.current.time || new Date().toISOString(),
+        fetchedAt: new Date().toISOString(),
+        source: 'Open-Meteo Live',
+      };
+
+      weatherCache.set(cacheKey, {
+        expiresAt: Date.now() + WEATHER_CACHE_TTL_MS,
+        payload,
+      });
+
+      res.json(payload);
+    } catch {
+      res.status(502).json({
+        error: 'Unable to reach live weather telemetry service right now.',
+      });
+    }
+  });
+
   // AUTH-1..6
   app.post('/api/auth/register', (req: Request, res: Response) => {
     const {

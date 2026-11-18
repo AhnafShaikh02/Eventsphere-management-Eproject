@@ -14,6 +14,7 @@ import type {
   SpeakerRecord,
   UserAccount,
   UserRole,
+  VenueWeatherData,
 } from '../types/eventsphere';
 
 export interface WorkspacePreferences {
@@ -225,6 +226,11 @@ async function apiRequest<T>(
 
 export const eventSphereApi = {
   getState: (token?: string | null) => apiRequest<EventSphereSnapshot>('/api/state', {}, token),
+
+  getVenueWeather: (location: string, refresh = false) =>
+    apiRequest<VenueWeatherData>(
+      `/api/weather?location=${encodeURIComponent(location)}${refresh ? '&refresh=1' : ''}`,
+    ),
 
   register: (payload: {
     name: string;

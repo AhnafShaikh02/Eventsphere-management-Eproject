@@ -220,3 +220,38 @@ export interface EventSphereSnapshot {
   analyticsSeries: DailyAnalyticsPoint[];
   concurrentUsers: number;
 }
+
+export type VenueWeatherConditionCategory =
+  | 'clear'
+  | 'partly_cloudy'
+  | 'cloudy'
+  | 'fog'
+  | 'drizzle'
+  | 'rain'
+  | 'snow'
+  | 'storm';
+
+export interface VenueWeatherData {
+  locationQuery: string;
+  resolvedCity: string;
+  country?: string;
+  latitude: number;
+  longitude: number;
+  timezone: string;
+  utcOffsetSeconds: number;
+  temperatureC: number;
+  apparentTemperatureC: number;
+  humidityPct: number;
+  windSpeedKmh: number;
+  precipitationMm: number;
+  weatherCode: number;
+  conditionLabel: string;
+  conditionCategory: VenueWeatherConditionCategory;
+  isDay: boolean;
+  highC: number | null;
+  lowC: number | null;
+  observedAt: string;
+  fetchedAt: string;
+  source: string;
+}
+

@@ -63,24 +63,24 @@ export const PrivacyAndComplianceCard: React.FC<PrivacyAndComplianceCardProps> =
     <Card padding="lg" className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2">
-          <ShieldCheck className="h-5 w-5 text-[#10B981]" />
+          <ShieldCheck className="h-5 w-5 text-[#8A621C] dark:text-[#D4AF63]" />
           <h2 className="font-display text-lg font-bold">GDPR Privacy &amp; Data Controls</h2>
         </div>
-        <span className="inline-flex items-center gap-1.5 font-mono text-[11px] text-[#059669] dark:text-[#34D399]">
+        <span className="inline-flex items-center gap-1.5 font-mono text-[11px] text-[#8A621C] dark:text-[#E8C987]">
           <Lock className="h-3.5 w-3.5" />
           AES-256-GCM PII Encryption Active
         </span>
       </div>
 
-      <p className="text-xs leading-relaxed text-[#466153] dark:text-[#8EAD9E]">
+      <p className="text-xs leading-relaxed text-[#525463] dark:text-[#9497A6]">
         Manage your data processing consent, download a portable copy of your records (GDPR Article 20), or exercise your right to permanent account erasure.
       </p>
 
-      <div className="space-y-2.5 rounded-xl border border-[var(--es-border)] bg-[#E4EDE7]/70 p-3.5 dark:bg-[#050A07]/70">
+      <div className="space-y-2.5 rounded-xl border border-[var(--es-border)] bg-[#E6E7EE]/70 p-3.5 dark:bg-[#0E0E13]/70">
         <label className="flex cursor-pointer items-center justify-between gap-3 text-xs">
           <div>
             <div className="font-semibold">Expo Engagement Telemetry</div>
-            <div className="text-[11px] text-[#466153] dark:text-[#8EAD9E]">
+            <div className="text-[11px] text-[#525463] dark:text-[#9497A6]">
               Include session bookmark and floor visit metrics in aggregate organizer analytics.
             </div>
           </div>
@@ -89,7 +89,7 @@ export const PrivacyAndComplianceCard: React.FC<PrivacyAndComplianceCardProps> =
             checked={analyticsTelemetry}
             disabled={busy}
             onChange={(e) => handleSaveConsent(e.target.checked, marketingEmails)}
-            className="h-4 w-4 accent-[#10B981]"
+            className="h-4 w-4 accent-[#D4AF63]"
           />
         </label>
 
@@ -97,7 +97,7 @@ export const PrivacyAndComplianceCard: React.FC<PrivacyAndComplianceCardProps> =
           <label className="flex cursor-pointer items-center justify-between gap-3 text-xs">
             <div>
               <div className="font-semibold">Event Schedule &amp; Pass Notifications</div>
-              <div className="text-[11px] text-[#466153] dark:text-[#8EAD9E]">
+              <div className="text-[11px] text-[#525463] dark:text-[#9497A6]">
                 Receive email confirmations, ticket updates, and schedule changes via SMTP.
               </div>
             </div>
@@ -106,7 +106,7 @@ export const PrivacyAndComplianceCard: React.FC<PrivacyAndComplianceCardProps> =
               checked={marketingEmails}
               disabled={busy}
               onChange={(e) => handleSaveConsent(analyticsTelemetry, e.target.checked)}
-              className="h-4 w-4 accent-[#10B981]"
+              className="h-4 w-4 accent-[#D4AF63]"
             />
           </label>
         </div>

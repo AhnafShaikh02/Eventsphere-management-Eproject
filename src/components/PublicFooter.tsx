@@ -18,26 +18,26 @@ export const PublicFooter: React.FC<PublicFooterProps> = ({
   onOpenSupport,
 }) => {
   return (
-    <footer className="pointer-events-auto relative z-10 border-t border-[#104E35]/18 bg-[#EEF4F0]/95 text-[#091911] dark:border-[#2A6F52]/36 dark:bg-[#040705]/96 dark:text-[#DDF2E7]">
+    <footer className="pointer-events-auto relative z-10 border-t border-[#272732]/18 bg-[#F8F8FB]/95 text-[#0B0B0E] dark:border-[#2D2D3A]/36 dark:bg-[#0B0B0E]/96 dark:text-[#F2F3F7]">
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
         <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
           <div className="space-y-3">
             <div className="inline-flex items-center gap-2.5 font-display text-lg font-extrabold tracking-tight">
               <span
                 aria-hidden="true"
-                className="h-5 w-5 rounded-full shadow-[0_0_16px_rgba(16,185,129,0.55)]"
+                className="h-5 w-5 rounded-full shadow-[0_0_16px_rgba(232,201,135,0.55)]"
                 style={{
                   background:
-                    'radial-gradient(circle at 32% 30%, #ECFDF5 0%, #34D399 34%, #065F46 74%, #020805 100%)',
+                    'radial-gradient(circle at 32% 30%, #FFF7E0 0%, #F0D290 36%, #9E7836 74%, #1A1307 100%)',
                 }}
               />
               <span>EventSphere</span>
             </div>
-            <p className="text-xs leading-relaxed text-[#466153] dark:text-[#8EAD9E]">
+            <p className="text-xs leading-relaxed text-[#525463] dark:text-[#9497A6]">
               Enterprise 3D exhibition operations platform uniting organizers, verified exhibitors,
               and attendees on one live synchronized floor plan.
             </p>
-            <div className="flex flex-wrap gap-3 pt-1 font-mono text-[11px] text-[#059669] dark:text-[#34D399]">
+            <div className="flex flex-wrap gap-3 pt-1 font-mono text-[11px] text-[#8A621C] dark:text-[#E8C987]">
               <span className="inline-flex items-center gap-1">
                 <ShieldCheck className="h-3.5 w-3.5" /> JWT + bcrypt
               </span>
@@ -51,7 +51,7 @@ export const PublicFooter: React.FC<PublicFooterProps> = ({
           </div>
 
           <div>
-            <h3 className="font-mono text-xs font-bold uppercase tracking-wider text-[#466153] dark:text-[#8EAD9E]">
+            <h3 className="font-mono text-xs font-bold uppercase tracking-wider text-[#525463] dark:text-[#9497A6]">
               Platform
             </h3>
             <ul className="mt-3 space-y-2 text-xs font-medium">
@@ -59,7 +59,7 @@ export const PublicFooter: React.FC<PublicFooterProps> = ({
                 <button
                   type="button"
                   onClick={() => onOpenSection('expos')}
-                  className="hover:text-[#059669] dark:hover:text-[#34D399]"
+                  className="hover:text-[#8A621C] dark:hover:text-[#E8C987]"
                 >
                   Explore Expos
                 </button>
@@ -68,7 +68,7 @@ export const PublicFooter: React.FC<PublicFooterProps> = ({
                 <button
                   type="button"
                   onClick={onOpenExplore}
-                  className="hover:text-[#059669] dark:hover:text-[#34D399]"
+                  className="hover:text-[#8A621C] dark:hover:text-[#E8C987]"
                 >
                   Interactive 3D Floor
                 </button>
@@ -77,7 +77,7 @@ export const PublicFooter: React.FC<PublicFooterProps> = ({
                 <button
                   type="button"
                   onClick={() => onOpenSection('exhibitors')}
-                  className="hover:text-[#059669] dark:hover:text-[#34D399]"
+                  className="hover:text-[#8A621C] dark:hover:text-[#E8C987]"
                 >
                   Exhibitor Directory
                 </button>
@@ -86,7 +86,7 @@ export const PublicFooter: React.FC<PublicFooterProps> = ({
                 <button
                   type="button"
                   onClick={() => onOpenSection('schedule')}
-                  className="hover:text-[#059669] dark:hover:text-[#34D399]"
+                  className="hover:text-[#8A621C] dark:hover:text-[#E8C987]"
                 >
                   Live Schedule
                 </button>
@@ -95,7 +95,7 @@ export const PublicFooter: React.FC<PublicFooterProps> = ({
                 <button
                   type="button"
                   onClick={onOpenAnalytics}
-                  className="hover:text-[#059669] dark:hover:text-[#34D399]"
+                  className="hover:text-[#8A621C] dark:hover:text-[#E8C987]"
                 >
                   Expo Analytics
                 </button>
@@ -104,7 +104,7 @@ export const PublicFooter: React.FC<PublicFooterProps> = ({
           </div>
 
           <div>
-            <h3 className="font-mono text-xs font-bold uppercase tracking-wider text-[#466153] dark:text-[#8EAD9E]">
+            <h3 className="font-mono text-xs font-bold uppercase tracking-wider text-[#525463] dark:text-[#9497A6]">
               Role Portals
             </h3>
             <ul className="mt-3 space-y-2 text-xs font-medium">
@@ -112,7 +112,7 @@ export const PublicFooter: React.FC<PublicFooterProps> = ({
                 <button
                   type="button"
                   onClick={() => onOpenPortal('admin')}
-                  className="hover:text-[#059669] dark:hover:text-[#34D399]"
+                  className="hover:text-[#8A621C] dark:hover:text-[#E8C987]"
                 >
                   Organizer Command Center
                 </button>
@@ -121,7 +121,7 @@ export const PublicFooter: React.FC<PublicFooterProps> = ({
                 <button
                   type="button"
                   onClick={() => onOpenPortal('exhibitor')}
-                  className="hover:text-[#059669] dark:hover:text-[#34D399]"
+                  className="hover:text-[#8A621C] dark:hover:text-[#E8C987]"
                 >
                   Exhibitor Portal
                 </button>
@@ -130,7 +130,7 @@ export const PublicFooter: React.FC<PublicFooterProps> = ({
                 <button
                   type="button"
                   onClick={() => onOpenPortal('attendee')}
-                  className="hover:text-[#059669] dark:hover:text-[#34D399]"
+                  className="hover:text-[#8A621C] dark:hover:text-[#E8C987]"
                 >
                   Attendee Hub &amp; Passes
                 </button>
@@ -139,7 +139,7 @@ export const PublicFooter: React.FC<PublicFooterProps> = ({
           </div>
 
           <div>
-            <h3 className="font-mono text-xs font-bold uppercase tracking-wider text-[#466153] dark:text-[#8EAD9E]">
+            <h3 className="font-mono text-xs font-bold uppercase tracking-wider text-[#525463] dark:text-[#9497A6]">
               Support &amp; Compliance
             </h3>
             <ul className="mt-3 space-y-2 text-xs font-medium">
@@ -147,7 +147,7 @@ export const PublicFooter: React.FC<PublicFooterProps> = ({
                 <button
                   type="button"
                   onClick={onOpenSupport}
-                  className="hover:text-[#059669] dark:hover:text-[#34D399]"
+                  className="hover:text-[#8A621C] dark:hover:text-[#E8C987]"
                 >
                   Organizer Support Desk
                 </button>
@@ -156,19 +156,19 @@ export const PublicFooter: React.FC<PublicFooterProps> = ({
                 <button
                   type="button"
                   onClick={() => onOpenSection('faq')}
-                  className="hover:text-[#059669] dark:hover:text-[#34D399]"
+                  className="hover:text-[#8A621C] dark:hover:text-[#E8C987]"
                 >
                   Platform FAQ &amp; Security
                 </button>
               </li>
-              <li className="text-[#466153] dark:text-[#8EAD9E]">
+              <li className="text-[#525463] dark:text-[#9497A6]">
                 Automated 7-Day Snapshots &amp; GDPR Consent
               </li>
             </ul>
           </div>
         </div>
 
-        <div className="mt-10 flex flex-wrap items-center justify-between gap-4 border-t border-[#104E35]/16 pt-6 text-xs text-[#355243] dark:border-[#2A6F52]/30 dark:text-[#8EAD9E]">
+        <div className="mt-10 flex flex-wrap items-center justify-between gap-4 border-t border-[#272732]/16 pt-6 text-xs text-[#3E404D] dark:border-[#2D2D3A]/30 dark:text-[#9497A6]">
           <span>© {new Date().getFullYear()} EventSphere Management. Enterprise Expo Platform.</span>
           <span className="font-mono text-[11px]">
             Real-time 3D Floor · Atomic Reservations · Role-Based Access

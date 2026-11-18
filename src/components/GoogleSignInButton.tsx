@@ -20,7 +20,7 @@ export const GoogleSignInButton: React.FC<GoogleSignInButtonProps> = ({
       type="button"
       onClick={onClick}
       disabled={disabled || loading}
-      className={`gsi-material-button inline-flex min-h-[40px] items-center justify-center gap-3 rounded-lg border border-[#747775]/45 bg-white px-4 py-2 text-sm font-medium text-[#1F1F1F] shadow-sm transition-all hover:bg-[#F8FAFC] hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#10B981]/60 disabled:cursor-not-allowed disabled:opacity-60 ${
+      className={`gsi-material-button inline-flex min-h-[40px] items-center justify-center gap-3 rounded-lg border border-[#747775]/45 bg-white px-4 py-2 text-sm font-medium text-[#1F1F1F] shadow-sm transition-all hover:bg-[#F8FAFC] hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D4AF63]/60 disabled:cursor-not-allowed disabled:opacity-60 ${
         fullWidth ? 'w-full' : ''
       }`}
     >

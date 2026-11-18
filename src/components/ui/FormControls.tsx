@@ -2,7 +2,7 @@ import React from 'react';
 import { Search, X } from 'lucide-react';
 
 const CONTROL_BASE =
-  'w-full rounded-xl border border-[#104E35]/22 bg-[#F4F8F5] px-3.5 py-2.5 text-sm text-[#091911] placeholder:text-[#355243]/65 transition-colors focus:border-[#059669] focus:outline-none focus:ring-2 focus:ring-[#10B981]/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-[#2A6F52]/40 dark:bg-[#050A07] dark:text-[#DDF2E7] dark:placeholder:text-[#8EAD9E]/60 dark:focus:border-[#34D399]';
+  'w-full rounded-xl border border-[#272732]/22 bg-[#F5F6F9] px-3.5 py-2.5 text-sm text-[#0B0B0E] placeholder:text-[#3E404D]/65 transition-colors focus:border-[#8A621C] focus:outline-none focus:ring-2 focus:ring-[#D4AF63]/25 disabled:cursor-not-allowed disabled:opacity-50 dark:border-[#2D2D3A]/40 dark:bg-[#0E0E13] dark:text-[#F2F3F7] dark:placeholder:text-[#9497A6]/60 dark:focus:border-[#E8C987]';
 
 interface FieldWrapperProps {
   label?: string;
@@ -25,7 +25,7 @@ const FieldWrapper: React.FC<FieldWrapperProps> = ({
     {label && (
       <label
         htmlFor={htmlFor}
-        className="block text-xs font-semibold text-[#466153] dark:text-[#8EAD9E]"
+        className="block text-xs font-semibold text-[#525463] dark:text-[#9497A6]"
       >
         {label}
         {required && <span className="ml-0.5 text-[#F97362]">*</span>}
@@ -35,7 +35,7 @@ const FieldWrapper: React.FC<FieldWrapperProps> = ({
     {error ? (
       <p className="text-xs font-medium text-[#F97362]">{error}</p>
     ) : hint ? (
-      <p className="text-[11px] text-[#466153]/85 dark:text-[#8EAD9E]/80">{hint}</p>
+      <p className="text-[11px] text-[#525463]/85 dark:text-[#9497A6]/80">{hint}</p>
     ) : null}
   </div>
 );
@@ -55,7 +55,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
       <FieldWrapper label={label} hint={hint} error={error} required={required} htmlFor={inputId}>
         <div className="relative">
           {leftIcon && (
-            <span className="pointer-events-none absolute top-1/2 left-3.5 -translate-y-1/2 text-[#466153] dark:text-[#8EAD9E]">
+            <span className="pointer-events-none absolute top-1/2 left-3.5 -translate-y-1/2 text-[#525463] dark:text-[#9497A6]">
               {leftIcon}
             </span>
           )}
@@ -149,7 +149,7 @@ export const SearchInput: React.FC<SearchInputProps> = ({
 }) => (
   <div className={`relative ${className}`}>
     <Search
-      className="pointer-events-none absolute top-1/2 left-3.5 h-4 w-4 -translate-y-1/2 text-[#059669] dark:text-[#34D399]"
+      className="pointer-events-none absolute top-1/2 left-3.5 h-4 w-4 -translate-y-1/2 text-[#8A621C] dark:text-[#E8C987]"
       aria-hidden="true"
     />
     <input
@@ -165,7 +165,7 @@ export const SearchInput: React.FC<SearchInputProps> = ({
         type="button"
         onClick={() => onChange('')}
         aria-label="Clear search"
-        className="absolute top-1/2 right-2.5 -translate-y-1/2 rounded-md p-1 text-[#466153] hover:bg-[#E8EFEA] dark:text-[#8EAD9E] dark:hover:bg-[#10B981]/15"
+        className="absolute top-1/2 right-2.5 -translate-y-1/2 rounded-md p-1 text-[#525463] hover:bg-[#ECEEF3] dark:text-[#9497A6] dark:hover:bg-[#E8C987]/15"
       >
         <X className="h-3.5 w-3.5" />
       </button>
@@ -178,10 +178,10 @@ interface CheckboxProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>
 }
 
 export const Checkbox: React.FC<CheckboxProps> = ({ label, className = '', ...rest }) => (
-  <label className={`flex cursor-pointer items-start gap-2.5 text-xs text-[#466153] dark:text-[#8EAD9E] ${className}`}>
+  <label className={`flex cursor-pointer items-start gap-2.5 text-xs text-[#525463] dark:text-[#9497A6] ${className}`}>
     <input
       type="checkbox"
-      className="mt-0.5 h-4 w-4 shrink-0 rounded border-[#104E35]/30 accent-[#10B981] focus:ring-2 focus:ring-[#10B981]/40"
+      className="mt-0.5 h-4 w-4 shrink-0 rounded border-[#272732]/30 accent-[#D4AF63] focus:ring-2 focus:ring-[#D4AF63]/40"
       {...rest}
     />
     <span className="leading-relaxed">{label}</span>
@@ -205,7 +205,7 @@ export const RadioGroup: React.FC<RadioGroupProps> = ({
 }) => (
   <div className="space-y-2">
     {label && (
-      <div className="text-xs font-semibold text-[#466153] dark:text-[#8EAD9E]">{label}</div>
+      <div className="text-xs font-semibold text-[#525463] dark:text-[#9497A6]">{label}</div>
     )}
     <div className="grid gap-2 sm:grid-cols-2">
       {options.map((opt) => {
@@ -215,8 +215,8 @@ export const RadioGroup: React.FC<RadioGroupProps> = ({
             key={opt.value}
             className={`flex cursor-pointer items-start gap-2.5 rounded-xl border p-3 transition-colors ${
               active
-                ? 'border-[#059669]/60 bg-[#10B981]/10 dark:border-[#34D399]/55 dark:bg-[#10B981]/12'
-                : 'border-[#104E35]/18 bg-[#E8F0EB] hover:border-[#059669]/40 dark:border-[#2A6F52]/38 dark:bg-[#050A07]'
+                ? 'border-[#8A621C]/60 bg-[#D4AF63]/10 dark:border-[#E8C987]/55 dark:bg-[#E8C987]/12'
+                : 'border-[#272732]/18 bg-[#F1F2F6] hover:border-[#8A621C]/40 dark:border-[#2D2D3A]/38 dark:bg-[#0E0E13]'
             }`}
           >
             <input
@@ -225,12 +225,12 @@ export const RadioGroup: React.FC<RadioGroupProps> = ({
               value={opt.value}
               checked={active}
               onChange={() => onChange(opt.value)}
-              className="mt-0.5 accent-[#10B981]"
+              className="mt-0.5 accent-[#D4AF63]"
             />
             <div>
-              <div className="text-xs font-bold text-[#09140E] dark:text-[#ECFDF5]">{opt.label}</div>
+              <div className="text-xs font-bold text-[#0B0B0E] dark:text-[#F8F9FC]">{opt.label}</div>
               {opt.description && (
-                <div className="mt-0.5 text-[11px] text-[#466153] dark:text-[#8EAD9E]">
+                <div className="mt-0.5 text-[11px] text-[#525463] dark:text-[#9497A6]">
                   {opt.description}
                 </div>
               )}

@@ -2,17 +2,17 @@ import * as THREE from 'three';
 import type { BoothStatus, ExpoBooth } from '../types/eventsphere';
 
 export const STATUS_COLORS: Record<BoothStatus, number> = {
-  available: 0x34d399,
+  available: 0xe8c987,
   reserved: 0xf97362,
   occupied: 0x38bdf8,
-  pending: 0xa78bfa,
+  pending: 0xc58b3b,
 };
 
 export const STATUS_HEX: Record<BoothStatus, string> = {
-  available: '#34D399',
+  available: '#E8C987',
   reserved: '#F97362',
   occupied: '#38BDF8',
-  pending: '#A78BFA',
+  pending: '#C58B3B',
 };
 
 export function getBoothWorldPosition(booth: ExpoBooth): THREE.Vector3 {
@@ -49,11 +49,11 @@ export function createHallFloorTexture(nightMode: boolean, maxAniso: number): TH
   canvas.height = 512;
   const ctx = canvas.getContext('2d')!;
 
-  ctx.fillStyle = nightMode ? '#050907' : '#E4ECE7';
+  ctx.fillStyle = nightMode ? '#0B0B0E' : '#EAEBF1';
   ctx.fillRect(0, 0, 512, 512);
 
   // Subtle architectural slab grid
-  ctx.strokeStyle = nightMode ? 'rgba(16, 185, 129, 0.13)' : 'rgba(9, 20, 14, 0.08)';
+  ctx.strokeStyle = nightMode ? 'rgba(148, 152, 174, 0.11)' : 'rgba(11, 11, 14, 0.08)';
   ctx.lineWidth = 1;
   for (let i = 0; i <= 512; i += 32) {
     ctx.beginPath();
@@ -67,7 +67,7 @@ export function createHallFloorTexture(nightMode: boolean, maxAniso: number): TH
   }
 
   // Primary tile border
-  ctx.strokeStyle = nightMode ? 'rgba(52, 211, 153, 0.22)' : 'rgba(5, 150, 105, 0.20)';
+  ctx.strokeStyle = nightMode ? 'rgba(232, 201, 135, 0.16)' : 'rgba(138, 98, 28, 0.16)';
   ctx.lineWidth = 2;
   ctx.strokeRect(2, 2, 508, 508);
 
@@ -87,14 +87,14 @@ export function createBoothFasciaTexture(booth: ExpoBooth, maxAniso: number): TH
   const ctx = canvas.getContext('2d')!;
 
   const accent = STATUS_HEX[booth.status];
-  ctx.fillStyle = '#070E0A';
+  ctx.fillStyle = '#101015';
   ctx.fillRect(0, 0, 512, 128);
 
   // Left color block
   ctx.fillStyle = accent;
   ctx.fillRect(0, 0, 112, 128);
 
-  ctx.fillStyle = '#040705';
+  ctx.fillStyle = '#0B0B0E';
   ctx.font = '800 50px "Plus Jakarta Sans", system-ui, sans-serif';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
@@ -102,12 +102,12 @@ export function createBoothFasciaTexture(booth: ExpoBooth, maxAniso: number): TH
 
   // Right exhibitor / status copy
   ctx.textAlign = 'left';
-  ctx.fillStyle = '#ECFDF5';
+  ctx.fillStyle = '#F8F9FC';
   ctx.font = '700 30px "DM Sans", system-ui, sans-serif';
   const title = booth.exhibitorName || (booth.status === 'pending' ? 'PENDING REVIEW' : 'OPEN BOOTH');
   ctx.fillText(title.slice(0, 22), 132, 48);
 
-  ctx.fillStyle = '#34D399';
+  ctx.fillStyle = '#E8C987';
   ctx.font = '600 21px "JetBrains Mono", monospace';
   const subtitle = `${booth.size.split(' ')[0]} · $${booth.priceUsd.toLocaleString()}`;
   ctx.fillText(subtitle, 132, 90);
@@ -129,14 +129,14 @@ export function createKeynoteLedTexture(maxAniso: number): THREE.CanvasTexture {
   const ctx = canvas.getContext('2d')!;
 
   const bg = ctx.createLinearGradient(0, 0, 1024, 384);
-  bg.addColorStop(0, '#030705');
-  bg.addColorStop(0.5, '#091B12');
-  bg.addColorStop(1, '#040B07');
+  bg.addColorStop(0, '#0B0B0E');
+  bg.addColorStop(0.5, '#191612');
+  bg.addColorStop(1, '#0B0B0E');
   ctx.fillStyle = bg;
   ctx.fillRect(0, 0, 1024, 384);
 
-  // Architectural emerald equalizer bars
-  const barColors = ['#10B981', '#34D399', '#6EE7B7'];
+  // Architectural champagne equalizer bars
+  const barColors = ['#C99E4E', '#E8C987', '#F3DCAA'];
   for (let i = 0; i < 36; i++) {
     const h = 44 + ((i * 37) % 120);
     ctx.fillStyle = barColors[i % 3];
@@ -145,16 +145,16 @@ export function createKeynoteLedTexture(maxAniso: number): THREE.CanvasTexture {
   }
   ctx.globalAlpha = 1;
 
-  ctx.fillStyle = '#34D399';
+  ctx.fillStyle = '#E8C987';
   ctx.font = '700 24px "JetBrains Mono", monospace';
   ctx.textAlign = 'center';
   ctx.fillText('EVENTSPHERE ARENA · REAL-TIME SYNCHRONIZATION', 512, 118);
 
-  ctx.fillStyle = '#ECFDF5';
+  ctx.fillStyle = '#F8F9FC';
   ctx.font = '800 68px "Bricolage Grotesque", system-ui, sans-serif';
   ctx.fillText('MAIN KEYNOTE STAGE', 512, 206);
 
-  ctx.fillStyle = '#8EAD9E';
+  ctx.fillStyle = '#A8A296';
   ctx.font = '500 26px "DM Sans", system-ui, sans-serif';
   ctx.fillText('NEXTGEN INDUSTRIAL & TECH EXPO 2026', 512, 268);
 
@@ -169,11 +169,11 @@ function createMonitorScreenTexture(accentHex: string, maxAniso: number): THREE.
   canvas.width = 256;
   canvas.height = 160;
   const ctx = canvas.getContext('2d')!;
-  ctx.fillStyle = '#040907';
+  ctx.fillStyle = '#0B0B0E';
   ctx.fillRect(0, 0, 256, 160);
   ctx.fillStyle = accentHex;
   ctx.fillRect(14, 14, 228, 12);
-  ctx.fillStyle = 'rgba(52, 211, 153, 0.35)';
+  ctx.fillStyle = 'rgba(232, 201, 135, 0.42)';
   for (let i = 0; i < 6; i++) {
     const h = 24 + ((i * 29) % 72);
     ctx.fillRect(18 + i * 36, 134 - h, 24, h);
@@ -191,6 +191,7 @@ export interface BoothGroupRefs {
   fasciaMat: THREE.MeshStandardMaterial;
   beaconMesh: THREE.Mesh;
   displayArt?: THREE.Object3D;
+  displayArtMat?: THREE.MeshStandardMaterial;
   hitMeshes: THREE.Mesh[];
   targetHeightScale: number;
   lastStatusKey: string;
@@ -225,12 +226,12 @@ export function createBoothGroup(
 
   // 2. Two-step chamfered terrazzo plinth base
   const baseMat = new THREE.MeshStandardMaterial({
-    color: 0x0b1711,
+    color: 0x111116,
     roughness: 0.44,
     metalness: 0.36,
   });
   const deckMat = new THREE.MeshStandardMaterial({
-    color: 0x13261d,
+    color: 0x181820,
     roughness: 0.62,
     metalness: 0.14,
   });
@@ -306,17 +307,18 @@ export function createBoothGroup(
   pedestal.castShadow = true;
   group.add(pedestal);
 
+  const displayArtMat = new THREE.MeshStandardMaterial({
+    color: 0xf3dcaa,
+    emissive: statusColor,
+    emissiveIntensity: 0.45,
+    metalness: 0.85,
+    roughness: 0.18,
+  });
   const displayArt = new THREE.Mesh(
     booth.size === '6x6m Island'
       ? new THREE.TorusKnotGeometry(0.24, 0.07, 36, 8)
       : new THREE.IcosahedronGeometry(0.24, 0),
-    new THREE.MeshStandardMaterial({
-      color: 0x6ee7b7,
-      emissive: statusColor,
-      emissiveIntensity: 0.45,
-      metalness: 0.85,
-      roughness: 0.18,
-    }),
+    displayArtMat,
   );
   displayArt.position.set(pedX, 1.08, pedZ);
   group.add(displayArt);
@@ -388,6 +390,7 @@ export function createBoothGroup(
     fasciaMat,
     beaconMesh,
     displayArt,
+    displayArtMat,
     hitMeshes,
     targetHeightScale: 1,
     lastStatusKey: `${booth.status}:${booth.exhibitorName || ''}:${booth.priceUsd}`,
@@ -403,19 +406,51 @@ export function updateBoothGroupAppearance(
   dimmed: boolean,
   isSelected: boolean,
   maxAniso: number,
+  elapsedSec = 0,
+  phaseOffset = 0,
 ): void {
   const refs = group.userData.refs as BoothGroupRefs | undefined;
   if (!refs) return;
 
   const statusColor = STATUS_COLORS[booth.status];
+  const isPulsing = !dimmed && (booth.status === 'pending' || booth.status === 'occupied');
+  const pulseWave = isPulsing ? 0.5 + 0.5 * Math.sin(elapsedSec * 2.2 + phaseOffset) : 0;
+
   refs.trimMat.color.setHex(statusColor);
   refs.trimMat.emissive.setHex(statusColor);
-  refs.trimMat.emissiveIntensity = dimmed ? 0.05 : isSelected ? 0.85 : 0.22;
+  refs.trimMat.emissiveIntensity = dimmed
+    ? 0.05
+    : isSelected
+      ? 0.85 + pulseWave * 0.28
+      : isPulsing
+        ? 0.26 + pulseWave * 0.66
+        : 0.22;
+
   refs.baseMat.opacity = dimmed ? 0.32 : 1;
   refs.baseMat.transparent = dimmed;
-  refs.fasciaMat.emissiveIntensity = dimmed ? 0.06 : isSelected ? 0.52 : 0.24;
+
+  refs.fasciaMat.emissiveIntensity = dimmed
+    ? 0.06
+    : isSelected
+      ? 0.52 + pulseWave * 0.12
+      : isPulsing
+        ? 0.24 + pulseWave * 0.14
+        : 0.24;
   refs.fasciaMat.opacity = dimmed ? 0.35 : 1;
   refs.fasciaMat.transparent = dimmed;
+
+  if (refs.displayArtMat) {
+    refs.displayArtMat.emissive.setHex(statusColor);
+    refs.displayArtMat.emissiveIntensity = dimmed
+      ? 0.1
+      : isSelected
+        ? 0.65 + pulseWave * 0.25
+        : isPulsing
+          ? 0.42 + pulseWave * 0.36
+          : 0.45;
+  }
+
+  refs.beaconMesh.scale.setScalar(isPulsing ? 1 + pulseWave * 0.12 : 1);
 
   const statusKey = `${booth.status}:${booth.exhibitorName || ''}:${booth.priceUsd}`;
   if (refs.lastStatusKey !== statusKey) {
@@ -434,13 +469,13 @@ export function createKeynoteStageGroup(maxAniso: number): THREE.Group {
   stage.position.set(0, 0, -14.5);
 
   const deckMat = new THREE.MeshStandardMaterial({
-    color: 0x08110c,
+    color: 0x121218,
     roughness: 0.42,
     metalness: 0.45,
   });
   const accentMat = new THREE.MeshStandardMaterial({
-    color: 0x10b981,
-    emissive: 0x10b981,
+    color: 0xe8c987,
+    emissive: 0xd4af63,
     emissiveIntensity: 0.65,
     roughness: 0.28,
   });
@@ -450,7 +485,7 @@ export function createKeynoteStageGroup(maxAniso: number): THREE.Group {
     metalness: 0.85,
   });
   const seatMat = new THREE.MeshStandardMaterial({
-    color: 0x11251b,
+    color: 0x1b1b24,
     roughness: 0.62,
     metalness: 0.15,
   });
@@ -629,10 +664,10 @@ export function createExpoTrussAndCrowd(): {
   const visitorHeadMesh = new THREE.InstancedMesh(visitorHeadGeo, headMat, visitorCount);
   const visitorSeeds: Array<{ baseX: number; baseZ: number; radius: number; speed: number; phase: number }> = [];
   const attirePalette = [
-    new THREE.Color('#10B981'),
-    new THREE.Color('#34D399'),
+    new THREE.Color('#E8C987'),
+    new THREE.Color('#F3DCAA'),
     new THREE.Color('#CBD5E1'),
-    new THREE.Color('#2DD4BF'),
+    new THREE.Color('#C58B3B'),
     new THREE.Color('#64748B'),
   ];
 
@@ -684,14 +719,14 @@ export function createSphereDomeGroup(): {
 } {
   const domeGroup = new THREE.Group();
 
-  // Subtle single-tier outer geodesic dome cradling the Expo Hall without cluttering the floor
-  const domeGeo = new THREE.IcosahedronGeometry(23.6, 1);
+  // Luminous champagne-gold outer geodesic dome cradling the Expo Hall
+  const domeGeo = new THREE.IcosahedronGeometry(23.8, 1);
   const wireGeo = new THREE.WireframeGeometry(domeGeo);
   domeGeo.dispose();
   const wireMat = new THREE.LineBasicMaterial({
-    color: 0x10b981,
+    color: 0xe8c987,
     transparent: true,
-    opacity: 0.1,
+    opacity: 0.36,
   });
   const domeWire = new THREE.LineSegments(wireGeo, wireMat);
   domeWire.position.set(0, 1.5, -1);
@@ -700,9 +735,9 @@ export function createSphereDomeGroup(): {
   // Subtle floor perimeter halo ring
   const floorRingGeo = new THREE.RingGeometry(22.2, 22.36, 96);
   const floorRingMat = new THREE.MeshBasicMaterial({
-    color: 0x34d399,
+    color: 0xe8c987,
     transparent: true,
-    opacity: 0.2,
+    opacity: 0.28,
     side: THREE.DoubleSide,
   });
   const floorRing = new THREE.Mesh(floorRingGeo, floorRingMat);
@@ -711,11 +746,11 @@ export function createSphereDomeGroup(): {
   domeGroup.add(floorRing);
 
   // Two sleek orbital meridian arcs overhead
-  const arcGeo = new THREE.TorusGeometry(23.8, 0.03, 8, 96);
+  const arcGeo = new THREE.TorusGeometry(24.0, 0.035, 8, 96);
   const arcMatA = new THREE.MeshBasicMaterial({
-    color: 0x34d399,
+    color: 0xf3dcaa,
     transparent: true,
-    opacity: 0.18,
+    opacity: 0.45,
   });
   const meridianRingA = new THREE.Mesh(arcGeo, arcMatA);
   meridianRingA.position.set(0, 1.5, -1);
@@ -723,26 +758,26 @@ export function createSphereDomeGroup(): {
   domeGroup.add(meridianRingA);
 
   const arcMatB = new THREE.MeshBasicMaterial({
-    color: 0x2dd4bf,
+    color: 0xd4af63,
     transparent: true,
-    opacity: 0.14,
+    opacity: 0.34,
   });
   const meridianRingB = new THREE.Mesh(arcGeo.clone(), arcMatB);
   meridianRingB.position.set(0, 1.5, -1);
   meridianRingB.rotation.set(-Math.PI * 0.24, -0.5, -0.22);
   domeGroup.add(meridianRingB);
 
-  // Refined center corridor guide hairlines
+  // Refined center corridor guide hairlines & South entrance plaza cross
   const laneGeo = new THREE.PlaneGeometry(0.055, 35.2);
   const laneMatA = new THREE.MeshBasicMaterial({
-    color: 0x10b981,
+    color: 0xe8c987,
     transparent: true,
-    opacity: 0.42,
+    opacity: 0.48,
   });
   const laneMatB = new THREE.MeshBasicMaterial({
-    color: 0x6ee7b7,
+    color: 0xf3dcaa,
     transparent: true,
-    opacity: 0.38,
+    opacity: 0.42,
   });
   const laneLeft = new THREE.Mesh(laneGeo, laneMatA);
   laneLeft.rotation.x = -Math.PI / 2;
@@ -753,6 +788,15 @@ export function createSphereDomeGroup(): {
   laneRight.rotation.x = -Math.PI / 2;
   laneRight.position.set(1.42, 0.034, -0.8);
   domeGroup.add(laneRight);
+
+  const plazaCrossGeo = new THREE.PlaneGeometry(0.05, 7.2);
+  for (const ang of [Math.PI * 0.27, -Math.PI * 0.27]) {
+    const crossLine = new THREE.Mesh(plazaCrossGeo, laneMatA);
+    crossLine.rotation.x = -Math.PI / 2;
+    crossLine.rotation.z = ang;
+    crossLine.position.set(0, 0.033, 20.1);
+    domeGroup.add(crossLine);
+  }
 
   return {
     domeGroup,
@@ -775,14 +819,14 @@ export function createZoneSectionsGroup(): {
   const zoneGroup = new THREE.Group();
 
   const zoneBorderMat = new THREE.LineBasicMaterial({
-    color: 0x34d399,
+    color: 0xe8c987,
     transparent: true,
-    opacity: 0.22,
+    opacity: 0.24,
   });
   const hallBorderMat = new THREE.LineBasicMaterial({
-    color: 0x10b981,
+    color: 0xd4af63,
     transparent: true,
-    opacity: 0.28,
+    opacity: 0.30,
   });
 
   // Outer floor slab boundary hairline (matches 35 x 35.5 slab without heavy edges)

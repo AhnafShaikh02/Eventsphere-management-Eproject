@@ -52,11 +52,11 @@ export const Modal: React.FC<ModalProps> = ({
         initial={{ opacity: 0, scale: 0.96, y: 10 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
-        className={`surface-luxe max-h-[90vh] w-full ${MAX_WIDTH_MAP[maxWidth]} flex flex-col overflow-hidden rounded-2xl border border-[#104E35]/22 bg-[#F0F5F2] text-[#091911] dark:border-[#2A6F52]/42 dark:bg-[#060D09] dark:text-[#DDF2E7]`}
+        className={`surface-luxe max-h-[90vh] w-full ${MAX_WIDTH_MAP[maxWidth]} flex flex-col overflow-hidden rounded-2xl border border-[#272732]/22 bg-[#FFFFFF] text-[#0B0B0E] dark:border-[#2D2D3A]/42 dark:bg-[#121217] dark:text-[#F2F3F7]`}
       >
-        <div className="flex items-center justify-between gap-3 border-b border-[#104E35]/16 px-6 py-4 dark:border-[#2A6F52]/32">
+        <div className="flex items-center justify-between gap-3 border-b border-[#272732]/16 px-6 py-4 dark:border-[#2D2D3A]/32">
           <div className="flex items-center gap-2.5">
-            {icon && <span className="text-[#059669] dark:text-[#34D399]">{icon}</span>}
+            {icon && <span className="text-[#8A621C] dark:text-[#E8C987]">{icon}</span>}
             <h2 className="font-display text-lg font-bold tracking-tight">{title}</h2>
           </div>
           <Button
@@ -105,7 +105,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
     icon={<AlertTriangle className="h-5 w-5 text-[#F97362]" />}
     maxWidth="sm"
   >
-    <p className="text-sm leading-relaxed text-[#466153] dark:text-[#8EAD9E]">{description}</p>
+    <p className="text-sm leading-relaxed text-[#525463] dark:text-[#9497A6]">{description}</p>
     <div className="mt-6 flex items-center justify-end gap-2.5">
       <Button variant="outline" size="md" onClick={onCancel} disabled={busy}>
         {cancelLabel}

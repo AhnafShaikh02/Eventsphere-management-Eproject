@@ -114,7 +114,7 @@ export const CloudBackupModal: React.FC<CloudBackupModalProps> = ({
       title="Cross-Device Cloud Sync"
     >
       <div className="space-y-4">
-        <p className="text-xs leading-relaxed text-[#466153] dark:text-[#8EAD9E]">
+        <p className="text-xs leading-relaxed text-[#525463] dark:text-[#9497A6]">
           Back up your bookmarked booths, field notes, and hall preferences to the EventSphere sync
           vault so you can resume seamlessly on mobile or desktop.
         </p>
@@ -155,12 +155,12 @@ export const CloudBackupModal: React.FC<CloudBackupModalProps> = ({
         </div>
 
         {syncMeta.lastSyncedAt && (
-          <div className="rounded-xl border border-[#104E35]/16 bg-[#E6EFE9] px-3 py-2 font-mono text-[11px] text-[#355243] dark:border-[#2A6F52]/34 dark:bg-[#08110C] dark:text-[#8EAD9E]">
+          <div className="rounded-xl border border-[#272732]/16 bg-[#EAEBF1] px-3 py-2 font-mono text-[11px] text-[#3E404D] dark:border-[#2D2D3A]/34 dark:bg-[#121217] dark:text-[#9497A6]">
             Last synced: {new Date(syncMeta.lastSyncedAt).toLocaleString()} · SHA {syncMeta.checksum}
           </div>
         )}
 
-        <div className="flex items-center justify-between border-t border-[#104E35]/16 pt-4 text-xs dark:border-[#2A6F52]/32">
+        <div className="flex items-center justify-between border-t border-[#272732]/16 pt-4 text-xs dark:border-[#2D2D3A]/32">
           <Button
             variant="text"
             leftIcon={<Download className="h-3.5 w-3.5" />}
@@ -169,7 +169,7 @@ export const CloudBackupModal: React.FC<CloudBackupModalProps> = ({
             Export JSON File
           </Button>
 
-          <label className="cursor-pointer font-semibold text-[#466153] hover:underline dark:text-[#8EAD9E]">
+          <label className="cursor-pointer font-semibold text-[#525463] hover:underline dark:text-[#9497A6]">
             Import JSON
             <input type="file" accept=".json,application/json" onChange={handleImportJson} className="hidden" />
           </label>

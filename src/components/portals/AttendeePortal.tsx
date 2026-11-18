@@ -64,11 +64,11 @@ const TicketQRMatrix: React.FC<{ code: string }> = ({ code }) => {
   }, [code]);
 
   return (
-    <div className="grid h-20 w-20 grid-cols-7 gap-0.5 rounded-lg border border-[#104E35]/20 bg-[#E6EFE9] p-1.5 shadow-inner dark:border-[#2A6F52]/38">
+    <div className="grid h-20 w-20 grid-cols-7 gap-0.5 rounded-lg border border-[#272732]/20 bg-[#EAEBF1] p-1.5 shadow-inner dark:border-[#2D2D3A]/38">
       {cells.map((filled, idx) => (
         <span
           key={idx}
-          className={filled ? 'rounded-[1px] bg-[#040705]' : 'bg-transparent'}
+          className={filled ? 'rounded-[1px] bg-[#0B0B0E]' : 'bg-transparent'}
         />
       ))}
     </div>
@@ -208,10 +208,10 @@ export const AttendeePortal: React.FC<AttendeePortalProps> = ({
                   return (
                     <div
                       key={s.id}
-                      className="flex items-center justify-between gap-3 rounded-xl border border-[#104E35]/18 bg-[#E4EDE7] p-3 text-xs dark:border-[#2A6F52]/34 dark:bg-[#050A07]"
+                      className="flex items-center justify-between gap-3 rounded-xl border border-[#272732]/18 bg-[#E6E7EE] p-3 text-xs dark:border-[#2D2D3A]/34 dark:bg-[#0E0E13]"
                     >
                       <div className="min-w-0">
-                        <div className="font-mono text-[11px] font-semibold text-[#059669] dark:text-[#34D399]">
+                        <div className="font-mono text-[11px] font-semibold text-[#8A621C] dark:text-[#E8C987]">
                           {s.startTime}–{s.endTime} · {s.location}
                         </div>
                         <div className="truncate font-bold">{s.title}</div>
@@ -275,19 +275,19 @@ export const AttendeePortal: React.FC<AttendeePortalProps> = ({
                     <div>
                       <div className="flex items-center justify-between">
                         <Badge tone={expo.status === 'live' ? 'emerald' : 'teal'}>{expo.status}</Badge>
-                        <span className="font-mono text-xs text-[#466153] dark:text-[#8EAD9E]">
+                        <span className="font-mono text-xs text-[#525463] dark:text-[#9497A6]">
                           {expo.date}
                         </span>
                       </div>
                       <h3 className="mt-2 font-display text-lg font-bold">{expo.title}</h3>
-                      <p className="mt-1 text-xs text-[#466153] dark:text-[#8EAD9E]">
+                      <p className="mt-1 text-xs text-[#525463] dark:text-[#9497A6]">
                         {expo.location} · {expo.registeredUserIds.length} attendees registered
                       </p>
-                      <p className="mt-2 text-xs leading-relaxed text-[#466153] dark:text-[#8EAD9E]">
+                      <p className="mt-2 text-xs leading-relaxed text-[#525463] dark:text-[#9497A6]">
                         {expo.description}
                       </p>
                     </div>
-                    <div className="mt-4 flex flex-wrap gap-2 border-t border-[#104E35]/16 pt-3 dark:border-[#2A6F52]/30">
+                    <div className="mt-4 flex flex-wrap gap-2 border-t border-[#272732]/16 pt-3 dark:border-[#2D2D3A]/30">
                       {registered ? (
                         <>
                           <Button size="sm" variant="secondary" onClick={() => setSection('tickets')}>
@@ -341,7 +341,7 @@ export const AttendeePortal: React.FC<AttendeePortalProps> = ({
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div>
                     <h3 className="font-display text-base font-bold">{expo.title}</h3>
-                    <p className="text-xs text-[#466153] dark:text-[#8EAD9E]">
+                    <p className="text-xs text-[#525463] dark:text-[#9497A6]">
                       {expo.date} → {expo.endDate} · {expo.location}
                     </p>
                   </div>
@@ -389,20 +389,20 @@ export const AttendeePortal: React.FC<AttendeePortalProps> = ({
                         <h3 className="font-display text-lg font-bold">
                           {expo?.title || 'EventSphere Expo'}
                         </h3>
-                        <p className="text-xs text-[#466153] dark:text-[#8EAD9E]">
+                        <p className="text-xs text-[#525463] dark:text-[#9497A6]">
                           {expo?.location} · {expo?.date}
                         </p>
                         <div className="pt-2 font-mono text-xs">
-                          <div className="text-[#466153] dark:text-[#8EAD9E]">Pass Holder</div>
+                          <div className="text-[#525463] dark:text-[#9497A6]">Pass Holder</div>
                           <div className="font-bold">{ticket.userName}</div>
                         </div>
-                        <div className="font-mono text-sm font-extrabold text-[#059669] dark:text-[#34D399]">
+                        <div className="font-mono text-sm font-extrabold text-[#8A621C] dark:text-[#E8C987]">
                           {ticket.ticketCode}
                         </div>
                       </div>
                       <TicketQRMatrix code={ticket.ticketCode} />
                     </div>
-                    <div className="mt-4 flex justify-end border-t border-[#104E35]/16 pt-3 dark:border-[#2A6F52]/30">
+                    <div className="mt-4 flex justify-end border-t border-[#272732]/16 pt-3 dark:border-[#2D2D3A]/30">
                       <Button
                         size="sm"
                         variant="outline"
@@ -467,15 +467,15 @@ export const AttendeePortal: React.FC<AttendeePortalProps> = ({
                         <h3 className="font-display text-base font-bold">{ex.companyName}</h3>
                         <Badge tone="teal">{ex.category}</Badge>
                       </div>
-                      <p className="mt-1 text-xs font-medium text-[#059669] dark:text-[#34D399]">
+                      <p className="mt-1 text-xs font-medium text-[#8A621C] dark:text-[#E8C987]">
                         {ex.tagline}
                       </p>
-                      <p className="mt-2 text-xs text-[#466153] dark:text-[#8EAD9E]">{ex.description}</p>
-                      <div className="mt-2 font-mono text-[11px] text-[#466153] dark:text-[#8EAD9E]">
+                      <p className="mt-2 text-xs text-[#525463] dark:text-[#9497A6]">{ex.description}</p>
+                      <div className="mt-2 font-mono text-[11px] text-[#525463] dark:text-[#9497A6]">
                         Products: {ex.products.join(' · ') || 'Showcasing live'}
                       </div>
                     </div>
-                    <div className="mt-4 flex items-center justify-between border-t border-[#104E35]/16 pt-3 dark:border-[#2A6F52]/30">
+                    <div className="mt-4 flex items-center justify-between border-t border-[#272732]/16 pt-3 dark:border-[#2D2D3A]/30">
                       <span className="font-mono text-xs">
                         {booth ? `Booth ${booth.number}` : 'Virtual Partner'}
                       </span>
@@ -497,7 +497,7 @@ export const AttendeePortal: React.FC<AttendeePortalProps> = ({
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <h2 className="font-display text-lg font-bold">Interactive Floor Plan Directory</h2>
-              <p className="text-xs text-[#466153] dark:text-[#8EAD9E]">
+              <p className="text-xs text-[#525463] dark:text-[#9497A6]">
                 Select any booth tile to focus the 3D camera directly on that exhibitor.
               </p>
             </div>
@@ -518,7 +518,7 @@ export const AttendeePortal: React.FC<AttendeePortalProps> = ({
                     <span className="font-mono text-xs font-bold">{b.number}</span>
                     <span className="h-2 w-2 rounded-xs" style={{ backgroundColor: STATUS_HEX[b.status] }} />
                   </div>
-                  <span className="mt-1.5 truncate w-full text-[11px] text-[#355243] dark:text-[#8EAD9E]">
+                  <span className="mt-1.5 truncate w-full text-[11px] text-[#3E404D] dark:text-[#9497A6]">
                     {b.exhibitorName || b.status}
                   </span>
                 </span>
@@ -550,17 +550,17 @@ export const AttendeePortal: React.FC<AttendeePortalProps> = ({
                   <Card key={s.id} padding="md" className="flex flex-col justify-between">
                     <div>
                       <div className="flex items-center justify-between">
-                        <span className="font-mono text-xs font-semibold text-[#059669] dark:text-[#34D399]">
+                        <span className="font-mono text-xs font-semibold text-[#8A621C] dark:text-[#E8C987]">
                           {s.startTime}–{s.endTime} · {s.location}
                         </span>
                         <Badge tone="teal">{s.topic}</Badge>
                       </div>
                       <h3 className="mt-2 font-display text-base font-bold">{s.title}</h3>
-                      <p className="mt-1 text-xs text-[#466153] dark:text-[#8EAD9E]">
+                      <p className="mt-1 text-xs text-[#525463] dark:text-[#9497A6]">
                         {s.speaker} · {s.speakerRole}
                       </p>
                     </div>
-                    <div className="mt-4 flex flex-wrap gap-2 border-t border-[#104E35]/16 pt-3 dark:border-[#2A6F52]/30">
+                    <div className="mt-4 flex flex-wrap gap-2 border-t border-[#272732]/16 pt-3 dark:border-[#2D2D3A]/30">
                       <Button
                         size="sm"
                         variant={reg ? 'secondary' : 'primary'}
@@ -598,12 +598,12 @@ export const AttendeePortal: React.FC<AttendeePortalProps> = ({
             <h2 className="font-display text-base font-bold">Saved Booths ({savedBooths.length})</h2>
             <div className="mt-3 space-y-2.5">
               {savedBooths.length === 0 ? (
-                <p className="text-xs text-[#466153] dark:text-[#8EAD9E]">No bookmarked booths yet.</p>
+                <p className="text-xs text-[#525463] dark:text-[#9497A6]">No bookmarked booths yet.</p>
               ) : (
                 savedBooths.map((b) => (
                   <div
                     key={b.id}
-                    className="rounded-xl border border-[#104E35]/18 bg-[#E4EDE7] p-3 text-xs dark:border-[#2A6F52]/34 dark:bg-[#050A07]"
+                    className="rounded-xl border border-[#272732]/18 bg-[#E6E7EE] p-3 text-xs dark:border-[#2D2D3A]/34 dark:bg-[#0E0E13]"
                   >
                     <div className="flex items-center justify-between font-bold">
                       <span>Booth {b.number} · {b.exhibitorName || b.zone}</span>
@@ -612,7 +612,7 @@ export const AttendeePortal: React.FC<AttendeePortalProps> = ({
                       </Button>
                     </div>
                     {notes[b.id] && (
-                      <p className="mt-1 text-[#466153] dark:text-[#8EAD9E]">Note: {notes[b.id]}</p>
+                      <p className="mt-1 text-[#525463] dark:text-[#9497A6]">Note: {notes[b.id]}</p>
                     )}
                   </div>
                 ))
@@ -624,14 +624,14 @@ export const AttendeePortal: React.FC<AttendeePortalProps> = ({
             <h2 className="font-display text-base font-bold">Bookmarked Sessions ({bookmarkedSessions.length})</h2>
             <div className="mt-3 space-y-2.5">
               {bookmarkedSessions.length === 0 ? (
-                <p className="text-xs text-[#466153] dark:text-[#8EAD9E]">No sessions bookmarked yet.</p>
+                <p className="text-xs text-[#525463] dark:text-[#9497A6]">No sessions bookmarked yet.</p>
               ) : (
                 bookmarkedSessions.map((s) => (
                   <div
                     key={s.id}
-                    className="rounded-xl border border-[#104E35]/18 bg-[#E4EDE7] p-3 text-xs dark:border-[#2A6F52]/34 dark:bg-[#050A07]"
+                    className="rounded-xl border border-[#272732]/18 bg-[#E6E7EE] p-3 text-xs dark:border-[#2D2D3A]/34 dark:bg-[#0E0E13]"
                   >
-                    <div className="font-mono text-[11px] text-[#059669] dark:text-[#34D399]">
+                    <div className="font-mono text-[11px] text-[#8A621C] dark:text-[#E8C987]">
                       {s.startTime}–{s.endTime} · {s.location}
                     </div>
                     <div className="mt-0.5 font-bold">{s.title}</div>
@@ -660,12 +660,12 @@ export const AttendeePortal: React.FC<AttendeePortalProps> = ({
             </Button>
           </div>
           {snapshot.notifications.map((n) => (
-            <div key={n.id} className="rounded-xl border border-[#104E35]/18 bg-[#E4EDE7] p-3 text-xs dark:border-[#2A6F52]/34 dark:bg-[#050A07]">
+            <div key={n.id} className="rounded-xl border border-[#272732]/18 bg-[#E6E7EE] p-3 text-xs dark:border-[#2D2D3A]/34 dark:bg-[#0E0E13]">
               <div className="flex justify-between font-bold">
                 <span>{n.title}</span>
                 <Badge tone="teal">{n.kind}</Badge>
               </div>
-              <p className="mt-1 text-[#466153] dark:text-[#8EAD9E]">{n.message}</p>
+              <p className="mt-1 text-[#525463] dark:text-[#9497A6]">{n.message}</p>
             </div>
           ))}
         </Card>
@@ -721,7 +721,7 @@ export const AttendeePortal: React.FC<AttendeePortalProps> = ({
         <div className="space-y-5">
           <Card padding="lg" className="space-y-4">
             <h2 className="font-display text-lg font-bold">Profile Settings</h2>
-            <p className="text-xs text-[#466153] dark:text-[#8EAD9E]">
+            <p className="text-xs text-[#525463] dark:text-[#9497A6]">
               Signed in as <strong>{currentUser.name}</strong> ({currentUser.email}).
             </p>
             <Button variant="primary" onClick={onOpenProfileModal}>

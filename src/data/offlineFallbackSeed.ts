@@ -79,7 +79,7 @@ export function createOfflineFallbackSnapshot(): EventSphereSnapshot {
         category: 'Robotics & AI',
         status: 'live',
         capacity: 1200,
-        bannerAccent: '#10B981',
+        bannerAccent: '#D4AF63',
         registeredUserIds: ['usr-att-1'],
       },
       {
@@ -109,7 +109,7 @@ export function createOfflineFallbackSnapshot(): EventSphereSnapshot {
         category: 'Clean Energy',
         status: 'upcoming',
         capacity: 900,
-        bannerAccent: '#34D399',
+        bannerAccent: '#E8C987',
         registeredUserIds: [],
       },
     ],
@@ -123,7 +123,7 @@ export function createOfflineFallbackSnapshot(): EventSphereSnapshot {
         tagline: 'Autonomous warehouse orchestration and tactile manipulator arms',
         description:
           'Lumina builds millimeter-accurate cobots and fleet routing controllers engineered for high-throughput fulfillment centers.',
-        logoColor: '#10B981',
+        logoColor: '#D4AF63',
         contactEmail: 'exhibitor@lumina-robotics.io',
         phone: '+44 20 7946 0811',
         website: 'https://lumina-robotics.example',
@@ -140,7 +140,7 @@ export function createOfflineFallbackSnapshot(): EventSphereSnapshot {
         tagline: 'Modular solid-state microgrids for zero-emission venues',
         description:
           'High-density containerized battery storage and bidirectional DC microgrids powering commercial expos and campuses.',
-        logoColor: '#34D399',
+        logoColor: '#E8C987',
         contactEmail: 'exhibitor@aethergrid.io',
         phone: '+44 20 7946 0420',
         website: 'https://aethergrid.example',

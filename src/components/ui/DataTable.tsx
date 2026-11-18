@@ -21,9 +21,9 @@ export function DataTable<T extends { id: string }>({
   onRowClick?: (row: T) => void;
 }) {
   return (
-    <div className="overflow-x-auto rounded-2xl border border-[#104E35]/18 bg-[#F0F5F2] dark:border-[#2A6F52]/38 dark:bg-[#08110C]">
+    <div className="overflow-x-auto rounded-2xl border border-[#272732]/18 bg-[#FFFFFF] dark:border-[#2D2D3A]/38 dark:bg-[#121217]">
       <table className="w-full text-left text-xs sm:text-sm">
-        <thead className="border-b border-[#104E35]/16 bg-[#E4EDE7] font-mono text-[11px] font-semibold uppercase tracking-wider text-[#355243] dark:border-[#2A6F52]/35 dark:bg-[#050A07] dark:text-[#8EAD9E]">
+        <thead className="border-b border-[#272732]/16 bg-[#E6E7EE] font-mono text-[11px] font-semibold uppercase tracking-wider text-[#3E404D] dark:border-[#2D2D3A]/35 dark:bg-[#0E0E13] dark:text-[#9497A6]">
           <tr>
             {columns.map((col) => (
               <th
@@ -35,12 +35,12 @@ export function DataTable<T extends { id: string }>({
             ))}
           </tr>
         </thead>
-        <tbody className="divide-y divide-[#104E35]/12 dark:divide-[#2A6F52]/24">
+        <tbody className="divide-y divide-[#272732]/12 dark:divide-[#2D2D3A]/24">
           {rows.length === 0 ? (
             <tr>
               <td
                 colSpan={columns.length}
-                className="px-4 py-8 text-center text-xs text-[#466153] dark:text-[#8EAD9E]"
+                className="px-4 py-8 text-center text-xs text-[#525463] dark:text-[#9497A6]"
               >
                 {emptyMessage}
               </td>
@@ -52,8 +52,8 @@ export function DataTable<T extends { id: string }>({
                 onClick={onRowClick ? () => onRowClick(row) : undefined}
                 className={
                   onRowClick
-                    ? 'cursor-pointer transition-colors hover:bg-[#F4F7F5] dark:hover:bg-[#10B981]/8'
-                    : 'transition-colors hover:bg-[#F4F7F5]/60 dark:hover:bg-[#10B981]/5'
+                    ? 'cursor-pointer transition-colors hover:bg-[#F3F4F8] dark:hover:bg-[#E8C987]/8'
+                    : 'transition-colors hover:bg-[#F3F4F8]/60 dark:hover:bg-[#E8C987]/5'
                 }
               >
                 {columns.map((col) => (
@@ -81,7 +81,7 @@ export const Pagination: React.FC<{
   if (totalPages <= 1) return null;
   return (
     <div className="flex items-center justify-between gap-3 pt-3 text-xs">
-      <span className="font-mono text-[#466153] dark:text-[#8EAD9E]">
+      <span className="font-mono text-[#525463] dark:text-[#9497A6]">
         Page {page} of {totalPages}
       </span>
       <div className="flex items-center gap-1.5">
