@@ -122,9 +122,8 @@ before(async () => {
   smtpServer = smtp.server;
 
   tempDataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'eventsphere-test-'));
-  const tsxBin = path.resolve(process.cwd(), 'node_modules', '.bin', 'tsx');
 
-  serverProc = spawn(tsxBin, ['server.ts'], {
+  serverProc = spawn(process.execPath, ['server.js'], {
     cwd: process.cwd(),
     env: {
       ...process.env,
